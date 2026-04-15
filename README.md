@@ -205,7 +205,7 @@ final controller = DicomController(service: service);
 
 ### Precision Texture Unpacking (GLSL)
 
-If you are curious about how I maintain 16-bit integrity through an 8-bit texture interface, look at our shader logic:
+If you are curious about how I maintain 16-bit integrity through an 8-bit texture interface, look at shader logic:
 
 ```glsl
 void main() {
