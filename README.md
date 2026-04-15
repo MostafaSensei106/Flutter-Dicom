@@ -1,6 +1,6 @@
 <h1 align="center">Flutter-Dicom</h1>
 <p align="center">
-  <img src="https://socialify.git.ci/MostafaSensei106/Flutter-Dicom/image?custom_language=Rust&font=KoHo&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdicom-rs%2Fdicom-rs%2Fmaster%2Flogo.png&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Banner">
+  <img src="https://socialify.git.ci/MostafaSensei106/Flutter-Dicom/image?custom_language=Rust&font=KoHo&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Banner">
 </p>
 
 <p align="center">
