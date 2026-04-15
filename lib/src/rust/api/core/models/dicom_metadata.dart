@@ -16,6 +16,12 @@ class DicomMetadata {
   final double rescaleIntercept;
   final double rescaleSlope;
   final String patientName;
+  final String photometricInterpretation;
+  final int samplesPerPixel;
+  final int bitsAllocated;
+  final int bitsStored;
+  final int highBit;
+  final int pixelRepresentation;
 
   const DicomMetadata({
     required this.width,
@@ -25,6 +31,12 @@ class DicomMetadata {
     required this.rescaleIntercept,
     required this.rescaleSlope,
     required this.patientName,
+    required this.photometricInterpretation,
+    required this.samplesPerPixel,
+    required this.bitsAllocated,
+    required this.bitsStored,
+    required this.highBit,
+    required this.pixelRepresentation,
   });
 
   @override
@@ -35,7 +47,13 @@ class DicomMetadata {
       windowWidth.hashCode ^
       rescaleIntercept.hashCode ^
       rescaleSlope.hashCode ^
-      patientName.hashCode;
+      patientName.hashCode ^
+      photometricInterpretation.hashCode ^
+      samplesPerPixel.hashCode ^
+      bitsAllocated.hashCode ^
+      bitsStored.hashCode ^
+      highBit.hashCode ^
+      pixelRepresentation.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -48,5 +66,11 @@ class DicomMetadata {
           windowWidth == other.windowWidth &&
           rescaleIntercept == other.rescaleIntercept &&
           rescaleSlope == other.rescaleSlope &&
-          patientName == other.patientName;
+          patientName == other.patientName &&
+          photometricInterpretation == other.photometricInterpretation &&
+          samplesPerPixel == other.samplesPerPixel &&
+          bitsAllocated == other.bitsAllocated &&
+          bitsStored == other.bitsStored &&
+          highBit == other.highBit &&
+          pixelRepresentation == other.pixelRepresentation;
 }

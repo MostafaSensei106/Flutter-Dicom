@@ -255,6 +255,12 @@ impl SseDecode for crate::api::core::models::dicom_metadata::DicomMetadata {
         let mut var_rescaleIntercept = <f32>::sse_decode(deserializer);
         let mut var_rescaleSlope = <f32>::sse_decode(deserializer);
         let mut var_patientName = <String>::sse_decode(deserializer);
+        let mut var_photometricInterpretation = <String>::sse_decode(deserializer);
+        let mut var_samplesPerPixel = <u16>::sse_decode(deserializer);
+        let mut var_bitsAllocated = <u16>::sse_decode(deserializer);
+        let mut var_bitsStored = <u16>::sse_decode(deserializer);
+        let mut var_highBit = <u16>::sse_decode(deserializer);
+        let mut var_pixelRepresentation = <u16>::sse_decode(deserializer);
         return crate::api::core::models::dicom_metadata::DicomMetadata {
             width: var_width,
             height: var_height,
@@ -263,6 +269,12 @@ impl SseDecode for crate::api::core::models::dicom_metadata::DicomMetadata {
             rescale_intercept: var_rescaleIntercept,
             rescale_slope: var_rescaleSlope,
             patient_name: var_patientName,
+            photometric_interpretation: var_photometricInterpretation,
+            samples_per_pixel: var_samplesPerPixel,
+            bits_allocated: var_bitsAllocated,
+            bits_stored: var_bitsStored,
+            high_bit: var_highBit,
+            pixel_representation: var_pixelRepresentation,
         };
     }
 }
@@ -302,6 +314,13 @@ impl SseDecode for Vec<u8> {
             ans_.push(<u8>::sse_decode(deserializer));
         }
         return ans_;
+    }
+}
+
+impl SseDecode for u16 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u16::<NativeEndian>().unwrap()
     }
 }
 
@@ -429,6 +448,12 @@ impl flutter_rust_bridge::IntoDart for crate::api::core::models::dicom_metadata:
             self.rescale_intercept.into_into_dart().into_dart(),
             self.rescale_slope.into_into_dart().into_dart(),
             self.patient_name.into_into_dart().into_dart(),
+            self.photometric_interpretation.into_into_dart().into_dart(),
+            self.samples_per_pixel.into_into_dart().into_dart(),
+            self.bits_allocated.into_into_dart().into_dart(),
+            self.bits_stored.into_into_dart().into_dart(),
+            self.high_bit.into_into_dart().into_dart(),
+            self.pixel_representation.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -495,6 +520,12 @@ impl SseEncode for crate::api::core::models::dicom_metadata::DicomMetadata {
         <f32>::sse_encode(self.rescale_intercept, serializer);
         <f32>::sse_encode(self.rescale_slope, serializer);
         <String>::sse_encode(self.patient_name, serializer);
+        <String>::sse_encode(self.photometric_interpretation, serializer);
+        <u16>::sse_encode(self.samples_per_pixel, serializer);
+        <u16>::sse_encode(self.bits_allocated, serializer);
+        <u16>::sse_encode(self.bits_stored, serializer);
+        <u16>::sse_encode(self.high_bit, serializer);
+        <u16>::sse_encode(self.pixel_representation, serializer);
     }
 }
 
@@ -529,6 +560,13 @@ impl SseEncode for Vec<u8> {
         for item in self {
             <u8>::sse_encode(item, serializer);
         }
+    }
+}
+
+impl SseEncode for u16 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u16::<NativeEndian>(self).unwrap();
     }
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dicom/core/controller/dicom_controller.dart';
+import 'package:flutter_dicom/src/core/controller/dicom_controller.dart';
+import 'package:flutter_dicom/src/core/shader/dicom_shader_painter.dart';
 
 /// A highly optimized, interactive widget for rendering DICOM images.
 ///

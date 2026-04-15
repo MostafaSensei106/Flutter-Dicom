@@ -15,14 +15,22 @@ void main() {
     
     vec4 texColor = texture(u_texture, uv);
     
-    float raw_value = texColor.r * 65535.0; 
+    // Unpack 16-bit value from R and G channels (stored as R=high, G=low)
+    // We added 32768 offset in Dart to keep it positive.
+    float high = texColor.r * 255.0;
+    float low = texColor.g * 255.0;
+    float raw_value = (high * 256.0 + low) - 32768.0;
+    
+    // Apply DICOM Rescale Slope and Intercept to get Hounsfield Units (HU)
     float hu = (raw_value * u_rescale_slope) + u_rescale_intercept;
     
+    // Apply Windowing (Level/Width)
     float min_val = u_window_center - (u_window_width / 2.0);
     float max_val = u_window_center + (u_window_width / 2.0);
     
     float mapped_color = (hu - min_val) / (max_val - min_val);
     
+    // Clamp to [0, 1] for display
     mapped_color = clamp(mapped_color, 0.0, 1.0);
     
     fragColor = vec4(mapped_color, mapped_color, mapped_color, 1.0);

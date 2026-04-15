@@ -281,8 +281,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   DicomMetadata dco_decode_dicom_metadata(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 7)
-      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    if (arr.length != 13)
+      throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
     return DicomMetadata(
       width: dco_decode_u_32(arr[0]),
       height: dco_decode_u_32(arr[1]),
@@ -291,6 +291,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       rescaleIntercept: dco_decode_f_32(arr[4]),
       rescaleSlope: dco_decode_f_32(arr[5]),
       patientName: dco_decode_String(arr[6]),
+      photometricInterpretation: dco_decode_String(arr[7]),
+      samplesPerPixel: dco_decode_u_16(arr[8]),
+      bitsAllocated: dco_decode_u_16(arr[9]),
+      bitsStored: dco_decode_u_16(arr[10]),
+      highBit: dco_decode_u_16(arr[11]),
+      pixelRepresentation: dco_decode_u_16(arr[12]),
     );
   }
 
@@ -316,6 +322,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  int dco_decode_u_16(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -393,6 +405,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_rescaleIntercept = sse_decode_f_32(deserializer);
     var var_rescaleSlope = sse_decode_f_32(deserializer);
     var var_patientName = sse_decode_String(deserializer);
+    var var_photometricInterpretation = sse_decode_String(deserializer);
+    var var_samplesPerPixel = sse_decode_u_16(deserializer);
+    var var_bitsAllocated = sse_decode_u_16(deserializer);
+    var var_bitsStored = sse_decode_u_16(deserializer);
+    var var_highBit = sse_decode_u_16(deserializer);
+    var var_pixelRepresentation = sse_decode_u_16(deserializer);
     return DicomMetadata(
       width: var_width,
       height: var_height,
@@ -401,6 +419,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       rescaleIntercept: var_rescaleIntercept,
       rescaleSlope: var_rescaleSlope,
       patientName: var_patientName,
+      photometricInterpretation: var_photometricInterpretation,
+      samplesPerPixel: var_samplesPerPixel,
+      bitsAllocated: var_bitsAllocated,
+      bitsStored: var_bitsStored,
+      highBit: var_highBit,
+      pixelRepresentation: var_pixelRepresentation,
     );
   }
 
@@ -428,6 +452,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  int sse_decode_u_16(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint16();
   }
 
   @protected
@@ -510,6 +540,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_f_32(self.rescaleIntercept, serializer);
     sse_encode_f_32(self.rescaleSlope, serializer);
     sse_encode_String(self.patientName, serializer);
+    sse_encode_String(self.photometricInterpretation, serializer);
+    sse_encode_u_16(self.samplesPerPixel, serializer);
+    sse_encode_u_16(self.bitsAllocated, serializer);
+    sse_encode_u_16(self.bitsStored, serializer);
+    sse_encode_u_16(self.highBit, serializer);
+    sse_encode_u_16(self.pixelRepresentation, serializer);
   }
 
   @protected
@@ -542,6 +578,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_u_16(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint16(self);
   }
 
   @protected

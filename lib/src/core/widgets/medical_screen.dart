@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_dicom/core/controller/dicom_controller.dart';
-import 'package:flutter_dicom/core/widgets/dicom_viewer.dart';
+import 'package:flutter_dicom/src/core/controller/dicom_controller.dart';
+import 'package:flutter_dicom/src/core/widgets/dicom_viewer.dart';
 
 class MedicalScreen extends StatefulWidget {
   final String dicomPath;

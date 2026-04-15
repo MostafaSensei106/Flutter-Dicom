@@ -32,6 +32,36 @@ pub fn process_dicom_file(path: &str, config: &DicomConfig) -> Result<DicomFrame
         .map(|e| e.to_str().unwrap_or_default().to_string())
         .unwrap_or_else(|_| "Unknown".to_string());
 
+    let photometric_interpretation = obj
+        .element(tags::PHOTOMETRIC_INTERPRETATION)
+        .map(|e| e.to_str().unwrap_or_default().to_string())
+        .unwrap_or_else(|_| "MONOCHROME2".to_string());
+    
+    let samples_per_pixel = obj
+        .element(tags::SAMPLES_PER_PIXEL)
+        .map(|e| e.to_int::<u16>().unwrap_or(1))
+        .unwrap_or(1);
+
+    let bits_allocated = obj
+        .element(tags::BITS_ALLOCATED)
+        .map(|e| e.to_int::<u16>().unwrap_or(16))
+        .unwrap_or(16);
+
+    let bits_stored = obj
+        .element(tags::BITS_STORED)
+        .map(|e| e.to_int::<u16>().unwrap_or(16))
+        .unwrap_or(16);
+
+    let high_bit = obj
+        .element(tags::HIGH_BIT)
+        .map(|e| e.to_int::<u16>().unwrap_or(15))
+        .unwrap_or(15);
+
+    let pixel_representation = obj
+        .element(tags::PIXEL_REPRESENTATION)
+        .map(|e| e.to_int::<u16>().unwrap_or(0))
+        .unwrap_or(0);
+
     let metadata = DicomMetadata {
         width,
         height,
@@ -40,11 +70,39 @@ pub fn process_dicom_file(path: &str, config: &DicomConfig) -> Result<DicomFrame
         rescale_intercept,
         rescale_slope,
         patient_name,
+        photometric_interpretation,
+        samples_per_pixel,
+        bits_allocated,
+        bits_stored,
+        high_bit,
+        pixel_representation,
     };
 
     let mut pixel_data: Vec<i16> = Vec::new();
     if !config.skip_pixels {
-        pixel_data = vec![0; (metadata.width * metadata.height) as usize]; // Dummy data
+        // Try to get raw pixel data as i16
+        // This works for most uncompressed grayscale DICOM files
+        let element = obj.element(tags::PIXEL_DATA).context("Pixel data element not found")?;
+        
+        // For uncompressed data, we can try to convert to a vector of i16
+        // Note: this might need adjustment for different transfer syntaxes or bit depths
+        pixel_data = element.to_multi_float64()
+            .map(|v| v.into_iter().map(|f| f as i16).collect())
+            .unwrap_or_else(|_| {
+                // Fallback: try to read as integers if floats don't work
+                element.to_multi_int::<i16>().unwrap_or_default()
+            });
+            
+        if pixel_data.is_empty() {
+             // Second fallback: try to read raw bytes and manually convert
+             let raw_bytes = element.to_bytes().unwrap_or_default();
+             if !raw_bytes.is_empty() {
+                // Assume 16-bit little endian if we have bytes but to_multi_int failed
+                pixel_data = raw_bytes.chunks_exact(2)
+                    .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
+                    .collect();
+             }
+        }
     }
 
     Ok(DicomFrameResult {
