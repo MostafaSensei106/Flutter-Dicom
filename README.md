@@ -20,8 +20,7 @@
 ---
 
 ## 🤔 Why Choose Flutter-Dicom?
-
-> **Stop guessing. Start diagnosing.** 
+ 
 > In medical imaging, an 8-bit approximation is often a liability. Your app needs clinical precision, not just a picture.
 
 Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your data to 8-bits per channel and lack the mathematical context needed for medical diagnostics. A doctor needs to see the exact Hounsfield Units, adjust the contrast (Windowing) in real-time, and zoom without UI stutter. Pure Dart DICOM parsers struggle with the sheer size of 16-bit volumetric data, leading to memory crashes and frozen screens.
