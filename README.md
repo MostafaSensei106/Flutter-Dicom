@@ -89,17 +89,6 @@ dependencies:
   flutter_dicom: ^0.1.0
 ```
 
-### 3. Platform Configuration (Shader Registration)
-
-> [!IMPORTANT]
-> You **must** register the medical windowing shader in your `pubspec.yaml` to enable hardware-accelerated rendering.
-
-```yaml
-flutter:
-  shaders:
-    - packages/flutter_dicom/shaders/dicom_window.frag
-```
-
 ---
 
 ## 🚀 Basic Usage
