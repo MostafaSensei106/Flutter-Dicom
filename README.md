@@ -4,78 +4,97 @@
 </p>
 
 <p align="center">
-  <strong>The Industry-Standard DICOM Engine for Flutter.</strong><br>
-  High-performance medical imaging powered by <b>Rust</b> and <b>Hardware-Accelerated Fragment Shaders</b>.
+  <strong>An advanced medical imaging and DICOM processing library for Flutter, poIred by a high-performance Rust core and GPU Shaders.</strong><br>
+  Go beyond basic image loading. Deliver <i>workstation-grade</i> rendering, <i>16-bit precision</i>, and <i>real-time windowing</i> in your medical apps.
 </p>
 
 <p align="center">
-  <a href="#-architectural-philosophy">Architecture</a> •
-  <a href="#-high-fidelity-rendering">Rendering Pipeline</a> •
-  <a href="#-benchmarks--comparison">Benchmarks</a> •
+  <a href="#-why-choose-flutter-dicom">Why?</a> •
+  <a href="#-key-features">Key Features</a> •
   <a href="#-installation">Installation</a> •
-  <a href="#-enterprise-patterns">Enterprise Usage</a> •
-  <a href="#-advanced-shaders">Shaders</a>
+  <a href="#-basic-usage">Basic Usage</a> •
+  <a href="#-advanced-usage">Advanced Usage</a> •
+  <a href="#-contributing">Contributing</a>
 </p>
 
 ---
 
-## 🏗️ Architectural Philosophy
+## 🤔 Why Choose Flutter-Dicom?
 
-> **Medical diagnostics don't tolerate compromises.**
-> Pure Dart implementations fail when handling large volumetric data or 16-bit high-dynamic-range pixels. We built `Flutter-Dicom` with a **Native-First** mindset.
+> **Stop guessing. Start diagnosing.** 
+> In medical imaging, an 8-bit approximation is often a liability. Your app needs clinical precision, not just a picture.
 
-Our architecture offloads CPU-intensive parsing to a dedicated Rust isolate and delegates pixel manipulation to the GPU. This ensures the Flutter UI thread (Main Isolate) remains exclusively for interactions, maintaining a consistent 60/120 FPS even during complex windowing adjustments.
+Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your data to 8-bits per channel and lack the mathematical context needed for medical diagnostics. A doctor needs to see the exact Hounsfield Units, adjust the contrast (Windowing) in real-time, and zoom without UI stutter. Pure Dart DICOM parsers struggle with the sheer size of 16-bit volumetric data, leading to memory crashes and frozen screens.
 
-### 📊 Engineering Comparison
+### 📊 How I compare
 
-| Capability | `Image.memory()` | Pure Dart DICOM | **Flutter-Dicom (Hybrid)** |
+| Feature | Standard `Image` | `dart_dicom` (Pure Dart) | **Flutter-Dicom** |
 | :--- | :---: | :---: | :--- |
-| **Bit-Depth Precision** | 8-bit (Clamped) | 16-bit (Software) | **✅ 16-bit (Full Range)** |
-| **Windowing Logic** | ❌ N/A | ⚠️ CPU (Slow/Heat) | **⚡ GPU (Shader-Based)** |
-| **Memory Pressure** | 🔴 High (Copying) | 🔴 High (GC overhead) | **🟢 Zero-Copy (FFI Buffer)** |
-| **Parsing Speed** | Fast (Native) | Slow (Dart VM) | **🚀 Ultra-Fast (Rust/LLVM)** |
-| **Extensibility** | Fixed | Low | **🏗️ IDicomLoader Abstraction** |
-| **Diagnostic Quality** | Low (Lossy) | Medium | **💎 High (Lossless)** |
+| **Parsing Engine** | Platform Native | Dart | **🚀 High-Perf Rust Native Core** |
+| **Bit-Depth Precision** | 8-bit (Lossy) | 16-bit (Slow) | **✅ Native 16-bit (Full Range)** |
+| **Rendering Engine** | Skia/Impeller | CPU Canvas | **⚡ GPU Fragment Shaders** |
+| **UI Responsiveness** | ✅ | ⚠️ | **⚡ Zero UI-Thread Blocking** |
+| **Interactive Windowing**| ❌ | ❌ | **📈 Real-time Contrast/Brightness** |
+| **Detailed Metadata** | ❌ | ✅ | **🩺 Full Tag Dictionary Access** |
+| **Memory Efficiency** | 🔴 High | 🔴 High | **🔋 Zero-Copy FFI Buffers** |
+| **Ready-to-use Widget** | ❌ | ❌ | **🤝 Built-in `DicomViewer`** |
 
 ---
 
-## ✨ Key Technical Pillars
+## ✨ Key Features
 
-### 🚀 Rust/LLVM Processing Core
-We use `dicom-rs` compiled to native machine code. This allows us to handle:
-- **Streaming Parsing**: Efficiently reading multi-frame datasets.
-- **Transfer Syntax Support**: Native handling of uncompressed, RLE, and JPEG-lossless encodings.
-- **Type-Safe Metadata**: Rigorous parsing of the DICOM tag dictionary.
+- **🚀 High-Performance Rust Core**: All heavy lifting—file parsing, transfer syntax decoding, and 16-bit pixel extraction—happens in a native Rust engine. This ensures sub-millisecond parsing precision without ever dropping a frame in your Flutter UI.
 
-### 🎨 GPU Fragment Shader Pipeline
-Standard rendering downsamples 16-bit medical data to 8-bit, losing critical diagnostic information. Our pipeline:
-1.  **Bit-Packing**: We pack 16-bit signed integers into the Red and Green channels of an RGBA texture.
-2.  **Bit-Unpacking (Shader Level)**: The GLSL shader reconstructs the 16-bit value in real-time.
-3.  **Linear Mapping**: Applies Hounsfield Unit (HU) rescaling and Window/Level algorithms directly on the GPU.
+- **🎨 GPU-Accelerated Shaders**: Medical Windowing (Level/Width) calculations aren't done on the CPU. I pack the 16-bit data into textures and compute the exact Hounsfield Units on the GPU via Fragment Shaders, ensuring a buttery smooth 60fps experience during drag gestures.
 
-### 🔒 Memory & Thread Safety
-- **Isolate-Level FFI**: Heavy computation never blocks the UI.
-- **Resource Management**: Native memory is managed via Rust's ownership model, preventing leaks common in platform-channel implementations.
+- **🩺 Diagnostic-Grade Precision**: 
+  - Supports full 16-bit pixel depth (-32768 to 32767).
+  - Automatically extracts `RescaleSlope` and `RescaleIntercept`.
+  - Maps real-world physical values accurately to Hounsfield Units (HU).
+
+- **🤝 Interactive Viewer Widget**: The built-in `DicomViewer` handles everything you need out of the box:
+  - Interactive Pan & Zoom (`InteractiveViewer` integration).
+  - Drag-to-adjust contrast (Window Width) and brightness (Window Center).
+  - Double-tap to reset to original DICOM metadata defaults.
+
+- **📈 Comprehensive Metadata**: Instantly access critical technical and patient data: `patientName`, `photometricInterpretation`, `samplesPerPixel`, `bitsAllocated`, `bitsStored`, `highBit`, and `pixelRepresentation`.
 
 ---
 
-## 📦 Installation & Setup
+## 📦 Installation
 
-> [!NOTE]
-> This library requires the Rust toolchain for the initial build to compile the performance core for your specific target architecture.
+> [!TIP]
+> **Don't worry about the "Rust Core"!**
+> Adding **Flutter-Dicom** to your project is designed to be as simple as adding any other Flutter package. While it uses a high-performance Rust engine, you don't need to be a Rust expert or manage complex builds manually. You just install the language once, and the library handles all the heavy lifting, compiling itself automatically for whatever platform (Android, iOS, macOS, Windows, Linux) or architecture you are targeting.
 
-### 1. Toolchain Setup
-```bash
-# Install Rust (Unix/macOS)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+### 1. Prerequisites (The Rust Toolchain)
 
-### 2. Dependency Integration
-Add to `pubspec.yaml`:
+Since this library uses a high-speed bridge to connect Flutter and Rust, you need the Rust compiler installed on your development machine.
+
+- **Windows**: Download and run [rustup-init.exe](https://rustup.rs).
+- **macOS / Linux**: Run the following command in your terminal:
+  ```bash
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  ```
+
+> [!IMPORTANT]
+> Once Rust is installed, the build system will automatically detect your Flutter target and compile the Rust core into a high-performance native shared library. You only need to set this up once!
+
+### 2. Add the Dependency
+
+Add the package to your `pubspec.yaml`:
+
 ```yaml
 dependencies:
   flutter_dicom: ^0.1.0
+```
 
+### 3. Platform Configuration (Shader Registration)
+
+> [!IMPORTANT]
+> You **must** register the medical windowing shader in your `pubspec.yaml` to enable hardware-accelerated rendering.
+
+```yaml
 flutter:
   shaders:
     - packages/flutter_dicom/shaders/dicom_window.frag
@@ -83,94 +102,148 @@ flutter:
 
 ---
 
-## 🚀 Enterprise Usage Patterns
+## 🚀 Basic Usage
 
-### Dependency Injection & Services
-We follow **SOLID** principles to ensure the library fits into enterprise-scale apps using Clean Architecture.
+### 1. Initialization
+
+Initialize the library in your `main()` function before starting the app.
 
 ```dart
-// Define your loading strategy (File, Network, or encrypted storage)
-final dicomService = DicomService(loader: FileDicomLoader());
-final controller = DicomController(service: dicomService);
+import 'package:flutter/material.dart';
+import 'package:flutter_dicom/flutter_dicom.dart';
 
-// Initialize GPU resources
-await controller.initialize();
-
-// Reactive State Management
-ValueListenableBuilder(
-  valueListenable: controller,
-  builder: (context, state, _) {
-    return DicomViewer(controller: controller);
-  },
-);
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Load the native Rust binary into memory
+  await RustLib.init();
+  
+  runApp(const MyApp());
+}
 ```
 
-### The "Diagnostic Guard" Pattern
-Prevent rendering until precision requirements are met:
+### 2. Loading and Displaying DICOM
+
+The `DicomController` is the brain of your Viewer. Pair it with the `DicomViewer` widget for an instant medical-grade experience.
 
 ```dart
-Future<void> safeLoad(String path) async {
-  try {
-    await controller.loadFromFile(
-      filePath: path,
-      config: DicomConfig(autoNormalize: true),
+import 'package:flutter/material.dart';
+import 'package:flutter_dicom/flutter_dicom.dart';
+
+class MyMedicalApp extends StatefulWidget {
+  @override
+  State<MyMedicalApp> createState() => _MyMedicalAppState();
+}
+
+class _MyMedicalAppState extends State<MyMedicalApp> {
+  final _controller = DicomController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize shaders and load a file
+    _controller.initialize().then((_) {
+      _controller.loadFromFile(filePath: '/sdcard/scans/head_ct.dcm');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: DicomViewer(controller: _controller),
     );
-    
-    // Verify metadata integrity before display
-    if (controller.metadata!.bitsStored < 12) {
-      throw DiagnosticQualityException("Insufficient bit depth for diagnosis");
-    }
-  } catch (e) {
-    logger.e("DICOM Pipeline Failure", e);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Critical: Free GPU textures
+    super.dispose();
   }
 }
 ```
 
----
+### 3. Adjusting Windowing Programmatically
 
-## 🔬 Deep Dive: The Shader Unpacking Logic
-
-For the senior engineers curious about our precision handling, here is how we maintain 16-bit integrity through an 8-bit texture interface:
-
-```glsl
-// Inside dicom_window.frag
-void main() {
-    vec4 texColor = texture(u_texture, uv);
-    
-    // Unpack: R (High Byte), G (Low Byte)
-    // Reconstruct -32768 to 32767 range
-    float raw_value = (texColor.r * 255.0 * 256.0 + texColor.g * 255.0) - 32768.0;
-    
-    // Apply Rescale Intercept & Slope
-    float hu = (raw_value * u_rescale_slope) + u_rescale_intercept;
-    
-    // Windowing WindowCenter/WindowWidth
-    float mapped = (hu - (u_window_center - u_window_width/2.0)) / u_window_width;
-    fragColor = vec4(vec3(clamp(mapped, 0.0, 1.0)), 1.0);
+```dart
+// Manually set Window Center and Width
+void applyBoneWindow() {
+  _controller.adjustWindowing(deltaX: 1500, deltaY: 300);
 }
+
+// Reset to file defaults
+void reset() => _controller.resetWindowing();
 ```
 
 ---
 
-## 🧪 Testing Rigor
+## 🔬 Advanced Usage
 
-`Flutter-Dicom` is built for clinical environments where failure isn't an option. Our CI/CD pipeline runs:
-- **Rust Crate Tests**: Ensuring byte-perfect parsing.
-- **Flutter Goldens**: Pixel-by-pixel rendering verification.
-- **Memory Profiling**: Ensuring zero-leak under continuous frame loading.
+### Custom Rust Logic with `DicomConfig`
+
+You can tune the Rust engine for specific use cases, such as fast-loading metadata while skipping expensive pixel processing.
+
+```dart
+await _controller.loadFromFile(
+  filePath: path,
+  config: DicomConfig(
+    autoNormalize: true, 
+    skipPixels: true, // Meta-data only mode
+  ),
+);
+```
+
+### Dependency Injection (DI) Architecture
+
+For enterprise apps, inject a custom `DicomService` to handle different storage backends (S3, local cache, etc.).
+
+```dart
+// 1. Define the service with a specific loader
+final service = DicomService(loader: FileDicomLoader());
+
+// 2. Inject into the controller
+final controller = DicomController(service: service);
+```
+
+### Precision Texture Unpacking (GLSL)
+
+If you are curious about how I maintain 16-bit integrity through an 8-bit texture interface, look at our shader logic:
+
+```glsl
+void main() {
+    vec4 texColor = texture(u_texture, uv);
+    
+    // Unpack R (High Byte) and G (Low Byte)
+    float high = texColor.r * 255.0;
+    float low = texColor.g * 255.0;
+    float raw_value = (high * 256.0 + low) - 32768.0;
+    
+    // HU = (Pixel * Slope) + Intercept
+    float hu = (raw_value * u_rescale_slope) + u_rescale_intercept;
+    // ... Windowing calculations follow
+}
+```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from Medical Imaging experts and Rustaceans. Please read our [Development Architecture Guide](CONTRIBUTING.md).
+Contributions are welcome! Here’s how to get started:
+
+1.  Fork the repository.
+2.  Create a new branch:
+    `git checkout -b feature/YourFeature`
+3.  Commit your changes:
+    `git commit -m "Add amazing feature"`
+4.  Push to your branch:
+    `git push origin feature/YourFeature`
+5.  Open a pull request.
+
+> 💡 Please read our **[Contributing Guidelines](CONTRIBUTING.md)** and open an issue first for major feature ideas or changes.
 
 ---
 
 ## 📜 License
 
-Licensed under **MIT**. For commercial support or specialized Transfer Syntax implementations, contact the maintainers.
+This project is licensed under the **GPL-3.0 License**.
+See the [LICENSE](LICENSE) file for full details.
 
 <p align="center">
-  Engineering the future of Mobile Diagnostics by <a href="https://github.com/MostafaSensei106">MostafaSensei106</a>
-</p>
