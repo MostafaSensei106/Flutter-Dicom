@@ -67,337 +67,223 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text(
-          'FLUTTER DICOM',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2),
-        ),
-        centerTitle: false,
-        backgroundColor: colorScheme.surfaceContainer,
-        elevation: 0,
+        title: const Text('Flutter DICOM'),
+        centerTitle: true,
         actions: [
-          IconButton.filledTonal(
+          IconButton(
             onPressed: _pickAndLoadFile,
             icon: const Icon(Icons.file_open_rounded),
-            tooltip: 'Open DICOM File',
           ),
-          const SizedBox(width: 8),
-          IconButton.filledTonal(
+          IconButton(
             onPressed: () => _controller.clear(),
             icon: const Icon(Icons.delete_outline_rounded),
-            tooltip: 'Clear',
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
         ],
       ),
       body: ListenableBuilder(
         listenable: _controller,
-        builder: (context, _) {
-          return Row(
-            children: [
-              // Main Viewer Area
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: colorScheme.outlineVariant,
-                      width: 1,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Stack(
-                      children: [
-                        DicomViewer(controller: _controller),
-                        if (!_controller.hasData && !_controller.isLoading)
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.medical_services_outlined,
-                                  size: 64,
-                                  color: colorScheme.primary.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Ready to load DICOM',
-                                  style: TextStyle(
-                                    color: colorScheme.onSurfaceVariant,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                FilledButton.icon(
-                                  onPressed: _pickAndLoadFile,
-                                  icon: const Icon(Icons.add),
-                                  label: const Text('Select File'),
-                                ),
-                              ],
+        builder: (context, _) => Column(
+          children: [
+            // Viewer
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                children: [
+                  DicomViewer(controller: _controller),
+                  if (_controller.hasData)
+                    Positioned(
+                      bottom: 12,
+                      left: 14,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _controller.metadata?.patientName ?? 'Anonymous',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        if (_controller.hasData) _buildOverlayInfo(colorScheme),
-                      ],
+                          Text(
+                            '${_controller.metadata?.width} x ${_controller.metadata?.height}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                ],
+              ),
+            ),
+
+            // Controls — only when data loaded
+            if (_controller.hasData)
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Windowing sliders
+                      _buildSlider(
+                        'Level',
+                        _controller.windowCenter ?? 0,
+                        -1000,
+                        2000,
+                        (v) => _controller.updateWindowing(center: v),
+                      ),
+                      _buildSlider(
+                        'Width',
+                        _controller.windowWidth ?? 0,
+                        1,
+                        4000,
+                        (v) => _controller.updateWindowing(width: v),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: _controller.resetWindowing,
+                        icon: const Icon(Icons.restore_rounded),
+                        label: const Text('Reset windowing'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 44),
+                        ),
+                      ),
+                      const Divider(height: 32),
+
+                      // Metadata grid
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        childAspectRatio: 2.5,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        children: [
+                          _metaTile(
+                            'Resolution',
+                            '${_controller.metadata!.width} × ${_controller.metadata!.height}',
+                          ),
+                          _metaTile(
+                            'Window center',
+                            '${_controller.metadata!.windowCenter}',
+                          ),
+                          _metaTile(
+                            'Window width',
+                            '${_controller.metadata!.windowWidth}',
+                          ),
+                          _metaTile(
+                            'Rescale intercept',
+                            '${_controller.metadata!.rescaleIntercept}',
+                          ),
+                          _metaTile(
+                            'Rescale slope',
+                            '${_controller.metadata!.rescaleSlope}',
+                          ),
+                          _metaTile(
+                            'Patient',
+                            _controller.metadata!.patientName.isEmpty
+                                ? 'Anonymous'
+                                : _controller.metadata!.patientName,
+                          ),
+                          _metaTile(
+                            'Photometric',
+                            _controller.metadata!.photometricInterpretation,
+                          ),
+                          _metaTile(
+                            'Samples/px',
+                            '${_controller.metadata!.samplesPerPixel}',
+                          ),
+                          _metaTile(
+                            'Bits allocated',
+                            '${_controller.metadata!.bitsAllocated}',
+                          ),
+                          _metaTile(
+                            'Bits stored',
+                            '${_controller.metadata!.bitsStored}',
+                          ),
+                          _metaTile(
+                            'High bit',
+                            '${_controller.metadata!.highBit}',
+                          ),
+                          _metaTile(
+                            'Px representation',
+                            '${_controller.metadata!.pixelRepresentation}',
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-
-              // Control Panel Sidebar
-              if (_controller.hasData)
-                _buildSidebar(colorScheme)
-              else
-                const SizedBox.shrink(),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildOverlayInfo(ColorScheme colorScheme) {
-    final meta = _controller.metadata!;
-    return Positioned(
-      bottom: 24,
-      left: 24,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              meta.patientName.isEmpty ? 'Anonymous' : meta.patientName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              '${meta.width} x ${meta.height} • ${meta.bitsStored} bit',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 12,
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSidebar(ColorScheme colorScheme) {
-    return Container(
-      width: 320,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        border: Border(left: BorderSide(color: colorScheme.outlineVariant)),
-      ),
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          _SectionHeader(
-            title: 'WINDOWING',
-            icon: Icons.contrast_rounded,
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 16),
-          _buildSliderTile(
-            label: 'Level (Center)',
-            value: _controller.windowCenter ?? 0,
-            min: -1000,
-            max: 2000,
-            onChanged: (val) => _controller.updateWindowing(center: val),
-            colorScheme: colorScheme,
-          ),
-          _buildSliderTile(
-            label: 'Width',
-            value: _controller.windowWidth ?? 0,
-            min: 1,
-            max: 4000,
-            onChanged: (val) => _controller.updateWindowing(width: val),
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _controller.resetWindowing,
-            icon: const Icon(Icons.restore_rounded),
-            label: const Text('Reset Windowing'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-            ),
-          ),
-          const SizedBox(height: 32),
-          _SectionHeader(
-            title: 'METADATA',
-            icon: Icons.info_outline_rounded,
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 16),
-          _MetadataTile(
-            label: 'Modality',
-            value: 'CT/MR', // You could extract this from metadata if added
-            colorScheme: colorScheme,
-          ),
-          _MetadataTile(
-            label: 'Resolution',
-            value:
-                '${_controller.metadata?.width} x ${_controller.metadata?.height}',
-            colorScheme: colorScheme,
-          ),
-          _MetadataTile(
-            label: 'Samples',
-            value: '${_controller.metadata?.samplesPerPixel}',
-            colorScheme: colorScheme,
-          ),
-          _MetadataTile(
-            label: 'Bits Stored',
-            value: '${_controller.metadata?.bitsStored}',
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 32),
-          _SectionHeader(
-            title: 'INSTRUCTIONS',
-            icon: Icons.touch_app_rounded,
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '• Drag on image to adjust WC/WW\n'
-            '• Pinch to zoom / Pan to move\n'
-            '• Double tap to reset view',
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-              height: 1.6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSliderTile({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required ValueChanged<double> onChanged,
-    required ColorScheme colorScheme,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                value.toStringAsFixed(0),
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ],
-          ),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            ),
-            child: Slider(
-              value: value.clamp(min, max),
-              min: min,
-              max: max,
-              onChanged: onChanged,
-              activeColor: colorScheme.primary,
-              inactiveColor: colorScheme.primaryContainer,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final ColorScheme colorScheme;
-
-  const _SectionHeader({
-    required this.title,
-    required this.icon,
-    required this.colorScheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget _buildSlider(
+    String label,
+    double value,
+    double min,
+    double max,
+    ValueChanged<double> onChanged,
+  ) {
+    return Column(
       children: [
-        Icon(icon, size: 18, color: colorScheme.secondary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            color: colorScheme.secondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.1,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              value.toStringAsFixed(0),
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Slider(
+          value: value.clamp(min, max),
+          min: min,
+          max: max,
+          onChanged: onChanged,
         ),
       ],
     );
   }
-}
 
-class _MetadataTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final ColorScheme colorScheme;
-
-  const _MetadataTile({
-    required this.label,
-    required this.value,
-    required this.colorScheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _metaTile(String key, String val) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+            key,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
+          const SizedBox(height: 3),
           Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            val,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
         ],
       ),
