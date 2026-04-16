@@ -64,11 +64,11 @@ Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your
 
 | Demo |
 | :---: |
-| <video src=".github/assets/demo.mp4" width="600" controls></video> |
+| <video src=".github/assets/demo.mp4" controls></video> |
 
-| Empty State | Viewer View | Metadata View |
+| Viewer View | Viewer View | Metadata View |
 | :---: | :---: | :---: |
-| <img src=".github/assets/empty_view.png" width="250" /> | <img src=".github/assets/viewer_view.png" width="250" /> | <img src=".github/assets/metadata_view.png" width="250" /> |
+| <img src=".github/assets/empty_view.png" width="250" height="540" /> | <img src=".github/assets/viewer_view.png" width="250" height="540" /> | <img src=".github/assets/metadata_view.png" width="250" height="540" /> |
 
 ---
 
