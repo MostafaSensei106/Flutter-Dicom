@@ -6,6 +6,19 @@ use anyhow::{Context, Result};
 use dicom::dictionary_std::tags;
 use dicom::object::open_file;
 
+/// Internal utility function for parsing a DICOM file and extracting its metadata and pixels.
+///
+/// This function uses the `dicom-rs` ecosystem to handle the complex structure of DICOM objects.
+/// 
+/// # Implementation Details:
+/// - **Metadata Extraction**: It manually traverses the DICOM object looking for critical tags (SOP Class, Windowing, etc.).
+/// - **Resilience**: It provides sane defaults for missing tags often encountered in non-standard DICOM files.
+/// - **Pixel Extraction**: It attempts multiple strategies to extract raw 16-bit pixel data, 
+///   falling back to raw byte manipulation if high-level API calls fail.
+///
+/// # Returns
+/// - `Ok(DicomFrameResult)` on successful processing.
+/// - `Err` if the file could not be opened or is missing critical metadata.
 pub fn process_dicom_file(path: &str, config: &DicomConfig) -> Result<DicomFrameResult> {
     let obj = open_file(path).context("Failed to open file")?;
 

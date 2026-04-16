@@ -10,11 +10,28 @@ import '../../rust/api/core/models/dicom_metadata.dart';
 import '../exceptions/dicom_exceptions.dart';
 import '../services/dicom_service.dart';
 
-/// The central controller for managing DICOM file processing and rendering state.
+/// The central state manager and orchestrator for DICOM file processing and rendering.
 ///
-/// Follows SOLID principles by using [DicomService] for actual data fetching.
+/// `DicomController` is responsible for:
+/// * Communicating with the high-performance Rust core to parse DICOM files.
+/// * Managing the lifecycle of GPU textures (cleaning up when no longer needed).
+/// * Keeping track of interactive states like **Windowing** (contrast/brightness) and **Zoom**.
+/// * Notifying the UI of changes to facilitate a reactive experience.
+///
+/// For enterprise use, it uses the [DicomService] which can be swapped for 
+/// custom implementations (e.g., local storage vs. cloud-based DICOM PACS).
+///
+/// **Usage:**
+/// ```dart
+/// final controller = DicomController();
+/// await controller.initialize();
+/// await controller.loadFromFile(filePath: 'path/to/scan.dcm');
+/// ```
 class DicomController extends ChangeNotifier {
 
+  /// Creates a [DicomController]. 
+  /// 
+  /// Pass a custom [DicomService] to change how files are loaded (optional).
   DicomController({final DicomService? service})
       : _service = service ?? DicomService();
   final DicomService _service;
@@ -31,20 +48,41 @@ class DicomController extends ChangeNotifier {
   double? _currentWindowWidth;
 
   // --- Getters ---
+  
+  /// Returns `true` while the Rust backend is busy parsing a file.
   bool get isLoading => _isLoading;
+  
+  /// Returns `true` if any step of the loading or processing pipeline failed.
   bool get hasError => _errorMessage != null;
+  
+  /// Returns `true` only if both the metadata and the GPU texture are ready for rendering.
   bool get hasData =>
       _currentFrame != null && _rawTexture != null && _shader != null;
+  
+  /// The latest error message produced by the controller or the underlying services.
   String? get errorMessage => _errorMessage;
+  
+  /// The medical metadata (Patient Name, SOP ID, Window defaults) for the current file.
   DicomMetadata? get metadata => _currentFrame?.metadata;
+  
+  /// The full result of the latest DICOM processing operation.
   DicomFrameResult? get currentFrame => _currentFrame;
+  
+  /// The internal 16-bit texture packed for GPU consumption.
   ui.Image? get rawTexture => _rawTexture;
+  
+  /// The GLSL shader instance used to compute windowing on the GPU.
   ui.FragmentShader? get shader => _shader;
 
+  /// The current Window Center (Level) being applied to the image.
   double? get windowCenter => _currentWindowCenter;
+  
+  /// The current Window Width being applied to the image.
   double? get windowWidth => _currentWindowWidth;
 
-  /// Initializes the controller by loading the fragment shader.
+  /// Loads the necessary fragment shaders from the plugin assets.
+  /// 
+  /// This must be called (directly or implicitly via [loadFromFile]) before any rendering can happen.
   Future<void> initialize() async {
     if (_shader != null) return;
     try {
@@ -59,7 +97,13 @@ class DicomController extends ChangeNotifier {
     }
   }
 
-  /// Loads and processes a DICOM file from the given [filePath].
+  /// Loads a DICOM file from the local file system.
+  ///
+  /// This triggers the heavy lifting in the Rust engine on a background thread.
+  /// Once parsed, the raw pixel data is automatically converted into a GPU-ready texture.
+  ///
+  /// [filePath] - Absolute path to the .dcm file.
+  /// [config] - Optional configuration to tune the Rust engine.
   Future<void> loadFromFile({
     required final String filePath,
     final DicomConfig? config,
@@ -96,8 +140,11 @@ class DicomController extends ChangeNotifier {
     }
   }
 
-  /// Converts raw 16-bit pixel data into a Flutter-compatible ui.Image.
-  /// We pack the 16-bit value into R and G channels to maintain precision.
+  /// Maps raw 16-bit integers to an 8-bit RGBA texture for Flutter/GPU compatibility.
+  ///
+  /// **Precision Preservation:** We pack the high byte into the Red channel 
+  /// and the low byte into the Green channel. The Fragment Shader then reconstructs 
+  /// the full 16-bit value.
   Future<ui.Image> _createTexture(final Int16List data, final int width, final int height) async {
     final rgbaData = Uint8List(width * height * 4);
 
@@ -120,7 +167,9 @@ class DicomController extends ChangeNotifier {
     return completer.future;
   }
 
-  /// Adjusts the Window Center and Width (Brightness & Contrast).
+  /// Adjusts the Window Center and Width relative to current values.
+  /// 
+  /// This is typically called by touch/mouse drag gestures on the [DicomViewer].
   void adjustWindowing({
     required final double deltaX,
     required final double deltaY,
@@ -134,7 +183,9 @@ class DicomController extends ChangeNotifier {
     );
   }
 
-  /// Updates the Window Center and Width directly.
+  /// Updates the Window Center and Width to specific values.
+  /// 
+  /// Useful for programmatic presets (e.g., "Bone Window", "Lung Window").
   void updateWindowing({final double? center, final double? width}) {
     if (!hasData) return;
 
@@ -148,7 +199,7 @@ class DicomController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Resets the windowing values back to the original DICOM defaults.
+  /// Resets the contrast and brightness to the defaults found in the DICOM headers.
   void resetWindowing() {
     if (!hasData) return;
     _currentWindowCenter = _currentFrame?.metadata.windowCenter;
@@ -156,7 +207,7 @@ class DicomController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Clears the current data and frees up memory.
+  /// Clears the current session data and frees memory.
   void clear() {
     _currentFrame = null;
     _rawTexture?.dispose();
@@ -167,6 +218,7 @@ class DicomController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Disposes resources used by the controller, including GPU textures.
   @override
   void dispose() {
     _rawTexture?.dispose();
