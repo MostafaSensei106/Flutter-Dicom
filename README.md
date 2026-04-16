@@ -1,6 +1,6 @@
 <h1 align="center">Flutter-Dicom</h1>
 <p align="center">
-  <img src="https://socialify.git.ci/MostafaSensei106/Flutter-Dicom/image?custom_language=Rust&font=KoHo&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdicom-rs%2Fdicom-rs%2Fmaster%2Flogo.png&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Banner">
+  <img src="https://socialify.git.ci/MostafaSensei106/Flutter-Dicom/image?custom_language=Rust&font=KoHo&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Banner">
 </p>
 
 <p align="center">
@@ -20,8 +20,7 @@
 ---
 
 ## 🤔 Why Choose Flutter-Dicom?
-
-> **Stop guessing. Start diagnosing.** 
+ 
 > In medical imaging, an 8-bit approximation is often a liability. Your app needs clinical precision, not just a picture.
 
 Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your data to 8-bits per channel and lack the mathematical context needed for medical diagnostics. A doctor needs to see the exact Hounsfield Units, adjust the contrast (Windowing) in real-time, and zoom without UI stutter. Pure Dart DICOM parsers struggle with the sheer size of 16-bit volumetric data, leading to memory crashes and frozen screens.
