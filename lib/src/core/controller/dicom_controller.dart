@@ -126,11 +126,22 @@ class DicomController extends ChangeNotifier {
     if (!hasData) return;
 
     final sensitivity = 1.5;
-    _currentWindowWidth = (_currentWindowWidth! + (deltaX * sensitivity)).clamp(
-      1.0,
-      8000.0,
+    updateWindowing(
+      center: _currentWindowCenter! + (deltaY * sensitivity),
+      width: _currentWindowWidth! + (deltaX * sensitivity),
     );
-    _currentWindowCenter = _currentWindowCenter! + (deltaY * sensitivity);
+  }
+
+  /// Updates the Window Center and Width directly.
+  void updateWindowing({double? center, double? width}) {
+    if (!hasData) return;
+
+    if (center != null) {
+      _currentWindowCenter = center;
+    }
+    if (width != null) {
+      _currentWindowWidth = width.clamp(1.0, 8000.0);
+    }
 
     notifyListeners();
   }
