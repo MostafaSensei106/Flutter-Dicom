@@ -28,6 +28,12 @@ abstract class DicomException implements Exception {
 /// * Unsupported DICOM transfer syntax.
 /// * Memory allocation failures during large volume parsing.
 class DicomProcessingException extends DicomException {
+  /// Thrown when the high-performance Rust engine fails to parse or process the file.
+  ///
+  /// Common causes include:
+  /// * Corrupted .dcm file.
+  /// * Unsupported DICOM transfer syntax.
+  /// * Memory allocation failures during large volume parsing.
   const DicomProcessingException(super.message, [super.originalError]);
 }
 
@@ -36,10 +42,15 @@ class DicomProcessingException extends DicomException {
 /// This usually indicates an issue with the Flutter assets configuration
 /// or an incompatible graphics driver on the target device.
 class DicomShaderException extends DicomException {
+  /// Thrown when the GPU Fragment Shader fails to load or compile.
+  ///
+  /// This usually indicates an issue with the Flutter assets configuration
+  /// or an incompatible graphics driver on the target device.
   const DicomShaderException(super.message);
 }
 
 /// Thrown when an invalid configuration is passed to the SDK.
 class DicomConfigurationException extends DicomException {
+  /// Thrown when an invalid configuration is passed to the SDK.
   const DicomConfigurationException(super.message);
 }

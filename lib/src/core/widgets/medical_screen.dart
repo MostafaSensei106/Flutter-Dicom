@@ -23,11 +23,11 @@ class _MedicalScreenState extends State<MedicalScreen> {
   late final DicomController _dicomController;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
     _dicomController = DicomController();
 
-    _dicomController.loadFromFile(filePath: widget.dicomPath);
+    await _dicomController.loadFromFile(filePath: widget.dicomPath);
   }
 
   @override
