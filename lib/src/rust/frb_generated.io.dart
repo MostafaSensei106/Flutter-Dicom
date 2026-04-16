@@ -3,16 +3,18 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:ffi' as ffi;
+
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
+
 import 'api/core/config/dicom_config.dart';
 import 'api/core/models/dicom_frame_result.dart';
 import 'api/core/models/dicom_metadata.dart';
 import 'api/core/utils/process_dicom_file.dart';
 import 'api/init.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi' as ffi;
 import 'frb_generated.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 
 abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustLibApiImplPlatform({
@@ -23,173 +25,173 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   });
 
   @protected
-  AnyhowException dco_decode_AnyhowException(dynamic raw);
+  AnyhowException dco_decode_AnyhowException(final dynamic raw);
 
   @protected
-  String dco_decode_String(dynamic raw);
+  String dco_decode_String(final dynamic raw);
 
   @protected
-  bool dco_decode_bool(dynamic raw);
+  bool dco_decode_bool(final dynamic raw);
 
   @protected
-  DicomConfig dco_decode_box_autoadd_dicom_config(dynamic raw);
+  DicomConfig dco_decode_box_autoadd_dicom_config(final dynamic raw);
 
   @protected
-  DicomConfig dco_decode_dicom_config(dynamic raw);
+  DicomConfig dco_decode_dicom_config(final dynamic raw);
 
   @protected
-  DicomFrameResult dco_decode_dicom_frame_result(dynamic raw);
+  DicomFrameResult dco_decode_dicom_frame_result(final dynamic raw);
 
   @protected
-  DicomMetadata dco_decode_dicom_metadata(dynamic raw);
+  DicomMetadata dco_decode_dicom_metadata(final dynamic raw);
 
   @protected
-  double dco_decode_f_32(dynamic raw);
+  double dco_decode_f_32(final dynamic raw);
 
   @protected
-  int dco_decode_i_16(dynamic raw);
+  int dco_decode_i_16(final dynamic raw);
 
   @protected
-  Int16List dco_decode_list_prim_i_16_strict(dynamic raw);
+  Int16List dco_decode_list_prim_i_16_strict(final dynamic raw);
 
   @protected
-  Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
+  Uint8List dco_decode_list_prim_u_8_strict(final dynamic raw);
 
   @protected
-  int dco_decode_u_16(dynamic raw);
+  int dco_decode_u_16(final dynamic raw);
 
   @protected
-  int dco_decode_u_32(dynamic raw);
+  int dco_decode_u_32(final dynamic raw);
 
   @protected
-  int dco_decode_u_8(dynamic raw);
+  int dco_decode_u_8(final dynamic raw);
 
   @protected
-  void dco_decode_unit(dynamic raw);
+  void dco_decode_unit(final dynamic raw);
 
   @protected
-  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+  AnyhowException sse_decode_AnyhowException(final SseDeserializer deserializer);
 
   @protected
-  String sse_decode_String(SseDeserializer deserializer);
+  String sse_decode_String(final SseDeserializer deserializer);
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer);
+  bool sse_decode_bool(final SseDeserializer deserializer);
 
   @protected
-  DicomConfig sse_decode_box_autoadd_dicom_config(SseDeserializer deserializer);
+  DicomConfig sse_decode_box_autoadd_dicom_config(final SseDeserializer deserializer);
 
   @protected
-  DicomConfig sse_decode_dicom_config(SseDeserializer deserializer);
+  DicomConfig sse_decode_dicom_config(final SseDeserializer deserializer);
 
   @protected
-  DicomFrameResult sse_decode_dicom_frame_result(SseDeserializer deserializer);
+  DicomFrameResult sse_decode_dicom_frame_result(final SseDeserializer deserializer);
 
   @protected
-  DicomMetadata sse_decode_dicom_metadata(SseDeserializer deserializer);
+  DicomMetadata sse_decode_dicom_metadata(final SseDeserializer deserializer);
 
   @protected
-  double sse_decode_f_32(SseDeserializer deserializer);
+  double sse_decode_f_32(final SseDeserializer deserializer);
 
   @protected
-  int sse_decode_i_16(SseDeserializer deserializer);
+  int sse_decode_i_16(final SseDeserializer deserializer);
 
   @protected
-  Int16List sse_decode_list_prim_i_16_strict(SseDeserializer deserializer);
+  Int16List sse_decode_list_prim_i_16_strict(final SseDeserializer deserializer);
 
   @protected
-  Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+  Uint8List sse_decode_list_prim_u_8_strict(final SseDeserializer deserializer);
 
   @protected
-  int sse_decode_u_16(SseDeserializer deserializer);
+  int sse_decode_u_16(final SseDeserializer deserializer);
 
   @protected
-  int sse_decode_u_32(SseDeserializer deserializer);
+  int sse_decode_u_32(final SseDeserializer deserializer);
 
   @protected
-  int sse_decode_u_8(SseDeserializer deserializer);
+  int sse_decode_u_8(final SseDeserializer deserializer);
 
   @protected
-  void sse_decode_unit(SseDeserializer deserializer);
+  void sse_decode_unit(final SseDeserializer deserializer);
 
   @protected
-  int sse_decode_i_32(SseDeserializer deserializer);
+  int sse_decode_i_32(final SseDeserializer deserializer);
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
+    final AnyhowException self,
+    final SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_String(String self, SseSerializer serializer);
+  void sse_encode_String(final String self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_bool(bool self, SseSerializer serializer);
+  void sse_encode_bool(final bool self, final SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_dicom_config(
-    DicomConfig self,
-    SseSerializer serializer,
+    final DicomConfig self,
+    final SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_dicom_config(DicomConfig self, SseSerializer serializer);
+  void sse_encode_dicom_config(final DicomConfig self, final SseSerializer serializer);
 
   @protected
   void sse_encode_dicom_frame_result(
-    DicomFrameResult self,
-    SseSerializer serializer,
+    final DicomFrameResult self,
+    final SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_dicom_metadata(DicomMetadata self, SseSerializer serializer);
+  void sse_encode_dicom_metadata(final DicomMetadata self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_f_32(double self, SseSerializer serializer);
+  void sse_encode_f_32(final double self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_i_16(int self, SseSerializer serializer);
+  void sse_encode_i_16(final int self, final SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_i_16_strict(
-    Int16List self,
-    SseSerializer serializer,
+    final Int16List self,
+    final SseSerializer serializer,
   );
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
+    final Uint8List self,
+    final SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_u_16(int self, SseSerializer serializer);
+  void sse_encode_u_16(final int self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_u_32(int self, SseSerializer serializer);
+  void sse_encode_u_32(final int self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_u_8(int self, SseSerializer serializer);
+  void sse_encode_u_8(final int self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_unit(void self, SseSerializer serializer);
+  void sse_encode_unit(final void self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_i_32(int self, SseSerializer serializer);
+  void sse_encode_i_32(final int self, final SseSerializer serializer);
 }
 
 // Section: wire_class
 
 class RustLibWire implements BaseWire {
-  factory RustLibWire.fromExternalLibrary(ExternalLibrary lib) =>
+
+  /// The symbols are looked up in [dynamicLibrary].
+  RustLibWire(final ffi.DynamicLibrary dynamicLibrary)
+      : _lookup = dynamicLibrary.lookup;
+  factory RustLibWire.fromExternalLibrary(final ExternalLibrary lib) =>
       RustLibWire(lib.ffiDynamicLibrary);
 
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-  _lookup;
-
-  /// The symbols are looked up in [dynamicLibrary].
-  RustLibWire(ffi.DynamicLibrary dynamicLibrary)
-    : _lookup = dynamicLibrary.lookup;
+      _lookup;
 }

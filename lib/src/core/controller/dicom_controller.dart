@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
-import 'package:flutter_dicom/src/core/exceptions/dicom_exceptions.dart';
-import 'package:flutter_dicom/src/core/services/dicom_service.dart';
-import 'package:flutter_dicom/src/rust/api/core/config/dicom_config.dart';
-import 'package:flutter_dicom/src/rust/api/core/models/dicom_frame_result.dart';
-import 'package:flutter_dicom/src/rust/api/core/models/dicom_metadata.dart';
+
+import '../../rust/api/core/config/dicom_config.dart';
+import '../../rust/api/core/models/dicom_frame_result.dart';
+import '../../rust/api/core/models/dicom_metadata.dart';
+import '../exceptions/dicom_exceptions.dart';
+import '../services/dicom_service.dart';
 
 /// The central controller for managing DICOM file processing and rendering state.
 ///
 /// Follows SOLID principles by using [DicomService] for actual data fetching.
 class DicomController extends ChangeNotifier {
+
+  DicomController({final DicomService? service})
+      : _service = service ?? DicomService();
   final DicomService _service;
 
   // --- State Variables ---
@@ -24,9 +29,6 @@ class DicomController extends ChangeNotifier {
   // --- Interactive State (Windowing) ---
   double? _currentWindowCenter;
   double? _currentWindowWidth;
-
-  DicomController({DicomService? service})
-    : _service = service ?? DicomService();
 
   // --- Getters ---
   bool get isLoading => _isLoading;
@@ -96,24 +98,24 @@ class DicomController extends ChangeNotifier {
 
   /// Converts raw 16-bit pixel data into a Flutter-compatible ui.Image.
   /// We pack the 16-bit value into R and G channels to maintain precision.
-  Future<ui.Image> _createTexture(Int16List data, int width, int height) async {
-    final Uint8List rgbaData = Uint8List(width * height * 4);
+  Future<ui.Image> _createTexture(final Int16List data, final int width, final int height) async {
+    final rgbaData = Uint8List(width * height * 4);
 
-    for (int i = 0; i < data.length; i++) {
-      final int val = data[i] + 32768; // Offset to make it unsigned u16
+    for (var i = 0; i < data.length; i++) {
+      final val = data[i] + 32768; // Offset to make it unsigned u16
       rgbaData[i * 4 + 0] = (val >> 8) & 0xFF; // R: High byte
       rgbaData[i * 4 + 1] = val & 0xFF; // G: Low byte
       rgbaData[i * 4 + 2] = 0; // B: unused
       rgbaData[i * 4 + 3] = 255; // A: opaque
     }
 
-    final Completer<ui.Image> completer = Completer();
+    final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       rgbaData,
       width,
       height,
       ui.PixelFormat.rgba8888,
-      (ui.Image img) => completer.complete(img),
+      (final ui.Image img) => completer.complete(img),
     );
     return completer.future;
   }
@@ -125,7 +127,7 @@ class DicomController extends ChangeNotifier {
   }) {
     if (!hasData) return;
 
-    final sensitivity = 1.5;
+    const sensitivity = 1.5;
     updateWindowing(
       center: _currentWindowCenter! + (deltaY * sensitivity),
       width: _currentWindowWidth! + (deltaX * sensitivity),
@@ -133,7 +135,7 @@ class DicomController extends ChangeNotifier {
   }
 
   /// Updates the Window Center and Width directly.
-  void updateWindowing({double? center, double? width}) {
+  void updateWindowing({final double? center, final double? width}) {
     if (!hasData) return;
 
     if (center != null) {

@@ -16,13 +16,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Advanced DICOM Viewer',
+      title: 'Flutter DICOM Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
       home: const DicomDemoScreen(),
     );
   }
@@ -51,9 +47,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
   }
 
   Future<void> _pickAndLoadFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
+    final result = await FilePicker.pickFiles(type: FileType.any);
 
     if (result != null && result.files.single.path != null) {
       try {
@@ -110,19 +104,11 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.black,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: colorScheme.outlineVariant,
                       width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
@@ -137,7 +123,9 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                                 Icon(
                                   Icons.medical_services_outlined,
                                   size: 64,
-                                  color: colorScheme.primary.withOpacity(0.5),
+                                  color: colorScheme.primary.withValues(
+                                    alpha: 0.5,
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
@@ -183,11 +171,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
       left: 24,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white10),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -202,7 +186,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
             Text(
               '${meta.width} x ${meta.height} • ${meta.bitsStored} bit',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
             ),
@@ -267,7 +251,8 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
           ),
           _MetadataTile(
             label: 'Resolution',
-            value: '${_controller.metadata?.width} x ${_controller.metadata?.height}',
+            value:
+                '${_controller.metadata?.width} x ${_controller.metadata?.height}',
             colorScheme: colorScheme,
           ),
           _MetadataTile(

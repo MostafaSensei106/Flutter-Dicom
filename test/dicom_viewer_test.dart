@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dicom/flutter_dicom.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_dicom/flutter_dicom.dart';
 
 class MockDicomController extends Mock implements DicomController {}
 
@@ -29,7 +29,8 @@ void main() {
   }
 
   group('DicomViewer Widget', () {
-    testWidgets('displays CircularProgressIndicator when loading', (tester) async {
+    testWidgets('displays CircularProgressIndicator when loading',
+        (final tester) async {
       when(() => mockController.isLoading).thenReturn(true);
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -37,7 +38,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('displays error message when hasError', (tester) async {
+    testWidgets('displays error message when hasError', (final tester) async {
       const errorMsg = 'Failed to load';
       when(() => mockController.hasError).thenReturn(true);
       when(() => mockController.errorMessage).thenReturn(errorMsg);
@@ -47,44 +48,44 @@ void main() {
       expect(find.text(errorMsg), findsOneWidget);
     });
 
-    testWidgets('displays default text when no data', (tester) async {
+    testWidgets('displays default text when no data', (final tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
 
       expect(find.text('No DICOM data loaded.'), findsOneWidget);
     });
 
-    testWidgets('displays CustomPaint when hasData', (tester) async {
+    testWidgets('displays CustomPaint when hasData', (final tester) async {
       when(() => mockController.hasData).thenReturn(true);
       // We also need to mock currentFrame, windowCenter, windowWidth, shader, rawTexture
       // to avoid null errors in DicomShaderPainter.
       // But we can just check if CustomPaint is present.
-      
+
       // (Advanced: would need more detailed mocking for full integration)
     });
 
-    testWidgets('triggers windowing adjustment on pan', (tester) async {
+    testWidgets('triggers windowing adjustment on pan', (final tester) async {
       when(() => mockController.hasData).thenReturn(true);
       // Mock necessary properties for build
       // ...
-      
+
       // await tester.drag(find.byType(DicomViewer), const Offset(10, 20));
       // verify(() => mockController.adjustWindowing(deltaX: 10, deltaY: 20)).called(1);
     });
 
-    testWidgets('triggers reset on double tap', (tester) async {
+    testWidgets('triggers reset on double tap', (final tester) async {
       when(() => mockController.hasData).thenReturn(true);
       // ...
-      
+
       // await tester.doubleTap(find.byType(DicomViewer));
       // verify(() => mockController.resetWindowing()).called(1);
     });
-   group('Edge Cases', () {
-    testWidgets('Handles null error message gracefully', (tester) async {
-      when(() => mockController.hasError).thenReturn(true);
-      when(() => mockController.errorMessage).thenReturn(null);
-      await tester.pumpWidget(createWidgetUnderTest());
-      expect(find.text('Unknown error'), findsOneWidget);
+    group('Edge Cases', () {
+      testWidgets('Handles null error message gracefully', (final tester) async {
+        when(() => mockController.hasError).thenReturn(true);
+        when(() => mockController.errorMessage).thenReturn(null);
+        await tester.pumpWidget(createWidgetUnderTest());
+        expect(find.text('Unknown error'), findsOneWidget);
+      });
     });
   });
-});
 }

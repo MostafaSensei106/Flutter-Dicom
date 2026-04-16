@@ -1,9 +1,9 @@
 /// Base exception for all DICOM-related errors in the SDK.
 abstract class DicomException implements Exception {
-  final String message;
-  final dynamic originalError;
 
   const DicomException(this.message, [this.originalError]);
+  final String message;
+  final dynamic originalError;
 
   @override
   String toString() {

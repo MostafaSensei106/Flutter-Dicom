@@ -1,12 +1,20 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter_dicom/src/rust/api/core/models/dicom_frame_result.dart';
+import '../../rust/api/core/models/dicom_frame_result.dart';
 
 /// A highly optimized CustomPainter that delegates DICOM rendering to the GPU.
 ///
 /// It uses a Flutter FragmentShader to apply medical Windowing (Level/Width)
 /// in real-time at 60fps without burdening the CPU.
 class DicomShaderPainter extends CustomPainter {
+
+  DicomShaderPainter({
+    required this.frameResult,
+    required this.windowCenter,
+    required this.windowWidth,
+    required this.shader,
+    required this.rawTexture,
+  });
   final DicomFrameResult frameResult;
   final double windowCenter;
   final double windowWidth;
@@ -17,16 +25,8 @@ class DicomShaderPainter extends CustomPainter {
   /// The raw 16-bit pixel data converted to a grayscale [ui.Image] texture
   final ui.Image rawTexture;
 
-  DicomShaderPainter({
-    required this.frameResult,
-    required this.windowCenter,
-    required this.windowWidth,
-    required this.shader,
-    required this.rawTexture,
-  });
-
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     // 1. Pass the canvas resolution to the shader
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
@@ -48,7 +48,7 @@ class DicomShaderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant DicomShaderPainter oldDelegate) {
+  bool shouldRepaint(covariant final DicomShaderPainter oldDelegate) {
     // Only repaint if the windowing (contrast/brightness) changes,
     // or if a completely new frame is loaded.
     return oldDelegate.windowCenter != windowCenter ||

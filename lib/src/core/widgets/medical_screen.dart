@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dicom/src/core/controller/dicom_controller.dart';
-import 'package:flutter_dicom/src/core/widgets/dicom_viewer.dart';
+import '../controller/dicom_controller.dart';
+import 'dicom_viewer.dart';
 
 class MedicalScreen extends StatefulWidget {
+  const MedicalScreen({required this.dicomPath, super.key});
   final String dicomPath;
-  const MedicalScreen({super.key, required this.dicomPath});
 
   @override
   State<MedicalScreen> createState() => _MedicalScreenState();
@@ -28,7 +28,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('DICOM Native Viewer'),

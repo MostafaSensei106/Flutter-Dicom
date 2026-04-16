@@ -3,23 +3,24 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+
 import '../../../frb_generated.dart';
 import 'dicom_metadata.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
 
 class DicomFrameResult {
-  final DicomMetadata metadata;
-  final Int16List pixelData;
 
   const DicomFrameResult({required this.metadata, required this.pixelData});
+  final DicomMetadata metadata;
+  final Int16List pixelData;
 
   @override
   int get hashCode => metadata.hashCode ^ pixelData.hashCode;
 
   @override
-  bool operator ==(Object other) =>
+  bool operator ==(final Object other) =>
       identical(this, other) ||
       other is DicomFrameResult &&
           runtimeType == other.runtimeType &&

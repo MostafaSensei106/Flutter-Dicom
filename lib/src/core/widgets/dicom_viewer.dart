@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dicom/src/core/controller/dicom_controller.dart';
-import 'package:flutter_dicom/src/core/shader/dicom_shader_painter.dart';
+import '../controller/dicom_controller.dart';
+import '../shader/dicom_shader_painter.dart';
 
 /// A highly optimized, interactive widget for rendering DICOM images.
 ///
@@ -11,8 +11,7 @@ import 'package:flutter_dicom/src/core/shader/dicom_shader_painter.dart';
 /// * Real-time Windowing (Contrast/Brightness) via Drag Gestures.
 class DicomViewer extends StatelessWidget {
   const DicomViewer({
-    super.key,
-    required this.controller,
+    required this.controller, super.key,
     this.fit = BoxFit.contain,
   });
 
@@ -20,11 +19,11 @@ class DicomViewer extends StatelessWidget {
   final BoxFit fit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // ListenableBuilder ensures only this widget rebuilds when state changes
     return ListenableBuilder(
       listenable: controller,
-      builder: (context, _) {
+      builder: (final context, final _) {
         if (controller.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -46,7 +45,7 @@ class DicomViewer extends StatelessWidget {
         return ClipRect(
           child: GestureDetector(
             // Handle Windowing adjustments (Drag up/down, left/right)
-            onPanUpdate: (details) {
+            onPanUpdate: (final details) {
               controller.adjustWindowing(
                 deltaX: details.delta.dx,
                 deltaY: details.delta.dy,
@@ -56,8 +55,6 @@ class DicomViewer extends StatelessWidget {
             child: InteractiveViewer(
               minScale: 0.5,
               maxScale: 10.0,
-              panEnabled: true,
-              scaleEnabled: true,
               child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,

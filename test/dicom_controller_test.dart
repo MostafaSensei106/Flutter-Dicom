@@ -1,7 +1,8 @@
 import 'dart:typed_data';
+
+import 'package:flutter_dicom/flutter_dicom.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_dicom/flutter_dicom.dart';
 
 class MockDicomService extends Mock implements DicomService {}
 
@@ -46,7 +47,7 @@ void main() {
 
       when(
         () => mockService.loadFrame(any(), config: any(named: 'config')),
-      ).thenAnswer((_) async => mockResult);
+      ).thenAnswer((final _) async => mockResult);
 
       // In unit tests, initialize() will fail because of ui.FragmentProgram
       // But we can still check if isLoading is set during the process
@@ -91,7 +92,7 @@ void main() {
 
       when(
         () => mockService.loadFrame(any(), config: any(named: 'config')),
-      ).thenAnswer((_) async => mockResult);
+      ).thenAnswer((final _) async => mockResult);
 
       // We skip full load logic here because it needs real UI dependencies
       // But we can check if it updates values if we stub the initialization

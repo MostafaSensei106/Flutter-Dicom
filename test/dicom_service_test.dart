@@ -1,7 +1,8 @@
 import 'dart:typed_data';
+
+import 'package:flutter_dicom/flutter_dicom.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_dicom/flutter_dicom.dart';
 
 class MockDicomLoader extends Mock implements IDicomLoader {}
 
@@ -39,7 +40,7 @@ void main() {
       );
 
       when(() => mockLoader.load(testPath, config: any(named: 'config')))
-          .thenAnswer((_) async => mockResult);
+          .thenAnswer((final _) async => mockResult);
 
       final result = await service.loadFrame(testPath);
 

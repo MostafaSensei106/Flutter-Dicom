@@ -3,16 +3,18 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+
 import '../../../frb_generated.dart';
 import '../config/dicom_config.dart';
 import '../models/dicom_frame_result.dart';
 import '../models/dicom_metadata.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 Future<DicomFrameResult> processDicomFile({
-  required String path,
-  required DicomConfig config,
-}) => RustLib.instance.api.crateApiCoreUtilsProcessDicomFileProcessDicomFile(
-  path: path,
-  config: config,
-);
+  required final String path,
+  required final DicomConfig config,
+}) =>
+    RustLib.instance.api.crateApiCoreUtilsProcessDicomFileProcessDicomFile(
+      path: path,
+      config: config,
+    );
