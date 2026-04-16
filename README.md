@@ -68,7 +68,7 @@ Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your
 
 | Viewer View | Viewer View | Metadata View |
 | :---: | :---: | :---: |
-| <img src=".github/assets/empty_view.png" width="250" height="540" /> | <img src=".github/assets/viewer_view.png" width="250" height="540" /> | <img src=".github/assets/metadata_view.png" width="250" height="540" /> |
+| <img src=".github/assets/empty_view.png" height="540" /> | <img src=".github/assets/viewer_view.png" height="540" /> | <img src=".github/assets/metadata_view.png" height="540" /> |
 
 ---
 
