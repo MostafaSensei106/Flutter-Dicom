@@ -60,6 +60,18 @@ Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your
 
 ---
 
+## 📸 Screenshots & Demo
+
+| Windowing Demo | Interactive Zoom | Metadata View |
+| :---: | :---: | :---: |
+| <img src=".github/assets/windowing.gif" width="250" /> | <img src=".github/assets/zoom.gif" width="250" /> | <img src=".github/assets/metadata.png" width="250" /> |
+
+| Bone Window | Soft Tissue Window | Lung Window |
+| :---: | :---: | :---: |
+| <img src=".github/assets/bone_window.png" width="250" /> | <img src=".github/assets/tissue_window.png" width="250" /> | <img src=".github/assets/lung_window.png" width="250" /> |
+
+---
+
 ## 📦 Installation
 
 > [!TIP]
