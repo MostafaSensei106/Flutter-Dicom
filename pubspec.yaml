@@ -2,8 +2,14 @@ name: flutter_dicom
 description: "An advanced medical imaging and DICOM processing library for Flutter."
 version: 0.1.0
 
-repository: https://github.com/MostafaSensei106/Network-Reachability
+repository: https://github.com/MostafaSensei106/Flutter-Dicom
 license: GPL-version 3.0
+
+topics:
+- dicom
+- medical-imaging
+- radiology
+- rust
 
 funding:
 - https://github.com/sponsors/MostafaSensei106
