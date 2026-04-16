@@ -9,12 +9,27 @@ import '../../../frb_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`
 
+/// Configuration options for the DICOM processing engine.
+///
+/// Use this struct to tune the balance between precision and performance.
 class DicomConfig {
+  const DicomConfig({
+    required this.autoNormalize,
+    required this.skipPixels,
+  });
 
-  const DicomConfig({required this.autoNormalize, required this.skipPixels});
+  /// If true, the pixel values will be automatically normalized into standard ranges
+  /// based on the metadata found in the DICOM headers.
   final bool autoNormalize;
+
+  /// If true, the Rust engine will only parse the file metadata (tags) and
+  /// skip the expensive pixel data extraction. This is useful for building
+  /// fast metadata viewers or file explorers.
   final bool skipPixels;
 
+  /// Provides the standard production-ready defaults:
+  /// - auto_normalize: true
+  /// - skip_pixels: false
   static Future<DicomConfig> default_() =>
       RustLib.instance.api.crateApiCoreConfigDicomConfigDicomConfigDefault();
 

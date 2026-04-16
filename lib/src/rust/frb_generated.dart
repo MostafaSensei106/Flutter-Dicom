@@ -19,7 +19,6 @@ import 'frb_generated.io.dart'
 
 /// Main entrypoint of the Rust API
 class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
-
   RustLib._();
   @internal
   static final instance = RustLib._();
@@ -41,8 +40,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({required final RustLibApi api}) {
-    instance.initMockImpl(api: api);
+  static void initMock({
+    required final RustLibApi api,
+  }) {
+    instance.initMockImpl(
+      api: api,
+    );
   }
 
   /// Dispose flutter_rust_bridge
@@ -87,15 +90,11 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiInitInitApp();
 
-  Future<DicomFrameResult> crateApiInitLoadDicom({
-    required final String path,
-    required final DicomConfig config,
-  });
+  Future<DicomFrameResult> crateApiInitLoadDicom(
+      {required final String path, required final DicomConfig config});
 
-  Future<DicomFrameResult> crateApiCoreUtilsProcessDicomFileProcessDicomFile({
-    required final String path,
-    required final DicomConfig config,
-  });
+  Future<DicomFrameResult> crateApiCoreUtilsProcessDicomFileProcessDicomFile(
+      {required final String path, required final DicomConfig config});
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -108,85 +107,70 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<DicomConfig> crateApiCoreConfigDicomConfigDicomConfigDefault() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (final port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_dicom_config,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiCoreConfigDicomConfigDicomConfigDefaultConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (final port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 1, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_dicom_config,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiCoreConfigDicomConfigDicomConfigDefaultConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiCoreConfigDicomConfigDicomConfigDefaultConstMeta =>
-      const TaskConstMeta(debugName: 'dicom_config_default', argNames: []);
+      const TaskConstMeta(
+        debugName: 'dicom_config_default',
+        argNames: [],
+      );
 
   @override
   Future<void> crateApiInitInitApp() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (final port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiInitInitAppConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (final port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 2, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiInitInitAppConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
-  TaskConstMeta get kCrateApiInitInitAppConstMeta =>
-      const TaskConstMeta(debugName: 'init_app', argNames: []);
+  TaskConstMeta get kCrateApiInitInitAppConstMeta => const TaskConstMeta(
+        debugName: 'init_app',
+        argNames: [],
+      );
 
   @override
-  Future<DicomFrameResult> crateApiInitLoadDicom({
-    required final String path,
-    required final DicomConfig config,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (final port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(path, serializer);
-          sse_encode_box_autoadd_dicom_config(config, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_dicom_frame_result,
-          decodeErrorData: sse_decode_AnyhowException,
-        ),
-        constMeta: kCrateApiInitLoadDicomConstMeta,
-        argValues: [path, config],
-        apiImpl: this,
+  Future<DicomFrameResult> crateApiInitLoadDicom(
+      {required final String path, required final DicomConfig config}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (final port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(path, serializer);
+        sse_encode_box_autoadd_dicom_config(config, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 3, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_dicom_frame_result,
+        decodeErrorData: sse_decode_AnyhowException,
       ),
-    );
+      constMeta: kCrateApiInitLoadDicomConstMeta,
+      argValues: [path, config],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiInitLoadDicomConstMeta => const TaskConstMeta(
@@ -195,32 +179,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<DicomFrameResult> crateApiCoreUtilsProcessDicomFileProcessDicomFile({
-    required final String path,
-    required final DicomConfig config,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (final port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(path, serializer);
-          sse_encode_box_autoadd_dicom_config(config, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_dicom_frame_result,
-          decodeErrorData: sse_decode_AnyhowException,
-        ),
-        constMeta: kCrateApiCoreUtilsProcessDicomFileProcessDicomFileConstMeta,
-        argValues: [path, config],
-        apiImpl: this,
+  Future<DicomFrameResult> crateApiCoreUtilsProcessDicomFileProcessDicomFile(
+      {required final String path, required final DicomConfig config}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (final port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(path, serializer);
+        sse_encode_box_autoadd_dicom_config(config, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 4, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_dicom_frame_result,
+        decodeErrorData: sse_decode_AnyhowException,
       ),
-    );
+      constMeta: kCrateApiCoreUtilsProcessDicomFileProcessDicomFileConstMeta,
+      argValues: [path, config],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta
@@ -350,7 +326,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  AnyhowException sse_decode_AnyhowException(final SseDeserializer deserializer) {
+  AnyhowException sse_decode_AnyhowException(
+      final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final inner = sse_decode_String(deserializer);
     return AnyhowException(inner);
@@ -371,8 +348,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   DicomConfig sse_decode_box_autoadd_dicom_config(
-    final SseDeserializer deserializer,
-  ) {
+      final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_dicom_config(deserializer));
   }
@@ -383,13 +359,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_autoNormalize = sse_decode_bool(deserializer);
     final var_skipPixels = sse_decode_bool(deserializer);
     return DicomConfig(
-      autoNormalize: var_autoNormalize,
-      skipPixels: var_skipPixels,
-    );
+        autoNormalize: var_autoNormalize, skipPixels: var_skipPixels);
   }
 
   @protected
-  DicomFrameResult sse_decode_dicom_frame_result(final SseDeserializer deserializer) {
+  DicomFrameResult sse_decode_dicom_frame_result(
+      final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final var_metadata = sse_decode_dicom_metadata(deserializer);
     final var_pixelData = sse_decode_list_prim_i_16_strict(deserializer);
@@ -413,20 +388,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_highBit = sse_decode_u_16(deserializer);
     final var_pixelRepresentation = sse_decode_u_16(deserializer);
     return DicomMetadata(
-      width: var_width,
-      height: var_height,
-      windowCenter: var_windowCenter,
-      windowWidth: var_windowWidth,
-      rescaleIntercept: var_rescaleIntercept,
-      rescaleSlope: var_rescaleSlope,
-      patientName: var_patientName,
-      photometricInterpretation: var_photometricInterpretation,
-      samplesPerPixel: var_samplesPerPixel,
-      bitsAllocated: var_bitsAllocated,
-      bitsStored: var_bitsStored,
-      highBit: var_highBit,
-      pixelRepresentation: var_pixelRepresentation,
-    );
+        width: var_width,
+        height: var_height,
+        windowCenter: var_windowCenter,
+        windowWidth: var_windowWidth,
+        rescaleIntercept: var_rescaleIntercept,
+        rescaleSlope: var_rescaleSlope,
+        patientName: var_patientName,
+        photometricInterpretation: var_photometricInterpretation,
+        samplesPerPixel: var_samplesPerPixel,
+        bitsAllocated: var_bitsAllocated,
+        bitsStored: var_bitsStored,
+        highBit: var_highBit,
+        pixelRepresentation: var_pixelRepresentation);
   }
 
   @protected
@@ -442,14 +416,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  Int16List sse_decode_list_prim_i_16_strict(final SseDeserializer deserializer) {
+  Int16List sse_decode_list_prim_i_16_strict(
+      final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getInt16List(len_);
   }
 
   @protected
-  Uint8List sse_decode_list_prim_u_8_strict(final SseDeserializer deserializer) {
+  Uint8List sse_decode_list_prim_u_8_strict(
+      final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
@@ -486,9 +462,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_AnyhowException(
-    final AnyhowException self,
-    final SseSerializer serializer,
-  ) {
+      final AnyhowException self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
@@ -507,15 +481,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_box_autoadd_dicom_config(
-    final DicomConfig self,
-    final SseSerializer serializer,
-  ) {
+      final DicomConfig self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_dicom_config(self, serializer);
   }
 
   @protected
-  void sse_encode_dicom_config(final DicomConfig self, final SseSerializer serializer) {
+  void sse_encode_dicom_config(
+      final DicomConfig self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_bool(self.autoNormalize, serializer);
     sse_encode_bool(self.skipPixels, serializer);
@@ -523,16 +496,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_dicom_frame_result(
-    final DicomFrameResult self,
-    final SseSerializer serializer,
-  ) {
+      final DicomFrameResult self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_dicom_metadata(self.metadata, serializer);
     sse_encode_list_prim_i_16_strict(self.pixelData, serializer);
   }
 
   @protected
-  void sse_encode_dicom_metadata(final DicomMetadata self, final SseSerializer serializer) {
+  void sse_encode_dicom_metadata(
+      final DicomMetadata self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_32(self.width, serializer);
     sse_encode_u_32(self.height, serializer);
@@ -563,9 +535,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_i_16_strict(
-    final Int16List self,
-    final SseSerializer serializer,
-  ) {
+      final Int16List self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putInt16List(self);
@@ -573,9 +543,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    final Uint8List self,
-    final SseSerializer serializer,
-  ) {
+      final Uint8List self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);

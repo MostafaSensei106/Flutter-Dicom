@@ -4,16 +4,15 @@ import '../../rust/api/core/models/dicom_frame_result.dart';
 
 /// A performance-critical [CustomPainter] that offloads medical rendering to the GPU.
 ///
-/// `DicomShaderPainter` acts as the bridge between Flutter's Canvas and the 
+/// `DicomShaderPainter` acts as the bridge between Flutter's Canvas and the
 /// custom GLSL Fragment Shader. It handles:
 /// 1. Passing current Window Center/Width to the shader.
 /// 2. Binding the 16-bit packed texture.
 /// 3. Passing Hounsfield Unit (HU) transformation constants.
 ///
-/// By performing these calculations on the GPU, we ensure clinical precision 
+/// By performing these calculations on the GPU, we ensure clinical precision
 /// and smooth 60fps interactivity even on mobile devices.
 class DicomShaderPainter extends CustomPainter {
-
   /// Creates a [DicomShaderPainter].
   DicomShaderPainter({
     required this.frameResult,
@@ -25,10 +24,10 @@ class DicomShaderPainter extends CustomPainter {
 
   /// The processing result containing metadata and pixel data pointers.
   final DicomFrameResult frameResult;
-  
+
   /// The user-defined or default Window Center for contrast mapping.
   final double windowCenter;
-  
+
   /// The user-defined or default Window Width for contrast mapping.
   final double windowWidth;
 
@@ -62,7 +61,7 @@ class DicomShaderPainter extends CustomPainter {
   }
 
   /// Determines if the painter needs to rebuild.
-  /// 
+  ///
   /// Optimized to only repaint when the visual state (windowing) actually changes.
   @override
   bool shouldRepaint(covariant final DicomShaderPainter oldDelegate) {

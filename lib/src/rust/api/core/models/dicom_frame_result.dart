@@ -10,10 +10,22 @@ import 'dicom_metadata.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
 
+/// Represents a single processed DICOM frame, ready for rendering.
+///
+/// It encapsulates both the medical [metadata] extracted from the headers
+/// and the raw [pixel_data] buffer processed by the Rust engine.
 class DicomFrameResult {
+  const DicomFrameResult({
+    required this.metadata,
+    required this.pixelData,
+  });
 
-  const DicomFrameResult({required this.metadata, required this.pixelData});
+  /// The clinical and technical metadata associated with this frame.
   final DicomMetadata metadata;
+
+  /// A 16-bit integer buffer containing the raw pixel values.
+  /// This buffer maintains full diagnostic precision and is designed
+  /// for GPU consumption via fragment shaders.
   final Int16List pixelData;
 
   @override

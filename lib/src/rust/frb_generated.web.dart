@@ -72,7 +72,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void dco_decode_unit(final dynamic raw);
 
   @protected
-  AnyhowException sse_decode_AnyhowException(final SseDeserializer deserializer);
+  AnyhowException sse_decode_AnyhowException(
+      final SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(final SseDeserializer deserializer);
@@ -81,13 +82,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(final SseDeserializer deserializer);
 
   @protected
-  DicomConfig sse_decode_box_autoadd_dicom_config(final SseDeserializer deserializer);
+  DicomConfig sse_decode_box_autoadd_dicom_config(
+      final SseDeserializer deserializer);
 
   @protected
   DicomConfig sse_decode_dicom_config(final SseDeserializer deserializer);
 
   @protected
-  DicomFrameResult sse_decode_dicom_frame_result(final SseDeserializer deserializer);
+  DicomFrameResult sse_decode_dicom_frame_result(
+      final SseDeserializer deserializer);
 
   @protected
   DicomMetadata sse_decode_dicom_metadata(final SseDeserializer deserializer);
@@ -99,7 +102,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int sse_decode_i_16(final SseDeserializer deserializer);
 
   @protected
-  Int16List sse_decode_list_prim_i_16_strict(final SseDeserializer deserializer);
+  Int16List sse_decode_list_prim_i_16_strict(
+      final SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(final SseDeserializer deserializer);
@@ -121,9 +125,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_AnyhowException(
-    final AnyhowException self,
-    final SseSerializer serializer,
-  );
+      final AnyhowException self, final SseSerializer serializer);
 
   @protected
   void sse_encode_String(final String self, final SseSerializer serializer);
@@ -133,21 +135,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_box_autoadd_dicom_config(
-    final DicomConfig self,
-    final SseSerializer serializer,
-  );
+      final DicomConfig self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_dicom_config(final DicomConfig self, final SseSerializer serializer);
+  void sse_encode_dicom_config(
+      final DicomConfig self, final SseSerializer serializer);
 
   @protected
   void sse_encode_dicom_frame_result(
-    final DicomFrameResult self,
-    final SseSerializer serializer,
-  );
+      final DicomFrameResult self, final SseSerializer serializer);
 
   @protected
-  void sse_encode_dicom_metadata(final DicomMetadata self, final SseSerializer serializer);
+  void sse_encode_dicom_metadata(
+      final DicomMetadata self, final SseSerializer serializer);
 
   @protected
   void sse_encode_f_32(final double self, final SseSerializer serializer);
@@ -157,15 +157,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_prim_i_16_strict(
-    final Int16List self,
-    final SseSerializer serializer,
-  );
+      final Int16List self, final SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    final Uint8List self,
-    final SseSerializer serializer,
-  );
+      final Uint8List self, final SseSerializer serializer);
 
   @protected
   void sse_encode_u_16(final int self, final SseSerializer serializer);

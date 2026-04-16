@@ -6,27 +6,26 @@ import '../shader/dicom_shader_painter.dart';
 ///
 /// `DicomViewer` provides a seamless user experience by integrating:
 /// * **GPU-Accelerated Rendering**: Uses the [DicomShaderPainter] for clinical precision.
-/// * **Interactive Gestures**: Built-in support for Panning, Zooming, and dragging 
+/// * **Interactive Gestures**: Built-in support for Panning, Zooming, and dragging
 ///   to adjust Windowing (Contrast/Brightness).
-/// * **State Management**: Listens to a [DicomController] to automatically update 
+/// * **State Management**: Listens to a [DicomController] to automatically update
 ///   itself when metadata or pixel data changes.
-/// 
+///
 /// **Default Interactions:**
 /// * **Two-Finger Pinch**: Zoom in/out.
 /// * **Single-Finger Drag**: Adjust Window Level/Width.
 /// * **Double-Tap**: Reset contrast/brightness to DICOM defaults.
 class DicomViewer extends StatelessWidget {
-
   /// Creates a [DicomViewer].
   const DicomViewer({
-    required this.controller, 
+    required this.controller,
     super.key,
     this.fit = BoxFit.contain,
   });
 
   /// The state controller that provides metadata and GPU shaders.
   final DicomController controller;
-  
+
   /// How the image should be inscribed into the allocated space.
   final BoxFit fit;
 

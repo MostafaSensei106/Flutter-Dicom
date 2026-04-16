@@ -10,8 +10,20 @@ import 'core/config/dicom_config.dart';
 import 'core/models/dicom_frame_result.dart';
 import 'core/models/dicom_metadata.dart';
 
-Future<DicomFrameResult> loadDicom({
-  required final String path,
-  required final DicomConfig config,
-}) =>
+/// The primary entry point for loading and parsing a DICOM file from the local file system.
+///
+/// This function performs the following:
+/// 1. Opens and validates the DICOM file at the provided [path].
+/// 2. Extracts critical medical metadata (Patient Name, Windowing, Pixel Precision).
+/// 3. Processes the raw Pixel Data into a memory-efficient buffer for Flutter consumption.
+///
+/// # Arguments
+/// * `path` - The absolute path to the .dcm file.
+/// * `config` - A [DicomConfig] object used to tune performance (e.g., skip pixel processing).
+///
+/// # Returns
+/// * A [DicomFrameResult] containing both the metadata and the 16-bit pixel buffer.
+/// * An error if the file is corrupted, missing, or has an unsupported transfer syntax.
+Future<DicomFrameResult> loadDicom(
+        {required final String path, required final DicomConfig config}) =>
     RustLib.instance.api.crateApiInitLoadDicom(path: path, config: config);

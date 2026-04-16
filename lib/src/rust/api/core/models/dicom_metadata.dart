@@ -9,8 +9,11 @@ import '../../../frb_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`
 
+/// Represents the extracted medical metadata from a DICOM file header.
+///
+/// This struct contains critical parameters for clinical rendering,
+/// including spatial dimensions, windowing defaults, and patient identity.
 class DicomMetadata {
-
   const DicomMetadata({
     required this.width,
     required this.height,
@@ -26,18 +29,49 @@ class DicomMetadata {
     required this.highBit,
     required this.pixelRepresentation,
   });
+
+  /// The number of pixel columns in the image.
   final int width;
+
+  /// The number of pixel rows in the image.
   final int height;
+
+  /// The default Window Center (Level) provided in the DICOM metadata.
+  /// Maps to the average Hounsfield Unit of interest.
   final double windowCenter;
+
+  /// The default Window Width provided in the DICOM metadata.
+  /// Determines the dynamic range around the center to be displayed.
   final double windowWidth;
+
+  /// The Rescale Intercept (Tag 0028,1052).
+  /// Used for converting stored pixel values to Hounsfield Units (HU).
   final double rescaleIntercept;
+
+  /// The Rescale Slope (Tag 0028,1053).
+  /// Used for converting stored pixel values to Hounsfield Units (HU).
   final double rescaleSlope;
+
+  /// The name of the patient as recorded in the file header.
   final String patientName;
+
+  /// The Photometric Interpretation (e.g., "MONOCHROME1", "MONOCHROME2").
+  /// Informs the renderer how to map pixel values to grayscale intensities.
   final String photometricInterpretation;
+
+  /// The number of color components in this image (e.g., 1 for Grayscale).
   final int samplesPerPixel;
+
+  /// The number of bits allocated per pixel (typically 16).
   final int bitsAllocated;
+
+  /// The number of bits actually used to store the pixel data (typically 12 or 16).
   final int bitsStored;
+
+  /// The most significant bit of the pixel data (typically bits_stored - 1).
   final int highBit;
+
+  /// Specifies whether the pixel data is signed (1) or unsigned (0).
   final int pixelRepresentation;
 
   @override

@@ -80,7 +80,8 @@ void main() {
       // verify(() => mockController.resetWindowing()).called(1);
     });
     group('Edge Cases', () {
-      testWidgets('Handles null error message gracefully', (final tester) async {
+      testWidgets('Handles null error message gracefully',
+          (final tester) async {
         when(() => mockController.hasError).thenReturn(true);
         when(() => mockController.errorMessage).thenReturn(null);
         await tester.pumpWidget(createWidgetUnderTest());

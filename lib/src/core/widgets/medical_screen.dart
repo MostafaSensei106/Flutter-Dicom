@@ -3,16 +3,15 @@ import '../controller/dicom_controller.dart';
 import 'dicom_viewer.dart';
 
 /// A template screen demonstrating the implementation of a medical viewer.
-/// 
+///
 /// This screen provides:
 /// * An [AppBar] with a reset button.
 /// * Automatic initialization and disposal of the [DicomController].
 /// * Integration of the [DicomViewer] for interactive medical scans.
 class MedicalScreen extends StatefulWidget {
-
   /// Creates a [MedicalScreen] for the given [dicomPath].
   const MedicalScreen({required this.dicomPath, super.key});
-  
+
   /// The local file system path to the .dcm file.
   final String dicomPath;
 
