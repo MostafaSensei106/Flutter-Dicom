@@ -62,7 +62,7 @@ Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your
 
 ## 📸 Screenshots & Demo
 
-| App Demo |
+| Demo |
 | :---: |
 | <video src=".github/assets/demo.mp4" width="600" controls></video> |
 
