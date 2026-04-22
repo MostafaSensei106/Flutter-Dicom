@@ -28,6 +28,14 @@ class DicomFrameResult {
   /// for GPU consumption via fragment shaders.
   final Int16List pixelData;
 
+  // HINT: Make it `#[frb(sync)]` to let it become the default constructor of Dart class.
+  /// Creates a new instance of [DicomFrameResult] from an existing one.
+  static Future<DicomFrameResult> newInstance(
+          {required final DicomFrameResult result}) =>
+      RustLib.instance.api
+          .crateApiCoreModelsDicomFrameResultDicomFrameResultNew(
+              result: result);
+
   @override
   int get hashCode => metadata.hashCode ^ pixelData.hashCode;
 

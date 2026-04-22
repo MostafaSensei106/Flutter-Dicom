@@ -10,10 +10,13 @@ import 'dicom_viewer.dart';
 /// * Integration of the [DicomViewer] for interactive medical scans.
 class MedicalScreen extends StatefulWidget {
   /// Creates a [MedicalScreen] for the given [dicomPath].
-  const MedicalScreen({required this.dicomPath, super.key});
+  const MedicalScreen({required this.dicomPath, this.title, super.key});
 
   /// The local file system path to the .dcm file.
   final String dicomPath;
+
+  /// The title of the screen.
+  final String? title;
 
   @override
   State<MedicalScreen> createState() => _MedicalScreenState();
@@ -40,7 +43,7 @@ class _MedicalScreenState extends State<MedicalScreen> {
   Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DICOM Native Viewer'),
+        title: Text(widget.title ?? 'DICOM Native Viewer'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

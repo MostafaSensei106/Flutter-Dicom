@@ -70,6 +70,19 @@ class DicomMetadata {
   /// Specifies whether the pixel data is signed (1) or unsigned (0).
   final int pixelRepresentation;
 
+  /// Provides sensible default values for DICOM metadata.
+  /// These defaults are used when specific tags are missing from the file header.
+  static Future<DicomMetadata> default_() => RustLib.instance.api
+      .crateApiCoreModelsDicomMetadataDicomMetadataDefault();
+
+  // HINT: Make it `#[frb(sync)]` to let it become the default constructor of Dart class.
+  /// Creates a new [DicomMetadata] instance by copying values from another.
+  /// Useful for ensuring a clean ownership transfer when constructing results.
+  static Future<DicomMetadata> newInstance(
+          {required final DicomMetadata data}) =>
+      RustLib.instance.api
+          .crateApiCoreModelsDicomMetadataDicomMetadataNew(data: data);
+
   @override
   int get hashCode =>
       patientName.hashCode ^

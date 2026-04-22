@@ -37,6 +37,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DicomConfig dco_decode_box_autoadd_dicom_config(final dynamic raw);
 
   @protected
+  DicomFrameResult dco_decode_box_autoadd_dicom_frame_result(final dynamic raw);
+
+  @protected
+  DicomMetadata dco_decode_box_autoadd_dicom_metadata(final dynamic raw);
+
+  @protected
   DicomConfig dco_decode_dicom_config(final dynamic raw);
 
   @protected
@@ -81,6 +87,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   DicomConfig sse_decode_box_autoadd_dicom_config(
+      final SseDeserializer deserializer);
+
+  @protected
+  DicomFrameResult sse_decode_box_autoadd_dicom_frame_result(
+      final SseDeserializer deserializer);
+
+  @protected
+  DicomMetadata sse_decode_box_autoadd_dicom_metadata(
       final SseDeserializer deserializer);
 
   @protected
@@ -134,6 +148,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_dicom_config(
       final DicomConfig self, final SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_dicom_frame_result(
+      final DicomFrameResult self, final SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_dicom_metadata(
+      final DicomMetadata self, final SseSerializer serializer);
 
   @protected
   void sse_encode_dicom_config(

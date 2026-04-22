@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import '../../rust/api/core/config/dicom_config.dart';
 import '../../rust/api/core/models/dicom_frame_result.dart';
 import '../../rust/api/core/models/dicom_metadata.dart';
+import '../constants/lib_shaders.dart';
 import '../exceptions/dicom_exceptions.dart';
 import '../services/dicom_service.dart';
 
@@ -86,7 +87,7 @@ class DicomController extends ChangeNotifier {
     if (_shader != null) return;
     try {
       final program = await ui.FragmentProgram.fromAsset(
-        'packages/flutter_dicom/assets/shaders/dicom_window.frag',
+        LibShaders.dicomWindow,
       );
       _shader = program.fragmentShader();
       notifyListeners();
