@@ -248,28 +248,28 @@ impl SseDecode for crate::api::core::models::dicom_frame_result::DicomFrameResul
 impl SseDecode for crate::api::core::models::dicom_metadata::DicomMetadata {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_patientName = <String>::sse_decode(deserializer);
+        let mut var_photometricInterpretation = <String>::sse_decode(deserializer);
         let mut var_width = <u32>::sse_decode(deserializer);
         let mut var_height = <u32>::sse_decode(deserializer);
         let mut var_windowCenter = <f32>::sse_decode(deserializer);
         let mut var_windowWidth = <f32>::sse_decode(deserializer);
         let mut var_rescaleIntercept = <f32>::sse_decode(deserializer);
         let mut var_rescaleSlope = <f32>::sse_decode(deserializer);
-        let mut var_patientName = <String>::sse_decode(deserializer);
-        let mut var_photometricInterpretation = <String>::sse_decode(deserializer);
         let mut var_samplesPerPixel = <u16>::sse_decode(deserializer);
         let mut var_bitsAllocated = <u16>::sse_decode(deserializer);
         let mut var_bitsStored = <u16>::sse_decode(deserializer);
         let mut var_highBit = <u16>::sse_decode(deserializer);
         let mut var_pixelRepresentation = <u16>::sse_decode(deserializer);
         return crate::api::core::models::dicom_metadata::DicomMetadata {
+            patient_name: var_patientName,
+            photometric_interpretation: var_photometricInterpretation,
             width: var_width,
             height: var_height,
             window_center: var_windowCenter,
             window_width: var_windowWidth,
             rescale_intercept: var_rescaleIntercept,
             rescale_slope: var_rescaleSlope,
-            patient_name: var_patientName,
-            photometric_interpretation: var_photometricInterpretation,
             samples_per_pixel: var_samplesPerPixel,
             bits_allocated: var_bitsAllocated,
             bits_stored: var_bitsStored,
@@ -441,14 +441,14 @@ impl
 impl flutter_rust_bridge::IntoDart for crate::api::core::models::dicom_metadata::DicomMetadata {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
+            self.patient_name.into_into_dart().into_dart(),
+            self.photometric_interpretation.into_into_dart().into_dart(),
             self.width.into_into_dart().into_dart(),
             self.height.into_into_dart().into_dart(),
             self.window_center.into_into_dart().into_dart(),
             self.window_width.into_into_dart().into_dart(),
             self.rescale_intercept.into_into_dart().into_dart(),
             self.rescale_slope.into_into_dart().into_dart(),
-            self.patient_name.into_into_dart().into_dart(),
-            self.photometric_interpretation.into_into_dart().into_dart(),
             self.samples_per_pixel.into_into_dart().into_dart(),
             self.bits_allocated.into_into_dart().into_dart(),
             self.bits_stored.into_into_dart().into_dart(),
@@ -513,14 +513,14 @@ impl SseEncode for crate::api::core::models::dicom_frame_result::DicomFrameResul
 impl SseEncode for crate::api::core::models::dicom_metadata::DicomMetadata {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.patient_name, serializer);
+        <String>::sse_encode(self.photometric_interpretation, serializer);
         <u32>::sse_encode(self.width, serializer);
         <u32>::sse_encode(self.height, serializer);
         <f32>::sse_encode(self.window_center, serializer);
         <f32>::sse_encode(self.window_width, serializer);
         <f32>::sse_encode(self.rescale_intercept, serializer);
         <f32>::sse_encode(self.rescale_slope, serializer);
-        <String>::sse_encode(self.patient_name, serializer);
-        <String>::sse_encode(self.photometric_interpretation, serializer);
         <u16>::sse_encode(self.samples_per_pixel, serializer);
         <u16>::sse_encode(self.bits_allocated, serializer);
         <u16>::sse_encode(self.bits_stored, serializer);

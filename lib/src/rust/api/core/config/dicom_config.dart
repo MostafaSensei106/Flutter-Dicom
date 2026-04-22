@@ -13,9 +13,6 @@ import '../../../frb_generated.dart';
 ///
 /// Use this struct to tune the balance between precision and performance.
 class DicomConfig {
-  /// Configuration options for the DICOM processing engine.
-  ///
-  /// Use this struct to tune the balance between precision and performance.
   const DicomConfig({
     required this.autoNormalize,
     required this.skipPixels,

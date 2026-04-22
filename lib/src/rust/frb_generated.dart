@@ -261,14 +261,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     if (arr.length != 13)
       throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
     return DicomMetadata(
-      width: dco_decode_u_32(arr[0]),
-      height: dco_decode_u_32(arr[1]),
-      windowCenter: dco_decode_f_32(arr[2]),
-      windowWidth: dco_decode_f_32(arr[3]),
-      rescaleIntercept: dco_decode_f_32(arr[4]),
-      rescaleSlope: dco_decode_f_32(arr[5]),
-      patientName: dco_decode_String(arr[6]),
-      photometricInterpretation: dco_decode_String(arr[7]),
+      patientName: dco_decode_String(arr[0]),
+      photometricInterpretation: dco_decode_String(arr[1]),
+      width: dco_decode_u_32(arr[2]),
+      height: dco_decode_u_32(arr[3]),
+      windowCenter: dco_decode_f_32(arr[4]),
+      windowWidth: dco_decode_f_32(arr[5]),
+      rescaleIntercept: dco_decode_f_32(arr[6]),
+      rescaleSlope: dco_decode_f_32(arr[7]),
       samplesPerPixel: dco_decode_u_16(arr[8]),
       bitsAllocated: dco_decode_u_16(arr[9]),
       bitsStored: dco_decode_u_16(arr[10]),
@@ -374,28 +374,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   DicomMetadata sse_decode_dicom_metadata(final SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_patientName = sse_decode_String(deserializer);
+    final var_photometricInterpretation = sse_decode_String(deserializer);
     final var_width = sse_decode_u_32(deserializer);
     final var_height = sse_decode_u_32(deserializer);
     final var_windowCenter = sse_decode_f_32(deserializer);
     final var_windowWidth = sse_decode_f_32(deserializer);
     final var_rescaleIntercept = sse_decode_f_32(deserializer);
     final var_rescaleSlope = sse_decode_f_32(deserializer);
-    final var_patientName = sse_decode_String(deserializer);
-    final var_photometricInterpretation = sse_decode_String(deserializer);
     final var_samplesPerPixel = sse_decode_u_16(deserializer);
     final var_bitsAllocated = sse_decode_u_16(deserializer);
     final var_bitsStored = sse_decode_u_16(deserializer);
     final var_highBit = sse_decode_u_16(deserializer);
     final var_pixelRepresentation = sse_decode_u_16(deserializer);
     return DicomMetadata(
+        patientName: var_patientName,
+        photometricInterpretation: var_photometricInterpretation,
         width: var_width,
         height: var_height,
         windowCenter: var_windowCenter,
         windowWidth: var_windowWidth,
         rescaleIntercept: var_rescaleIntercept,
         rescaleSlope: var_rescaleSlope,
-        patientName: var_patientName,
-        photometricInterpretation: var_photometricInterpretation,
         samplesPerPixel: var_samplesPerPixel,
         bitsAllocated: var_bitsAllocated,
         bitsStored: var_bitsStored,
@@ -506,14 +506,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_dicom_metadata(
       final DicomMetadata self, final SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.patientName, serializer);
+    sse_encode_String(self.photometricInterpretation, serializer);
     sse_encode_u_32(self.width, serializer);
     sse_encode_u_32(self.height, serializer);
     sse_encode_f_32(self.windowCenter, serializer);
     sse_encode_f_32(self.windowWidth, serializer);
     sse_encode_f_32(self.rescaleIntercept, serializer);
     sse_encode_f_32(self.rescaleSlope, serializer);
-    sse_encode_String(self.patientName, serializer);
-    sse_encode_String(self.photometricInterpretation, serializer);
     sse_encode_u_16(self.samplesPerPixel, serializer);
     sse_encode_u_16(self.bitsAllocated, serializer);
     sse_encode_u_16(self.bitsStored, serializer);
