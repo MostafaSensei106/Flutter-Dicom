@@ -30,3 +30,4 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+test/series-00001/**
