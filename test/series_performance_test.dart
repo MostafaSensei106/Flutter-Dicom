@@ -45,7 +45,8 @@ void main() async {
   }
 
   /// Prints a separator line.
-  void separator([final String char = '─', final int len = 52]) => print(char * len);
+  void separator([final String char = '─', final int len = 52]) =>
+      print(char * len);
 
   /// Formats milliseconds as a human-readable string.
   String fmtMs(final num ms) {
@@ -93,7 +94,8 @@ void main() async {
         sw.stop();
 
         final fps = files.length / (sw.elapsedMilliseconds / 1000);
-        final avg = latencies.reduce((final a, final b) => a + b) / latencies.length;
+        final avg =
+            latencies.reduce((final a, final b) => a + b) / latencies.length;
         final sorted = List.of(latencies)..sort();
         final p99 = sorted[(sorted.length * 0.99).floor()].toDouble();
 
@@ -110,7 +112,8 @@ void main() async {
       }
 
       final avgFps = runFps.reduce((final a, final b) => a + b) / iterations;
-      final avgLat = runLatencies.reduce((final a, final b) => a + b) / iterations;
+      final avgLat =
+          runLatencies.reduce((final a, final b) => a + b) / iterations;
       final avgP99 = runP99.reduce((final a, final b) => a + b) / iterations;
       final minFps = runFps.reduce(min);
       final maxFps = runFps.reduce(max);
@@ -164,7 +167,8 @@ void main() async {
       latencies.sort();
       final total = latencies.length;
 
-      double pct(final double p) => latencies[(total * p / 100).floor()].toDouble();
+      double pct(final double p) =>
+          latencies[(total * p / 100).floor()].toDouble();
       final p50 = pct(50);
       final p95 = pct(95);
       final p99 = pct(99);
@@ -576,7 +580,8 @@ void main() async {
         latencies.add(sw.elapsedMilliseconds);
       }
 
-      final avg = latencies.reduce((final a, final b) => a + b) / latencies.length;
+      final avg =
+          latencies.reduce((final a, final b) => a + b) / latencies.length;
       final sorted = List.of(latencies)..sort();
 
       print('  Avg latency    : ${fmtMs(avg)}');
