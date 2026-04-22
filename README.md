@@ -282,33 +282,12 @@ Contributions are welcome! Here’s how to get started:
 > 💡 Please read our **[Contributing Guidelines](CONTRIBUTING.md)** and open an issue first for major feature ideas or changes.
 
 ---
+## 📜 License
 
-## 📊 Workstation-Grade Performance
+This project is licensed under the **GPL-3.0 License**.
+See the [LICENSE](LICENSE) file for full details.
 
-I don't just promise speed; I measure it. Below are the verified results from our **Extreme Stress Suite**, run on a standard series of **267 DICOM frames** in Release mode.
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei106</a>
+</p>
 
-### 🚀 High-Throughput Sequential Processing (Cine Loop)
-Designed for seamless playback of large CT/MRI volumes.
-
-| Metric | Result (Avg of 10 Runs) | Performance Grade |
-| :--- | :--- | :--- |
-| **Throughput** | **292.4 FPS** | 🏆 Ultra-Fast |
-| **Average Latency** | **2.86 ms / frame** | ⚡ Sub-millisecond feel |
-| **99th Percentile (p99)** | **5.90 ms** | 🎯 Extremely Consistent |
-| **Burst Capacity** | **263.2 FPS** | 🚄 Real-time Ready |
-
-### 🎮 Interactive Responsiveness (Windowing & Scrubbing)
-Ensuring instant visual feedback during clinical diagnostic tasks.
-
-| Interaction Type | Throughput | Stability |
-| :--- | :--- | :--- |
-| **Window Level/Width Adjustments** | **3,316 ops/sec** | ✅ Fluid at 120Hz+ |
-| **Bi-directional Scrubbing** | **308 frames/sec** | ✅ No frame drops |
-| **Rapid Burst Loads** | **10 files in 38ms** | ✅ Instant response |
-
-### 💎 Technical Reliability & Edge Cases
-- **Zero Memory Leaks**: Verified through 1,300+ consecutive load/dispose cycles.
-- **Floating Point Robustness**: Handled extreme windowing values ($10^{307}$) without arithmetic overflow or UI crashes.
-- **Multi-Core Scaling**: Leveraging Rust's `Rayon` for parallel pixel packing across all available CPU cores.
-
----
