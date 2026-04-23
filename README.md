@@ -206,27 +206,26 @@ void main() {
 ## ⚡ Performance Benchmarks
 
 The **Flutter-Dicom** library is meticulously optimized for both blistering speed and strict memory efficiency. The following benchmarks were executed on an **AMD Ryzen™ 7 5800H (16 Threads)** using a clinical dataset of **267 DICOM frames**. 
-
-The results highlight the massive performance overhead provided by our Rust + GPU Shader architecture, delivering true workstation-grade capabilities directly inside Flutter.
+The results highlight the massive performance overhead provided by our Rust + GPU Shader architecture.
 
 ### 📊 At-a-Glance Summary
 
-| Metric | Performance | Clinical Impact |
+| Metric | Performance | Status |
 | :--- | :--- | :--- |
-| **Max Throughput** | **~296 FPS** | Flawless rendering on 120Hz/144Hz displays. |
-| **Pipeline Latency** | **3.73 ms / frame** | Instantaneous loading of massive CT/MRI studies. |
-| **Windowing Speed** | **3,402 Ops/s** | Zero-lag, real-time contrast & brightness tuning. |
-| **Scrubbing Speed** | **323 Ops/s** | Buttery smooth scrolling through slices. |
-| **Stability (p99)** | **6.00 ms** | Ultra-consistent frame times; absolutely no UI stutter. |
+| **Max Throughput** | **~296 FPS** | ✅ Ultra Fast |
+| **Pipeline Latency** | **3.73 ms / frame** | ✅ Sub-16ms |
+| **Windowing Speed** | **3,402 Ops/s** | ✅ Real-time |
+| **Scrubbing Speed** | **323 Ops/s** | ✅ Fluid |
+| **Stability (p99)** | **6.00 ms** | ✅ Consistent |
 
 ---
 
 ### 🔬 Detailed Deep Dive
 
 #### 🚀 1. Raw Rendering & Latency Distribution
-Our zero-copy FFI bridge ensures that frame data flows from disk to GPU without bogging down the Dart isolate. Averaging **296.2 FPS**, the engine delivers rock-solid consistency. 
+FFI bridge ensures that frame data flows from disk to GPU without bogging down the Dart isolate. Averaging **296.2 FPS**, the engine delivers rock-solid consistency. 
 
-Out of 801 sampled frames, **95.6% were processed in under 5ms**. Here is the exact latency distribution showcasing our jitter-free pipeline:
+**Latency Distribution:** Out of 801 sampled frames, the mean processing time was **2.68 ms**. Even the 99th percentile (p99) maxed out at just **6.00 ms**, keeping us well below the 16.6ms threshold required for 60 FPS.
 
 ```text
 ▶ LATENCY DISTRIBUTION (801 Samples)
@@ -244,9 +243,6 @@ Out of 801 sampled frames, **95.6% were processed in under 5ms**. Here is the ex
    20–25 ms │                                  0
 ────────────────────────────────────────────────────
 ```
-
-
-**Latency Distribution:** Out of 801 sampled frames, the mean processing time was **2.68 ms**. Even the 99th percentile (p99) maxed out at just **6.00 ms**, keeping us well below the 16.6ms threshold required for 60 FPS.
 
 #### 🎛️ 2. Workstation-Grade Interaction
 Offloading Hounsfield Unit (HU) mapping to the GPU means complex math doesn't slow down your UI.
