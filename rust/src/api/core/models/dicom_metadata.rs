@@ -1,72 +1,66 @@
+
+
 /// Represents the extracted medical metadata from a DICOM file header.
 ///
 /// This struct contains critical parameters for clinical rendering,
 /// including spatial dimensions, windowing defaults, and patient identity.
 #[derive(Debug, Clone)]
 pub struct DicomMetadata {
-    /// The name of the patient as recorded in the file header.
+    pub patient_id: String,
     pub patient_name: String,
-
-    /// The Photometric Interpretation (e.g., "MONOCHROME1", "MONOCHROME2").
-    /// Informs the renderer how to map pixel values to grayscale intensities.
+    pub study_date: String,
+    pub series_date: String,
+    pub acquisition_date: String,
+    pub content_date: String,
+    pub study_description: String,
+    pub modality: String,
+    pub study_instance_uid: String,
+    pub series_instance_uid: String,
+    pub sop_instance_uid: String,
+    pub series_description: String,
+    pub body_part_examined: String,
+    pub tooth_info: String,
+    pub slice_thickness: f32,
+    pub instance_number: String,
     pub photometric_interpretation: String,
-
-    /// The number of pixel columns in the image.
     pub width: u32,
-    /// The number of pixel rows in the image.
     pub height: u32,
-
-    /// The default Window Center (Level) provided in the DICOM metadata.
     pub window_center: f32,
-    /// The default Window Width provided in the DICOM metadata.
     pub window_width: f32,
-
-    /// The Rescale Intercept (Tag 0028,1052).
     pub rescale_intercept: f32,
-    /// The Rescale Slope (Tag 0028,1053).
     pub rescale_slope: f32,
-
-    /// The number of color components in this image (e.g., 1 for Grayscale).
     pub samples_per_pixel: u16,
-
-    /// The number of bits allocated per pixel (typically 16).
     pub bits_allocated: u16,
-    /// The number of bits actually used to store the pixel data (typically 12 or 16).
     pub bits_stored: u16,
-    /// The most significant bit of the pixel data (typically bits_stored - 1).
     pub high_bit: u16,
-
-    /// Specifies whether the pixel data is signed (1) or unsigned (0).
     pub pixel_representation: u16,
+    pub pixel_spacing: String,
+    pub image_position_patient: String,
+    pub image_orientation_patient: String,
+    pub slice_location: f32,
+    pub spacing_between_slices: f32,
+    pub number_of_frames: u32,
 }
 
-impl DicomMetadata {
-    /// Creates a new [DicomMetadata] instance by copying values from another.
-    /// Useful for ensuring a clean ownership transfer when constructing results.
-    pub fn new(data: DicomMetadata) -> Self {
-        return Self {
-            patient_name: data.patient_name,
-            photometric_interpretation: data.photometric_interpretation,
-            width: data.width,
-            height: data.height,
-            window_center: data.window_center,
-            window_width: data.window_width,
-            rescale_intercept: data.rescale_intercept,
-            rescale_slope: data.rescale_slope,
-            samples_per_pixel: data.samples_per_pixel,
-            bits_allocated: data.bits_allocated,
-            bits_stored: data.bits_stored,
-            high_bit: data.high_bit,
-            pixel_representation: data.pixel_representation,
-        };
-    }
-}
 impl Default for DicomMetadata {
-    /// Provides sensible default values for DICOM metadata.
-    /// These defaults are used when specific tags are missing from the file header.
     fn default() -> Self {
-        return Self {
+        Self {
+            patient_id: "Unknown".to_string(),
             patient_name: "Unknown".to_string(),
+            study_date: "Unknown".to_string(),
+            series_date: "Unknown".to_string(),
+            acquisition_date: "Unknown".to_string(),
+            content_date: "Unknown".to_string(),
+            study_description: "Unknown".to_string(),
+            modality: "Unknown".to_string(),
+            study_instance_uid: "Unknown".to_string(),
+            series_instance_uid: "Unknown".to_string(),
+            sop_instance_uid: "Unknown".to_string(),
+            series_description: "Unknown".to_string(),
+            body_part_examined: "Unknown".to_string(),
+            tooth_info: "".to_string(),
+            slice_thickness: 0.0,
+            instance_number: "Unknown".to_string(),
             photometric_interpretation: "MONOCHROME2".to_string(),
             width: 0,
             height: 0,
@@ -79,6 +73,12 @@ impl Default for DicomMetadata {
             bits_stored: 16,
             high_bit: 15,
             pixel_representation: 0,
-        };
+            pixel_spacing: "".to_string(),
+            image_position_patient: "".to_string(),
+            image_orientation_patient: "".to_string(),
+            slice_location: 0.0,
+            spacing_between_slices: 0.0,
+            number_of_frames: 1,
+        }
     }
 }

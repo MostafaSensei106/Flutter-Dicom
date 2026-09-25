@@ -1,6 +1,6 @@
-pub struct LibConstants;
+pub struct LibConstants {}
 
-pub struct DefaultConfigs;
+pub struct DefaultConfigs {}
 
 impl DefaultConfigs {
     pub const AUTO_NORMALIZE: bool = false;

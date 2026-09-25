@@ -1,6 +1,6 @@
 use crate::api::core::{
     config::dicom_config::DicomConfig, models::dicom_frame_result::DicomFrameResult,
-    utils::process_dicom_file::process_dicom_file,
+    utils::process_dicom_file::{process_dicom_file, process_dicom_from_bytes},
 };
 
 /// Initializes the high-performance Rust backend.
@@ -29,4 +29,23 @@ pub fn init_app() {
 /// * An error if the file is corrupted, missing, or has an unsupported transfer syntax.
 pub fn load_dicom(path: String, config: DicomConfig) -> anyhow::Result<DicomFrameResult> {
     process_dicom_file(&path, &config)
+}
+
+
+/// Parses a DICOM file directly from an in-memory byte array.
+/// Useful for Web or environments where a local file system is unavailable.
+pub fn load_dicom_from_bytes(bytes: Vec<u8>, config: DicomConfig) -> anyhow::Result<DicomFrameResult> {
+    process_dicom_from_bytes(&bytes, &config)
+}
+
+/// Loads a complete DICOM series (volumetric stack) from a directory path.
+/// Automatically groups slices by Series Instance UID and sorts them spatially using Strategy Pattern.
+pub fn load_dicom_series_from_dir(dir_path: String) -> anyhow::Result<Vec<crate::api::core::models::dicom_series::DicomSeries>> {
+    crate::api::core::utils::series_loader::SeriesLoader::load_directory(&dir_path)
+}
+
+/// Loads a complete DICOM series from specific file paths.
+/// Automatically groups and sorts slices.
+pub fn load_dicom_series_from_files(paths: Vec<String>) -> anyhow::Result<Vec<crate::api::core::models::dicom_series::DicomSeries>> {
+    crate::api::core::utils::series_loader::SeriesLoader::load_files(paths)
 }

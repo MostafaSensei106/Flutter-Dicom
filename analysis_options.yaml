@@ -13,8 +13,16 @@
 
 include: package:lints/recommended.yaml
 
-exclude:
-- "lib/src/rust/**"
+analyzer:
+  exclude:
+    - "lib/src/rust/**"
+    - "lib/src/frb_generated*.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 # Specify additional rules.
 linter:

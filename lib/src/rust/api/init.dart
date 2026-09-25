@@ -3,12 +3,12 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'core/config/dicom_config.dart';
 import 'core/models/dicom_frame_result.dart';
 import 'core/models/dicom_metadata.dart';
+import 'core/models/dicom_series.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// The primary entry point for loading and parsing a DICOM file from the local file system.
 ///
@@ -25,5 +25,23 @@ import 'core/models/dicom_metadata.dart';
 /// * A [DicomFrameResult] containing both the metadata and the 16-bit pixel buffer.
 /// * An error if the file is corrupted, missing, or has an unsupported transfer syntax.
 Future<DicomFrameResult> loadDicom(
-        {required final String path, required final DicomConfig config}) =>
+        {required String path, required DicomConfig config}) =>
     RustLib.instance.api.crateApiInitLoadDicom(path: path, config: config);
+
+/// Parses a DICOM file directly from an in-memory byte array.
+/// Useful for Web or environments where a local file system is unavailable.
+Future<DicomFrameResult> loadDicomFromBytes(
+        {required List<int> bytes, required DicomConfig config}) =>
+    RustLib.instance.api
+        .crateApiInitLoadDicomFromBytes(bytes: bytes, config: config);
+
+/// Loads a complete DICOM series (volumetric stack) from a directory path.
+/// Automatically groups slices by Series Instance UID and sorts them spatially using Strategy Pattern.
+Future<List<DicomSeries>> loadDicomSeriesFromDir({required String dirPath}) =>
+    RustLib.instance.api.crateApiInitLoadDicomSeriesFromDir(dirPath: dirPath);
+
+/// Loads a complete DICOM series from specific file paths.
+/// Automatically groups and sorts slices.
+Future<List<DicomSeries>> loadDicomSeriesFromFiles(
+        {required List<String> paths}) =>
+    RustLib.instance.api.crateApiInitLoadDicomSeriesFromFiles(paths: paths);
