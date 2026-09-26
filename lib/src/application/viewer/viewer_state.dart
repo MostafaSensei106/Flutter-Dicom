@@ -59,17 +59,18 @@ final class DicomViewerState {
     double? rotation,
     double? zoom,
     DicomOffset? pan,
-  }) => DicomViewerState(
-    status: status ?? this.status,
-    currentFrame: currentFrame ?? this.currentFrame,
-    frameCount: frameCount ?? this.frameCount,
-    window: window ?? this.window,
-    colorMap: colorMap ?? this.colorMap,
-    invert: invert ?? this.invert,
-    rotation: rotation ?? this.rotation,
-    zoom: zoom ?? this.zoom,
-    pan: pan ?? this.pan,
-  );
+  }) =>
+      DicomViewerState(
+        status: status ?? this.status,
+        currentFrame: currentFrame ?? this.currentFrame,
+        frameCount: frameCount ?? this.frameCount,
+        window: window ?? this.window,
+        colorMap: colorMap ?? this.colorMap,
+        invert: invert ?? this.invert,
+        rotation: rotation ?? this.rotation,
+        zoom: zoom ?? this.zoom,
+        pan: pan ?? this.pan,
+      );
 }
 
 /// Command — every viewer mutation goes through one of these so undo /
@@ -85,8 +86,8 @@ final class SetWindowCommand implements DicomViewerCommand {
 
   @override
   DicomViewerState execute(DicomViewerState state) => state.copyWith(
-    window: state.window.copyWith(center: center, width: width),
-  );
+        window: state.window.copyWith(center: center, width: width),
+      );
 }
 
 final class ResetWindowCommand implements DicomViewerCommand {

@@ -10,7 +10,8 @@ final class DicomAnnotationStyle {
 /// Closed annotation hierarchy — new kinds (e.g. `ArrowAnnotation`) extend
 /// without touching the renderer, serializer, or controller.
 sealed class DicomAnnotation {
-  const DicomAnnotation({required this.id, this.style = const DicomAnnotationStyle()});
+  const DicomAnnotation(
+      {required this.id, this.style = const DicomAnnotationStyle()});
   final String id;
   final DicomAnnotationStyle style;
 }
@@ -27,7 +28,8 @@ final class LineAnnotation extends DicomAnnotation {
 }
 
 final class RectangleAnnotation extends DicomAnnotation {
-  const RectangleAnnotation({required super.id, required this.rect, super.style});
+  const RectangleAnnotation(
+      {required super.id, required this.rect, super.style});
   final DicomRect rect;
 }
 

@@ -1,7 +1,7 @@
 /// A single window (level / width pair) with an optional label.
 final class DicomWindow {
   const DicomWindow({required this.center, required this.width, this.label})
-    : assert(width > 0, 'window width must be positive');
+      : assert(width > 0, 'window width must be positive');
 
   final double center;
   final double width;
@@ -13,7 +13,8 @@ final class DicomWindow {
   /// Linear windowing map of a modality value to [0, 1].
   double apply(double value) => ((value - min) / (max - min)).clamp(0.0, 1.0);
 
-  DicomWindow copyWith({double? center, double? width, String? Function()? label}) =>
+  DicomWindow copyWith(
+          {double? center, double? width, String? Function()? label}) =>
       DicomWindow(
         center: center ?? this.center,
         width: (width ?? this.width).clamp(1.0, 8000.0),

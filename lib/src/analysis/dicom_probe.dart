@@ -45,7 +45,10 @@ final class ModalityProbe implements DicomProbe {
       case DicomFloat32PixelData(:final buffer):
         raw = buffer[index].toDouble();
       case DicomRgbPixelData(:final buffer):
-        raw = (buffer[index * 3] + buffer[index * 3 + 1] + buffer[index * 3 + 2]) / 3.0;
+        raw = (buffer[index * 3] +
+                buffer[index * 3 + 1] +
+                buffer[index * 3 + 2]) /
+            3.0;
     }
     final modality = pixels.transform.toModalityValue(raw);
     return DicomProbeResult(

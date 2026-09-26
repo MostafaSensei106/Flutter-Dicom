@@ -16,8 +16,7 @@ final class ScaleBarOverlay implements DicomOverlay {
     final spacing =
         context.geometry.pixelSpacing ?? context.geometry.imagerPixelSpacing;
     if (spacing == null) return;
-    final physicalWidthMm =
-        context.geometry.imageWidth * spacing.column;
+    final physicalWidthMm = context.geometry.imageWidth * spacing.column;
     if (physicalWidthMm <= 0) return;
     final pixelsPerMm =
         (context.viewport.width * context.scale) / physicalWidthMm;

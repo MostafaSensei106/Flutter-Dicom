@@ -34,7 +34,8 @@ final class PngDicomExporter implements DicomExporter {
     final height = pixels.height;
     final gray = Uint8List(width * height);
     for (var i = 0; i < gray.length; i++) {
-      gray[i] = (window.apply(pixels.modalityAt(i)) * 255).round().clamp(0, 255);
+      gray[i] =
+          (window.apply(pixels.modalityAt(i)) * 255).round().clamp(0, 255);
     }
     return _encodeGrayscalePng(width, height, gray);
   }

@@ -105,7 +105,9 @@ void main() {
       );
       expect(const DicomSource.files(['a']), isA<DicomSource>());
       expect(
-        DicomSource.bytesList([Uint8List.fromList([1])]),
+        DicomSource.bytesList([
+          Uint8List.fromList([1])
+        ]),
         isA<DicomSource>(),
       );
     });
@@ -159,8 +161,7 @@ void main() {
         highBit: 15,
         pixelRepresentation: DicomPixelRepresentation.unsigned,
         samplesPerPixel: 1,
-        photometricInterpretation:
-            DicomPhotometricInterpretation.monochrome2,
+        photometricInterpretation: DicomPhotometricInterpretation.monochrome2,
         numberOfFrames: 1,
       );
       expect(meta.defaultWindow.center, 40);
@@ -198,15 +199,15 @@ void main() {
 
   group('Probe / ROI / Ruler', () {
     DicomInt16PixelData pixels() => DicomInt16PixelData(
-      buffer: Int16List.fromList(List.filled(16, 100)),
-      width: 4,
-      height: 4,
-      transform: const DicomPixelTransform(
-        rescaleSlope: 1,
-        rescaleIntercept: -1024,
-        representation: DicomPixelRepresentation.signed,
-      ),
-    );
+          buffer: Int16List.fromList(List.filled(16, 100)),
+          width: 4,
+          height: 4,
+          transform: const DicomPixelTransform(
+            rescaleSlope: 1,
+            rescaleIntercept: -1024,
+            representation: DicomPixelRepresentation.signed,
+          ),
+        );
 
     test('probe reports modality values', () {
       const probe = ModalityProbe();

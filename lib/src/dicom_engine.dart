@@ -118,8 +118,9 @@ final class _ViewerOwnedRenderer implements DicomRenderer {
   Future<DicomRenderResult> render(
     DicomPixelData pixels, {
     DicomRenderOptions options = const DicomRenderOptions(),
-  }) => throw UnimplementedError(
-    'Off-screen rendering is not implemented; '
-    'render through DicomViewer + DicomViewerController.',
-  );
+  }) =>
+      throw UnimplementedError(
+        'Off-screen rendering is not implemented; '
+        'render through DicomViewer + DicomViewerController.',
+      );
 }

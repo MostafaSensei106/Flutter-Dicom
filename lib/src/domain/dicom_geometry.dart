@@ -49,7 +49,8 @@ final class DicomPixelSpacing {
 
 /// Image orientation (0020,0037): row + column direction cosines.
 final class DicomOrientation {
-  const DicomOrientation({required this.rowCosines, required this.columnCosines});
+  const DicomOrientation(
+      {required this.rowCosines, required this.columnCosines});
   final List<double> rowCosines;
   final List<double> columnCosines;
 
@@ -112,9 +113,15 @@ final class DicomGeometry {
     final s = pixelSpacing ?? imagerPixelSpacing;
     if (o == null || p == null || s == null) return null;
     return [
-      p.x + o.rowCosines[0] * point.x * s.column + o.columnCosines[0] * point.y * s.row,
-      p.y + o.rowCosines[1] * point.x * s.column + o.columnCosines[1] * point.y * s.row,
-      p.z + o.rowCosines[2] * point.x * s.column + o.columnCosines[2] * point.y * s.row,
+      p.x +
+          o.rowCosines[0] * point.x * s.column +
+          o.columnCosines[0] * point.y * s.row,
+      p.y +
+          o.rowCosines[1] * point.x * s.column +
+          o.columnCosines[1] * point.y * s.row,
+      p.z +
+          o.rowCosines[2] * point.x * s.column +
+          o.columnCosines[2] * point.y * s.row,
     ];
   }
 

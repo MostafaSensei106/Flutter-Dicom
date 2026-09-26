@@ -32,8 +32,7 @@ final class PixelProbeOverlay implements DicomOverlay {
     canvas.drawLine(Offset(dx, dy - 10), Offset(dx, dy + 10), marker);
 
     final result = probe.probe(pixels, point);
-    final text =
-        'HU ${result.hu?.toStringAsFixed(0) ?? '—'}'
+    final text = 'HU ${result.hu?.toStringAsFixed(0) ?? '—'}'
         '  (${point.x.toInt()}, ${point.y.toInt()})';
     final span = TextSpan(
       text: text,

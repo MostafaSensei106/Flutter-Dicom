@@ -28,9 +28,8 @@ abstract final class RustMetadataMapper {
     return DicomMetadata(
       patientName: _clean(m.patientName),
       patientId: _clean(m.patientId),
-      modality: m.modality == 'Unknown'
-          ? null
-          : DicomModality.parse(m.modality),
+      modality:
+          m.modality == 'Unknown' ? null : DicomModality.parse(m.modality),
       rows: m.height,
       columns: m.width,
       bitsAllocated: m.bitsAllocated,

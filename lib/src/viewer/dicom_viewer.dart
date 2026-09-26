@@ -109,7 +109,10 @@ class _DicomViewerState extends State<DicomViewer> {
     final texture = widget.controller.texture;
     final pixels = widget.controller.pixels;
     final geometry = widget.controller.geometry;
-    if (shader == null || texture == null || pixels == null || geometry == null) {
+    if (shader == null ||
+        texture == null ||
+        pixels == null ||
+        geometry == null) {
       return widget.loadingBuilder?.call(context) ??
           const Center(child: CircularProgressIndicator());
     }

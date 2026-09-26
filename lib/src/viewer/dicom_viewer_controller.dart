@@ -50,7 +50,7 @@ abstract interface class DicomViewerController {
 /// re-uploads the visible stack.
 final class DefaultDicomViewerController implements DicomViewerController {
   DefaultDicomViewerController({DicomParser? parser})
-    : _parser = parser ?? const RustDicomParser();
+      : _parser = parser ?? const RustDicomParser();
 
   final DicomParser _parser;
   final StreamController<DicomViewerState> _states =
@@ -129,7 +129,8 @@ final class DefaultDicomViewerController implements DicomViewerController {
     _update(_state.copyWith(currentFrame: index));
   }
 
-  Future<void> _showFrame(final int index, {required DicomWindow window}) async {
+  Future<void> _showFrame(final int index,
+      {required DicomWindow window}) async {
     final doc = _document!;
     final frame = await doc.frames.get(index);
     final pixels = frame.pixelData;

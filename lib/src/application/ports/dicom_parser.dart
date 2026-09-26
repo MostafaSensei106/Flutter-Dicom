@@ -47,9 +47,10 @@ abstract interface class DicomFrameProvider {
 /// Caching provider — wraps any [DicomFrameProvider] with an LRU-style
 /// [DicomFrameCache] so scrubbing never re-decodes visible frames.
 final class CachedFrameProvider implements DicomFrameProvider {
-  CachedFrameProvider({required DicomFrameProvider inner, DicomFrameCache<DicomFrame>? cache})
-    : _inner = inner,
-      _cache = cache ?? LruFrameCache<DicomFrame>();
+  CachedFrameProvider(
+      {required DicomFrameProvider inner, DicomFrameCache<DicomFrame>? cache})
+      : _inner = inner,
+        _cache = cache ?? LruFrameCache<DicomFrame>();
 
   final DicomFrameProvider _inner;
   final DicomFrameCache<DicomFrame> _cache;

@@ -47,14 +47,14 @@ final class OrientationOverlay implements DicomOverlay {
   }
 
   String _negate(String letter) => switch (letter) {
-    'L' => 'R',
-    'R' => 'L',
-    'A' => 'P',
-    'P' => 'A',
-    'H' => 'F',
-    'F' => 'H',
-    _ => letter,
-  };
+        'L' => 'R',
+        'R' => 'L',
+        'A' => 'P',
+        'P' => 'A',
+        'H' => 'F',
+        'F' => 'H',
+        _ => letter,
+      };
 
   void _draw(Canvas canvas, String letter, Offset center) {
     final span = TextSpan(

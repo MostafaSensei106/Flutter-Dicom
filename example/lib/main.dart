@@ -50,9 +50,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
 
     if (result != null && result.files.single.path != null) {
       try {
-        await _controller.load(
-          DicomSource.file(result.files.single.path!),
-        );
+        await _controller.load(DicomSource.file(result.files.single.path!));
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -151,9 +149,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                                   if (_cine.playing) {
                                     _cine.pause();
                                   } else {
-                                    _cine.play(
-                                      frameCount: state.frameCount,
-                                    );
+                                    _cine.play(frameCount: state.frameCount);
                                   }
                                   setState(() {});
                                 },
@@ -182,13 +178,10 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                             for (final preset in DicomWindowPreset.all)
                               ActionChip(
                                 label: Text(preset.label ?? ''),
-                                onPressed: () =>
-                                    _controller.setWindow(preset),
+                                onPressed: () => _controller.setWindow(preset),
                               ),
                             ActionChip(
-                              label: Text(
-                                state.invert ? 'Uninvert' : 'Invert',
-                              ),
+                              label: Text(state.invert ? 'Uninvert' : 'Invert'),
                               onPressed: () =>
                                   _controller.setInvert(!state.invert),
                             ),
@@ -223,9 +216,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                           ),
                         ),
                         const Divider(height: 32),
-                        _MetadataGrid(
-                          metadata: _controller.document!.metadata,
-                        ),
+                        _MetadataGrid(metadata: _controller.document!.metadata),
                       ],
                     ),
                   ),

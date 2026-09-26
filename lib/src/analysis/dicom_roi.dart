@@ -46,7 +46,8 @@ final class DicomRoi {
       DicomUint16PixelData(:final buffer) => buffer[index].toDouble(),
       DicomFloat32PixelData(:final buffer) => buffer[index].toDouble(),
       DicomRgbPixelData(:final buffer) =>
-        (buffer[index * 3] + buffer[index * 3 + 1] + buffer[index * 3 + 2]) / 3.0,
+        (buffer[index * 3] + buffer[index * 3 + 1] + buffer[index * 3 + 2]) /
+            3.0,
     };
   }
 }

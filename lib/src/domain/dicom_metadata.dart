@@ -117,7 +117,7 @@ final class DicomMetadata {
   DicomWindow get defaultWindow => windowPresets.isNotEmpty
       ? windowPresets.first
       : (DicomWindowPreset.forImage(this) ??
-            const DicomWindow(center: 40, width: 400));
+          const DicomWindow(center: 40, width: 400));
 
   /// Unknown-tag access without growing this class.
   T? tag<T>(DicomTagId id) {

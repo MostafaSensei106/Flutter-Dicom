@@ -58,11 +58,10 @@ Future<ui.Image> pixelsToTexture(DicomPixelData pixels) {
         throw const DicomConfigurationException('Truncated pixel buffer');
       }
       for (var i = 0; i < count; i++) {
-        stored[i] =
-            (0.299 * buffer[i * 3] +
-                    0.587 * buffer[i * 3 + 1] +
-                    0.114 * buffer[i * 3 + 2])
-                .round();
+        stored[i] = (0.299 * buffer[i * 3] +
+                0.587 * buffer[i * 3 + 1] +
+                0.114 * buffer[i * 3 + 2])
+            .round();
       }
     case DicomUint16PixelData(:final buffer):
       if (buffer.length < count) {
@@ -174,7 +173,6 @@ final class DicomOverlaysPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DicomOverlaysPainter oldDelegate) {
-    return oldDelegate.overlays != overlays ||
-        oldDelegate.context != context;
+    return oldDelegate.overlays != overlays || oldDelegate.context != context;
   }
 }

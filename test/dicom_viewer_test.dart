@@ -38,14 +38,14 @@ class _FakeProvider implements DicomFrameProvider {
 
   @override
   Future<DicomFrame> get(int index) async => DicomFrame(
-    index: index,
-    metadata: FakeParser.meta,
-    pixelData: DicomInt16PixelData(
-      buffer: Int16List(16),
-      width: 4,
-      height: 4,
-    ),
-  );
+        index: index,
+        metadata: FakeParser.meta,
+        pixelData: DicomInt16PixelData(
+          buffer: Int16List(16),
+          width: 4,
+          height: 4,
+        ),
+      );
 }
 
 void main() {
@@ -59,7 +59,8 @@ void main() {
       );
       expect(find.text('No DICOM data loaded.'), findsOneWidget);
 
-      await tester.runAsync(() => controller.load(const DicomSource.file('fake.dcm')));
+      await tester
+          .runAsync(() => controller.load(const DicomSource.file('fake.dcm')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -98,8 +99,7 @@ void main() {
           home: Scaffold(
             body: DicomViewer(
               controller: controller,
-              errorBuilder: (context, error) =>
-                  const Text('custom error view'),
+              errorBuilder: (context, error) => const Text('custom error view'),
             ),
           ),
         ),

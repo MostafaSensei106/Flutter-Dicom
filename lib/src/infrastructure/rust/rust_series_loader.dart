@@ -22,8 +22,8 @@ final class RustDicomSeriesLoader implements DicomSeriesLoader {
       final paths = switch (source) {
         DicomFilesSource(:final paths) => paths,
         _ => throw const DicomConfigurationException(
-          'Series loading needs DicomSource.files',
-        ),
+            'Series loading needs DicomSource.files',
+          ),
       };
       if (paths.isEmpty) {
         throw const DicomConfigurationException('Empty file list');

@@ -5,8 +5,9 @@ enum DicomPixelRepresentation {
   unsigned,
   signed;
 
-  static DicomPixelRepresentation fromRaw(int raw) =>
-      raw == 1 ? DicomPixelRepresentation.signed : DicomPixelRepresentation.unsigned;
+  static DicomPixelRepresentation fromRaw(int raw) => raw == 1
+      ? DicomPixelRepresentation.signed
+      : DicomPixelRepresentation.unsigned;
 }
 
 /// Photometric interpretation relevant for display.
@@ -27,7 +28,8 @@ enum DicomPhotometricInterpretation {
       'MONOCHROME2' => DicomPhotometricInterpretation.monochrome2,
       var s when s.startsWith('RGB') || s.startsWith('YBR') =>
         DicomPhotometricInterpretation.rgb,
-      var s when s.startsWith('PALETTE') => DicomPhotometricInterpretation.palette,
+      var s when s.startsWith('PALETTE') =>
+        DicomPhotometricInterpretation.palette,
       _ => DicomPhotometricInterpretation.unknown,
     };
   }
@@ -60,8 +62,7 @@ final class DicomPixelTransform {
 
   /// `true` for unsigned 16-bit data stored with the `-32768` offset.
   bool get isOffsetUnsigned16 =>
-      representation == DicomPixelRepresentation.unsigned &&
-      bitsAllocated > 8;
+      representation == DicomPixelRepresentation.unsigned && bitsAllocated > 8;
 
   /// Maps a stored value to its modality value (HU for CT).
   double toModalityValue(double raw) {
@@ -115,8 +116,8 @@ final class DicomInt16PixelData extends DicomPixelData {
 
   @override
   double modalityAt(int index) => transform.toModalityValue(
-    buffer[index].toDouble(),
-  );
+        buffer[index].toDouble(),
+      );
 }
 
 /// 8-bit monochrome frame.
@@ -148,12 +149,13 @@ final class DicomUint8PixelData extends DicomPixelData {
 
   @override
   double modalityAt(int index) => transform.toModalityValue(
-    buffer[index].toDouble(),
-  );
+        buffer[index].toDouble(),
+      );
 }
 
 /// Interleaved RGB frame.
-final class DicomRgbPixelData extends DicomPixelData {  const DicomRgbPixelData({
+final class DicomRgbPixelData extends DicomPixelData {
+  const DicomRgbPixelData({
     required this.buffer,
     required this.width,
     required this.height,
@@ -217,8 +219,8 @@ final class DicomUint16PixelData extends DicomPixelData {
 
   @override
   double modalityAt(int index) => transform.toModalityValue(
-    buffer[index].toDouble(),
-  );
+        buffer[index].toDouble(),
+      );
 }
 
 /// 32-bit float frame (e.g. parametric maps).
@@ -250,6 +252,6 @@ final class DicomFloat32PixelData extends DicomPixelData {
 
   @override
   double modalityAt(int index) => transform.toModalityValue(
-    buffer[index].toDouble(),
-  );
+        buffer[index].toDouble(),
+      );
 }
