@@ -83,6 +83,36 @@ final class AngleAnnotation extends DicomAnnotation {
   final DicomPoint armB;
 }
 
+/// Directed arrow from [start] to [end].
+final class ArrowAnnotation extends DicomAnnotation {
+  /// Creates an arrow annotation from [start] to [end].
+  const ArrowAnnotation({
+    required super.id,
+    required this.start,
+    required this.end,
+    super.style,
+  });
+
+  /// Arrow tail in image-pixel coordinates.
+  final DicomPoint start;
+
+  /// Arrow head in image-pixel coordinates.
+  final DicomPoint end;
+}
+
+/// Freehand polyline through image-pixel [points].
+final class FreehandAnnotation extends DicomAnnotation {
+  /// Creates a freehand annotation through [points].
+  const FreehandAnnotation({
+    required super.id,
+    required this.points,
+    super.style,
+  });
+
+  /// Polyline vertices in image-pixel coordinates.
+  final List<DicomPoint> points;
+}
+
 /// Free text label anchored at a point.
 final class TextAnnotation extends DicomAnnotation {
   /// Creates a text annotation showing [text] at [position].

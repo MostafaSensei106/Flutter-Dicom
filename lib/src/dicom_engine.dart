@@ -11,7 +11,9 @@ import 'domain/dicom_source.dart';
 import 'export/dicom_export.dart';
 import 'infrastructure/rust/rust_dicom_decoder.dart';
 import 'infrastructure/rust/rust_dicom_parser.dart';
+import 'infrastructure/rust/rust_series_loader.dart';
 import 'rust/frb_generated.dart';
+import 'series/dicom_series.dart';
 
 /// Engine configuration (dependency injection root).
 final class DicomEngineConfig {
@@ -70,10 +72,19 @@ abstract interface class DicomEngine {
   /// Exporter used for encoded output.
   DicomExporter get exporter;
 
+  /// Series loader used for spatially ordered stacks.
+  DicomSeriesLoader get seriesLoader;
+
   /// Opens [source] into a lazily decoded document.
   Future<DicomDocument> open(
     final DicomSource source, {
     final DicomOpenOptions options = const DicomOpenOptions(),
+  });
+
+  /// Loads a spatially sorted series (stack navigation order).
+  Future<DicomSeries> openSeries(
+    final DicomSource source, {
+    final DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
   });
 
   /// Releases engine resources.
@@ -113,7 +124,10 @@ final class _DefaultDicomEngine implements DicomEngine {
   DicomRenderer get renderer => const _ViewerOwnedRenderer();
 
   @override
-  DicomExporter get exporter => const PngDicomExporter();
+  DicomExporter get exporter => const MultiFormatDicomExporter();
+
+  @override
+  DicomSeriesLoader get seriesLoader => const RustDicomSeriesLoader();
 
   @override
   Future<DicomDocument> open(
@@ -123,6 +137,13 @@ final class _DefaultDicomEngine implements DicomEngine {
     final result = await parser.parse(source, options: options.parseOptions);
     return DicomDocument(metadata: result.metadata, frames: result.frames);
   }
+
+  @override
+  Future<DicomSeries> openSeries(
+    final DicomSource source, {
+    final DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
+  }) =>
+      seriesLoader.load(source, options: options);
 
   @override
   Future<void> dispose() async {}

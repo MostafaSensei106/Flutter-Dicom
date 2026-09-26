@@ -1,3 +1,16 @@
+## Unreleased (M1–M7 milestones)
+
+- (arch, breaking): `DefaultDicomViewerController` takes an injected `DicomParser` (`parser: engine.parser`) — the viewer no longer imports Rust/FFI.
+- (arch, breaking): `DicomEngine` gains `seriesLoader` + `openSeries`; `DicomExporter` dispatches PNG/JPEG/TIFF via `MultiFormatDicomExporter`; `DicomWebClient` gains `retrieveInstance`/`storeInstance`; `DicomDimseClient` is now typed (assoc state machine + `DimseCommand`s).
+- (feat M1): frame LRU cache + neighbor prefetch, `nextFrame`/`previousFrame`/`frameIndex`/`frameCount`.
+- (feat M2): unified `DicomViewTransform` (zoom/pan/rotation/flip about viewport center) driving paint, gestures (1-finger windowing, 2-finger zoom/pan/rotate), and all data overlays; `probeAt` with HU + patient mm; `InMemoryDicomPresetStore`.
+- (feat M3): cine 1–60 fps + loop flag; rotation-aware orientation markers; `RulerOverlay`, `DicomEllipseRoi`, `RoiOverlay`, `Arrow`/`Freehand` annotations + `AnnotationOverlay`.
+- (feat M4): spatial series ordering (IPP projection, instance fallback) + `DicomSeries.filePaths`; `DicomVolume.fromSeries` (median slice gap, origin, spacing); example opens series spatially sorted.
+- (feat M5): `DicomVoxelVolume` + nearest/trilinear MPR, MIP/MinIP on any axis, `DicomMprCoordinator` crosshair mediator, `DicomMprController`, CPU composite volume renderer behind the separate `DicomVolumeRenderer` port.
+- (feat M6): JPEG/TIFF export via `package:image`; Explicit-LE `DicomWriter` + `DicomDatasetBuilder` (Secondary Capture round-trips through the Rust reader); `StructuredReport` (Container/Text/Code/Num) with the same guarantee.
+- (feat M7): threshold/brush/flood-fill segmentation + stats + `MaskOverlay`; CPU PET/CT fusion (`DicomFusionRenderer` + slice registration); `HttpDicomWebClient` (QIDO/WADO/STOW + series staging); `DefaultDicomDimseClient` (assoc state machine + C-ECHO/C-STORE/C-FIND over Explicit LE; C-MOVE/C-GET typed for a later inbound SCP).
+- (deps): added `image: ^4.10.1` for JPEG/TIFF codecs.
+
 ## 0.2.0
 
 - (arch, breaking): removed the entire legacy API — `DicomController`, `DicomService`/`IDicomLoader`, `MedicalScreen`, `DicomShaderPainter` widget glue, `DicomConfig`/`DicomFrameResult`/generated models from public exports, and all compat shims. The public surface is exactly the §32 contract: engine, domain, ports, analysis, series, volume, annotations, cine, network, advanced, viewer, export, overlays, errors.

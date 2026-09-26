@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'dicom_overlay.dart';
@@ -5,7 +7,8 @@ import 'dicom_overlay.dart';
 /// Anatomical orientation markers derived from direction cosines.
 ///
 /// Maps the dominant patient axis of each image edge to R/L/A/P/H/F.
-/// Renders nothing when orientation is unknown.
+/// Marker positions follow the view rotation so they stay glued to the
+/// rotated anatomy. Renders nothing when orientation is unknown.
 final class OrientationOverlay implements DicomOverlay {
   /// Creates an anatomical orientation marker overlay.
   const OrientationOverlay();
@@ -22,10 +25,41 @@ final class OrientationOverlay implements DicomOverlay {
     final w = context.viewport.width;
     final h = context.viewport.height;
     // Left edge shows the negative row direction; right edge positive.
-    _draw(canvas, _negate(row), Offset(margin, h / 2));
-    _draw(canvas, row, Offset(w - margin, h / 2));
-    _draw(canvas, _negate(col), Offset(w / 2, margin + 6));
-    _draw(canvas, col, Offset(w / 2, h - margin - 6));
+    _draw(
+      canvas,
+      _negate(row),
+      _rotated(Offset(margin, h / 2), w, h, context.rotation),
+    );
+    _draw(canvas, row, _rotated(Offset(w - margin, h / 2), w, h, context.rotation));
+    _draw(
+      canvas,
+      _negate(col),
+      _rotated(Offset(w / 2, margin + 6), w, h, context.rotation),
+    );
+    _draw(
+      canvas,
+      col,
+      _rotated(Offset(w / 2, h - margin - 6), w, h, context.rotation),
+    );
+  }
+
+  /// Rotates [point] about the viewport center by [degrees] clockwise.
+  Offset _rotated(
+    final Offset point,
+    final double w,
+    final double h,
+    final double degrees,
+  ) {
+    if (degrees == 0) return point;
+    final rad = degrees * math.pi / 180.0;
+    final cosR = math.cos(rad);
+    final sinR = math.sin(rad);
+    final dx = point.dx - w / 2;
+    final dy = point.dy - h / 2;
+    return Offset(
+      w / 2 + dx * cosR - dy * sinR,
+      h / 2 + dx * sinR + dy * cosR,
+    );
   }
 
   /// Dominant patient axis of a direction cosine vector.

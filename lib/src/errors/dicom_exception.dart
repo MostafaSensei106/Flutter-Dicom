@@ -54,3 +54,9 @@ class DicomConfigurationException extends DicomException {
   /// Thrown when an invalid configuration is passed to the SDK.
   const DicomConfigurationException(super.message);
 }
+
+/// Thrown for network-layer failures (TCP, HTTP, association rejections).
+class DicomNetworkException extends DicomException {
+  /// Thrown for network-layer failures (TCP, HTTP, association rejections).
+  const DicomNetworkException(super.message, [super.originalError]);
+}

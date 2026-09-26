@@ -2,16 +2,18 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui;
 
+import '../analysis/dicom_probe.dart';
+import '../application/cache/frame_cache.dart';
 import '../application/ports/dicom_parser.dart';
 import '../application/viewer/viewer_state.dart';
 import '../dicom_engine.dart';
 import '../domain/dicom_color_map.dart';
+import '../domain/dicom_frame.dart';
 import '../domain/dicom_geometry.dart';
 import '../domain/dicom_pixel_data.dart';
 import '../domain/dicom_source.dart';
 import '../domain/dicom_windowing.dart';
 import '../errors/dicom_exception.dart';
-import '../infrastructure/rust/rust_dicom_parser.dart';
 import 'painting.dart';
 
 /// Viewer controller contract — reactive state in, commands out.
@@ -45,6 +47,18 @@ abstract interface class DicomViewerController {
   /// Displays the frame at [index].
   Future<void> setFrame(final int index);
 
+  /// Advances one frame, clamping at the last frame.
+  Future<void> nextFrame();
+
+  /// Moves back one frame, clamping at the first frame.
+  Future<void> previousFrame();
+
+  /// Index of the currently displayed frame.
+  int get frameIndex;
+
+  /// Total number of frames in the loaded document.
+  int get frameCount;
+
   /// Replaces the active windowing preset.
   void setWindow(final DicomWindow window);
 
@@ -63,6 +77,23 @@ abstract interface class DicomViewerController {
   /// Pans the image by [offset].
   void pan(final DicomOffset offset);
 
+  /// Enables or disables horizontal mirroring.
+  void setFlipH(final bool value);
+
+  /// Enables or disables vertical mirroring.
+  void setFlipV(final bool value);
+
+  /// View transform composed from the current zoom / pan / rotation / flip.
+  DicomViewTransform get viewTransform;
+
+  /// Probes the frame at viewport [screenPoint] (mm + HU when known).
+  ///
+  /// Returns null before load or when the point falls outside the image.
+  DicomProbeResult? probeAt(
+    final DicomPoint screenPoint,
+    final DicomViewport viewport,
+  );
+
   /// Restores default windowing, transform, and color map.
   void reset();
 
@@ -70,19 +101,24 @@ abstract interface class DicomViewerController {
   void dispose();
 }
 
-/// Default controller wiring the Rust-backed parser to the GPU painter.
+/// Default controller wiring a [DicomParser] to the GPU painter.
 ///
-/// Frame textures are cached (LRU, 8 entries) so cine scrubbing never
-/// re-uploads the visible stack.
+/// The parser is injected (Hexagonal port) — this file never imports Rust,
+/// FFI, or filesystem code. Frame pixel data is cached (LRU, 8 entries) and
+/// neighbors are prefetched so cine scrubbing never re-decodes the stack.
 final class DefaultDicomViewerController implements DicomViewerController {
-  /// Creates a controller backed by an optional [parser].
-  DefaultDicomViewerController({final DicomParser? parser})
-      : _parser = parser ?? const RustDicomParser();
+  /// Creates a controller backed by [parser].
+  ///
+  /// Obtain the parser from [DicomEngine.parser]:
+  /// `DefaultDicomViewerController(parser: engine.parser)`.
+  DefaultDicomViewerController({required final DicomParser parser})
+      : _parser = parser;
 
   final DicomParser _parser;
   final StreamController<DicomViewerState> _states =
       StreamController<DicomViewerState>.broadcast();
   final LinkedHashMap<int, ui.Image> _textures = LinkedHashMap();
+  final LruFrameCache<DicomFrame> _frameCache = LruFrameCache<DicomFrame>();
 
   static const int _textureCacheCapacity = 8;
 
@@ -128,7 +164,14 @@ final class DefaultDicomViewerController implements DicomViewerController {
     try {
       final parse = await _parser.parse(source);
       _disposeTextures();
-      _document = DicomDocument(metadata: parse.metadata, frames: parse.frames);
+      _frameCache.clear();
+      _document = DicomDocument(
+        metadata: parse.metadata,
+        frames: CachedFrameProvider(
+          inner: parse.frames,
+          cache: _frameCache,
+        ),
+      );
       await _showFrame(0, window: parse.metadata.defaultWindow);
       _update(
         _state.copyWith(
@@ -136,6 +179,7 @@ final class DefaultDicomViewerController implements DicomViewerController {
           frameCount: parse.frameCount,
         ),
       );
+      _prefetchNeighbors(0);
     } catch (e) {
       final error = e is DicomException
           ? e
@@ -154,6 +198,38 @@ final class DefaultDicomViewerController implements DicomViewerController {
     }
     await _showFrame(index, window: _state.window);
     _update(_state.copyWith(currentFrame: index));
+    _prefetchNeighbors(index);
+  }
+
+  @override
+  int get frameIndex => _state.currentFrame;
+
+  @override
+  int get frameCount => _state.frameCount;
+
+  @override
+  Future<void> nextFrame() => setFrame(_state.currentFrame + 1);
+
+  @override
+  Future<void> previousFrame() => setFrame(_state.currentFrame - 1);
+
+  /// Warms the frame + texture caches for adjacent frames (cine lookahead).
+  void _prefetchNeighbors(final int index) {
+    final doc = _document;
+    if (doc == null) return;
+    for (final neighbor in [index - 1, index + 1]) {
+      if (neighbor < 0 || neighbor >= doc.frameCount) continue;
+      if (_textures.containsKey(neighbor)) continue;
+      unawaited(
+        doc.frames.get(neighbor).then(
+          (final frame) async {
+            final pixels = frame.pixelData;
+            if (pixels == null || pixels.length == 0) return;
+            await _cachedTexture(neighbor, pixels);
+          },
+        ).catchError((final _) {}),
+      );
+    }
   }
 
   Future<void> _showFrame(final int index,
@@ -234,6 +310,42 @@ final class DefaultDicomViewerController implements DicomViewerController {
   }
 
   @override
+  void setFlipH(final bool value) {
+    if (value == _state.flipH) return;
+    _update(_state.copyWith(flipH: value));
+  }
+
+  @override
+  void setFlipV(final bool value) {
+    if (value == _state.flipV) return;
+    _update(_state.copyWith(flipV: value));
+  }
+
+  @override
+  DicomViewTransform get viewTransform => _state.viewTransform;
+
+  @override
+  DicomProbeResult? probeAt(
+    final DicomPoint screenPoint,
+    final DicomViewport viewport,
+  ) {
+    final px = _pixels;
+    final geo = geometry;
+    if (px == null || geo == null) return null;
+    final imagePoint =
+        _state.viewTransform.screenToImage(screenPoint, viewport, px.width, px.height);
+    if (imagePoint == null) return null;
+    final base = const ModalityProbe().probe(px, imagePoint);
+    return DicomProbeResult(
+      coordinate: base.coordinate,
+      rawValue: base.rawValue,
+      modalityValue: base.modalityValue,
+      hu: base.hu,
+      patientPosition: geo.imageToPatient(imagePoint),
+    );
+  }
+
+  @override
   void reset() {
     final doc = _document;
     _update(
@@ -244,6 +356,8 @@ final class DefaultDicomViewerController implements DicomViewerController {
         rotation: 0,
         zoom: 1,
         pan: const DicomOffset(0, 0),
+        flipH: false,
+        flipV: false,
       ),
     );
   }
@@ -258,6 +372,7 @@ final class DefaultDicomViewerController implements DicomViewerController {
       image.dispose();
     }
     _textures.clear();
+    _frameCache.clear();
     _texture = null;
     _pixels = null;
   }

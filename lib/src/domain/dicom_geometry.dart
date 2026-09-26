@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Point in any 2D DICOM coordinate space (screen / viewport / image).
 final class DicomPoint {
   /// Creates a point at ([x], [y]).
@@ -111,6 +113,126 @@ final class DicomPosition {
 
   /// Z coordinate in mm.
   final double z;
+}
+
+/// View transform applied about the viewport center: flip → zoom →
+/// rotation → pan (in screen pixels).
+///
+/// The viewer paints the image with the equivalent Flutter `Transform`
+/// (`translate(pan) * rotate * scale(zoom, flip)` around center), and maps
+/// pointer positions back with [screenToImage] so probe, ruler, and ROI
+/// always agree with what is on screen.
+final class DicomViewTransform {
+  /// Creates a view transform with zoom, pan, rotation, and flip flags.
+  const DicomViewTransform({
+    this.zoom = 1,
+    this.pan = const DicomOffset(0, 0),
+    this.rotation = 0,
+    this.flipH = false,
+    this.flipV = false,
+  });
+
+  /// Zoom factor applied to the image.
+  final double zoom;
+
+  /// Pan offset in viewport pixels (applied after zoom/rotation).
+  final DicomOffset pan;
+
+  /// Clockwise rotation in degrees.
+  final double rotation;
+
+  /// Whether the image is mirrored horizontally.
+  final bool flipH;
+
+  /// Whether the image is mirrored vertically.
+  final bool flipV;
+
+  /// `true` when no transform is applied.
+  bool get isIdentity =>
+      zoom == 1 &&
+      pan.dx == 0 &&
+      pan.dy == 0 &&
+      rotation == 0 &&
+      !flipH &&
+      !flipV;
+
+  /// Viewport tap → image pixel. `null` when outside the image.
+  DicomPoint? screenToImage(
+    final DicomPoint screen,
+    final DicomViewport viewport,
+    final int imageWidth,
+    final int imageHeight,
+  ) {
+    if (viewport.width <= 0 ||
+        viewport.height <= 0 ||
+        imageWidth <= 0 ||
+        imageHeight <= 0 ||
+        zoom <= 0) {
+      return null;
+    }
+    final cx = viewport.width / 2;
+    final cy = viewport.height / 2;
+    // Undo pan + rotation + zoom + flip (reverse of imageToScreen).
+    final ox = screen.x - cx - pan.dx;
+    final oy = screen.y - cy - pan.dy;
+    final rad = -rotation * 3.141592653589793 / 180.0;
+    final cosR = _cos(rad);
+    final sinR = _sin(rad);
+    final rx = ox * cosR - oy * sinR;
+    final ry = ox * sinR + oy * cosR;
+    final ux = (flipH ? -rx : rx) / zoom;
+    final uy = (flipV ? -ry : ry) / zoom;
+    final baseX = ux + cx;
+    final baseY = uy + cy;
+    final px = (baseX / viewport.width) * imageWidth;
+    final py = (baseY / viewport.height) * imageHeight;
+    if (px < 0 || py < 0 || px >= imageWidth || py >= imageHeight) {
+      return null;
+    }
+    return DicomPoint(px, py);
+  }
+
+  /// Image pixel → viewport position (always inside by construction).
+  DicomPoint imageToScreen(
+    final DicomPoint image,
+    final DicomViewport viewport,
+    final int imageWidth,
+    final int imageHeight,
+  ) {
+    final cx = viewport.width / 2;
+    final cy = viewport.height / 2;
+    var ox = (image.x / imageWidth) * viewport.width - cx;
+    var oy = (image.y / imageHeight) * viewport.height - cy;
+    if (flipH) ox = -ox;
+    if (flipV) oy = -oy;
+    ox *= zoom;
+    oy *= zoom;
+    final rad = rotation * 3.141592653589793 / 180.0;
+    final cosR = _cos(rad);
+    final sinR = _sin(rad);
+    final rx = ox * cosR - oy * sinR;
+    final ry = ox * sinR + oy * cosR;
+    return DicomPoint(rx + cx + pan.dx, ry + cy + pan.dy);
+  }
+
+  static double _cos(final double rad) {
+    // Exact fast paths keep 0/90/180/270 rotations pixel-perfect.
+    final deg = (rad * 180.0 / 3.141592653589793) % 360;
+    final norm = deg < 0 ? deg + 360 : deg;
+    if (norm == 0) return 1;
+    if (norm == 180) return -1;
+    if (norm == 90 || norm == 270) return 0;
+    return math.cos(rad);
+  }
+
+  static double _sin(final double rad) {
+    final deg = (rad * 180.0 / 3.141592653589793) % 360;
+    final norm = deg < 0 ? deg + 360 : deg;
+    if (norm == 0 || norm == 180) return 0;
+    if (norm == 90) return 1;
+    if (norm == 270) return -1;
+    return math.sin(rad);
+  }
 }
 
 /// Spatial context shared by probe, ruler, scale bar, orientation,

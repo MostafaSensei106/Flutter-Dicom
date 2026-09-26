@@ -17,8 +17,11 @@ abstract interface class DicomCineController {
   /// Stops playback and releases the scheduler subscription.
   void stop();
 
-  /// Updates the playback rate, clamped to 1–120 fps.
+  /// Updates the playback rate, clamped to 1–60 fps.
   void setFps(final double fps);
+
+  /// Loop flag used by the most recent [play] call.
+  bool get loop;
 
   /// Releases scheduler resources.
   void dispose();
@@ -74,6 +77,7 @@ final class DefaultDicomCineController implements DicomCineController {
 
   StreamSubscription<int>? _subscription;
   double _fps = 24;
+  bool _loop = true;
 
   @override
   bool get playing => _subscription != null;
@@ -82,9 +86,13 @@ final class DefaultDicomCineController implements DicomCineController {
   double get fps => _fps;
 
   @override
+  bool get loop => _loop;
+
+  @override
   Future<void> play(
       {required final int frameCount, final bool loop = true}) async {
     await stop();
+    _loop = loop;
     _subscription = _scheduler
         .frames(frameCount: frameCount, fps: _fps, loop: loop)
         .listen((final index) => onFrame(index));
@@ -105,7 +113,7 @@ final class DefaultDicomCineController implements DicomCineController {
   @override
   void setFps(final double fps) {
     if (fps <= 0) return;
-    _fps = fps.clamp(1.0, 120.0);
+    _fps = fps.clamp(1.0, 60.0);
   }
 
   @override

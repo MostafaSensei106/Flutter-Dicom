@@ -162,6 +162,35 @@ abstract interface class DicomPresetStore {
   Future<void> delete(final String name);
 }
 
+/// In-memory preset store for custom windows (session scope).
+///
+/// Persist across restarts by implementing [DicomPresetStore] over
+/// shared preferences / a file — the viewer only depends on the port.
+final class InMemoryDicomPresetStore implements DicomPresetStore {
+  /// Creates an empty in-memory preset store.
+  InMemoryDicomPresetStore();
+
+  final Map<String, DicomWindow> _presets = {};
+
+  @override
+  Future<List<DicomWindow>> load() async =>
+      List.unmodifiable(_presets.values);
+
+  @override
+  Future<void> save(final String name, final DicomWindow window) async {
+    _presets[name] = DicomWindow(
+      center: window.center,
+      width: window.width,
+      label: name,
+    );
+  }
+
+  @override
+  Future<void> delete(final String name) async {
+    _presets.remove(name);
+  }
+}
+
 /// Strategy hook for future non-linear mappings (sigmoid / custom VOI LUT).
 abstract interface class WindowingStrategy {
   /// Maps [value] through [window] to a normalized output.

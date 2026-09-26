@@ -3,13 +3,53 @@ import 'dart:typed_data';
 import '../application/ports/dicom_exporter.dart';
 import '../domain/dicom_pixel_data.dart';
 import '../domain/dicom_windowing.dart';
+import 'dicom_jpeg.dart';
+import 'dicom_tiff.dart';
 
+/// Multi-format exporter dispatching PNG / JPEG / TIFF strategies.
+///
+/// Windowed grayscale in all three formats (what you see is what you get);
+/// pass an explicit window through the per-format `exportWindowed` methods
+/// for clinical exports. This is the engine default behind [DicomExporter].
+final class MultiFormatDicomExporter implements DicomExporter {
+  /// Creates a multi-format exporter with per-format strategies.
+  const MultiFormatDicomExporter({
+    this.png = const PngDicomExporter(),
+    this.jpeg = const JpegDicomExporter(),
+    this.tiff = const TiffDicomExporter(),
+  });
+
+  /// PNG strategy.
+  final PngDicomExporter png;
+
+  /// JPEG strategy.
+  final JpegDicomExporter jpeg;
+
+  /// TIFF strategy.
+  final TiffDicomExporter tiff;
+
+  @override
+  Future<Uint8List> export(
+    final DicomPixelData pixels, {
+    required final DicomExportFormat format,
+    final DicomExportOptions options = const DicomExportOptions(),
+  }) {
+    const fallback = DicomWindow(center: 40, width: 400);
+    return switch (format) {
+      DicomExportFormat.png => png.exportWindowed(pixels, fallback),
+      DicomExportFormat.jpeg => jpeg.exportWindowed(
+          pixels,
+          fallback,
+          quality: options.quality,
+        ),
+      DicomExportFormat.tiff => tiff.exportWindowed(pixels, fallback),
+    };
+  }
+}
 /// PNG exporter rendering windowed grayscale (what you see is what you get).
 ///
-/// Only [DicomExportFormat.png] is implemented; JPEG/TIFF throw
-/// [UnimplementedError]. Pixel values are mapped through [DicomWindowPreset.softTissue]-style
-/// normalization when no window is supplied — pass an explicit window via
-/// [PngDicomExporter.exportWindowed] for clinical exports.
+/// Pass an explicit window via [PngDicomExporter.exportWindowed] for
+/// clinical exports.
 final class PngDicomExporter implements DicomExporter {
   /// Creates a PNG exporter.
   const PngDicomExporter();

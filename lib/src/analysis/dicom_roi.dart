@@ -57,6 +57,62 @@ final class DicomRoi {
   }
 }
 
+/// Elliptical ROI inscribed in [bounds].
+///
+/// Pixels are sampled when their center falls inside the ellipse, so
+/// statistics match the rendered overlay exactly.
+final class DicomEllipseRoi {
+  /// Creates an elliptical ROI inscribed in [bounds].
+  const DicomEllipseRoi(this.bounds);
+
+  /// Bounding rectangle of the ellipse in image-pixel coordinates.
+  final DicomRect bounds;
+
+  /// Analyzes pixels inside the ellipse.
+  Future<RoiStatistics> analyze(
+    final DicomPixelData pixels, {
+    final DicomMeasurementUnit unit = DicomMeasurementUnit.modalityValue,
+  }) async {
+    final x0 = bounds.left.toInt().clamp(0, pixels.width - 1);
+    final y0 = bounds.top.toInt().clamp(0, pixels.height - 1);
+    final x1 = (bounds.left + bounds.width).toInt().clamp(0, pixels.width);
+    final y1 = (bounds.top + bounds.height).toInt().clamp(0, pixels.height);
+    final cx = bounds.left + bounds.width / 2;
+    final cy = bounds.top + bounds.height / 2;
+    final rx = bounds.width / 2;
+    final ry = bounds.height / 2;
+    if (rx <= 0 || ry <= 0) return RoiStatistics.fromValues(const []);
+
+    final values = <double>[];
+    for (var y = y0; y < y1; y++) {
+      for (var x = x0; x < x1; x++) {
+        final nx = (x + 0.5 - cx) / rx;
+        final ny = (y + 0.5 - cy) / ry;
+        if (nx * nx + ny * ny > 1) continue;
+        final raw = _rawAt(pixels, y * pixels.width + x);
+        values.add(
+          unit == DicomMeasurementUnit.modalityValue
+              ? pixels.transform.toModalityValue(raw)
+              : raw,
+        );
+      }
+    }
+    return RoiStatistics.fromValues(values);
+  }
+
+  double _rawAt(final DicomPixelData pixels, final int index) {
+    return switch (pixels) {
+      DicomInt16PixelData(:final buffer) => buffer[index].toDouble(),
+      DicomUint8PixelData(:final buffer) => buffer[index].toDouble(),
+      DicomUint16PixelData(:final buffer) => buffer[index].toDouble(),
+      DicomFloat32PixelData(:final buffer) => buffer[index].toDouble(),
+      DicomRgbPixelData(:final buffer) =>
+        (buffer[index * 3] + buffer[index * 3 + 1] + buffer[index * 3 + 2]) /
+            3.0,
+    };
+  }
+}
+
 /// Descriptive statistics over an ROI.
 final class RoiStatistics {
   /// Creates statistics from precomputed aggregate values.

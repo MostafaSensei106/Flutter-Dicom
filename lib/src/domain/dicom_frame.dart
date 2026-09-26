@@ -1,5 +1,4 @@
-import 'dicom_metadata.dart';
-import 'dicom_pixel_data.dart';
+import '../../flutter_dicom.dart';
 
 /// Parse options — metadata-only mode skips pixel decoding entirely.
 final class DicomParseOptions {
@@ -45,11 +44,26 @@ final class DicomFrame {
 /// Lightweight reference used by series / volume builders.
 final class DicomFrameReference {
   /// Creates a frame reference.
-  const DicomFrameReference({required this.index, this.label});
+  const DicomFrameReference({
+    required this.index,
+    this.label,
+    this.position,
+    this.instanceNumber,
+    this.sliceLocation,
+  });
 
   /// Zero-based frame index.
   final int index;
 
   /// Optional display label.
   final String? label;
+
+  /// Image position (0020,0032) of the slice, when known.
+  final DicomPosition? position;
+
+  /// Instance Number (0020,0013) of the slice, when known.
+  final int? instanceNumber;
+
+  /// Slice Location (0020,1041) of the slice, when known.
+  final double? sliceLocation;
 }

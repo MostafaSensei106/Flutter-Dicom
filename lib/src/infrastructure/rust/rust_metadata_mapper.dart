@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../../domain/dicom_geometry.dart';
 import '../../domain/dicom_metadata.dart';
 import '../../domain/dicom_pixel_data.dart';
+import '../../domain/dicom_tag_id.dart';
 import '../../domain/dicom_windowing.dart';
 import '../../rust/api/core/models/dicom_frame_result.dart' as rust;
 import '../../rust/api/core/models/dicom_metadata.dart' as rust;
@@ -47,6 +48,7 @@ abstract final class RustMetadataMapper {
       imageOrientationPatient: orientation,
       imagePositionPatient: position,
       windowPresets: presets,
+      extraTags: _extraTags(m),
     );
   }
 
@@ -134,9 +136,58 @@ abstract final class RustMetadataMapper {
     );
   }
 
+  /// Parses an Image Orientation Patient value for series sorting.
+  static DicomOrientation? parseOrientation(final String raw) =>
+      _parseOrientation(raw);
+
   static DicomPosition? _parsePosition(final String raw) {
     final v = _parseDoubles(raw, 3);
     if (v == null) return null;
     return DicomPosition(v[0], v[1], v[2]);
+  }
+
+  /// Parses an Image Position Patient value for series sorting.
+  static DicomPosition? parsePosition(final String raw) =>
+      _parsePosition(raw);
+
+  /// Parses an Instance Number value for series sorting.
+  static int? parseInstanceNumber(final String raw) {
+    final v = int.tryParse(raw.trim());
+    if (v != null) return v;
+    return double.tryParse(raw.trim())?.toInt();
+  }
+
+  /// Stashes identity tags (UIDs, dates) that have no typed metadata slot.
+  static Map<DicomTagId, Object?> _extraTags(final rust.DicomMetadata m) {
+    final tags = <DicomTagId, Object?>{};
+    final studyUid = m.studyInstanceUid.trim();
+    if (studyUid.isNotEmpty && studyUid != 'Unknown') {
+      tags[DicomTagId.studyInstanceUid] = studyUid;
+    }
+    final seriesUid = m.seriesInstanceUid.trim();
+    if (seriesUid.isNotEmpty && seriesUid != 'Unknown') {
+      tags[DicomTagId.seriesInstanceUid] = seriesUid;
+    }
+    final sopUid = m.sopInstanceUid.trim();
+    if (sopUid.isNotEmpty && sopUid != 'Unknown') {
+      tags[DicomTagId.sopInstanceUid] = sopUid;
+    }
+    final date = _parseDate(m.studyDate);
+    if (date != null) tags[DicomTagId.studyDate] = date;
+    return tags;
+  }
+
+  /// Parses a DICOM DA value (`YYYYMMDD`) for study dates.
+  static DateTime? _parseDate(final String raw) {
+    final v = raw.trim();
+    if (v.length != 8) return null;
+    final y = int.tryParse(v.substring(0, 4));
+    final m = int.tryParse(v.substring(4, 6));
+    final d = int.tryParse(v.substring(6, 8));
+    if (y == null || m == null || d == null) return null;
+    return DateTime.tryParse(
+      '${y.toString().padLeft(4, '0')}-${m.toString().padLeft(2, '0')}-'
+      '${d.toString().padLeft(2, '0')}',
+    );
   }
 }

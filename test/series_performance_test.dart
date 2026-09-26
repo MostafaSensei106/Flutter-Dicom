@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter_dicom/flutter_dicom.dart';
+import 'package:flutter_dicom/src/infrastructure/rust/rust_dicom_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ============================================================
@@ -131,7 +132,7 @@ void main() async {
   group('3 ▸ Windowing & Contrast Stress Test', () {
     test('Rapid setWindow ops stay real-time', () async {
       final files = await loadSeries(seriesPath);
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       await controller.load(DicomSource.file(files.first.path));
 
@@ -158,7 +159,7 @@ void main() async {
   group('4 ▸ Full Pipeline per File', () {
     test('load → window ×5 → reset → next', () async {
       final files = await loadSeries(seriesPath);
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
 
       final sw = Stopwatch()..start();
@@ -186,7 +187,7 @@ void main() async {
     test('Bidirectional setFrame across files-source document', () async {
       final files = await loadSeries(seriesPath);
       final paths = files.map((final e) => e.path).toList();
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       await controller.load(DicomSource.files(paths));
       final count = controller.state.frameCount;
@@ -222,7 +223,7 @@ void main() async {
       final files = await loadSeries(seriesPath);
       final sw = Stopwatch()..start();
       for (final file in files.take(20)) {
-        final controller = DefaultDicomViewerController();
+        final controller = DefaultDicomViewerController(parser: const RustDicomParser());
         await controller.load(DicomSource.file(file.path));
         expect(controller.state.status, isA<DicomViewerReady>());
         controller.dispose();
@@ -240,7 +241,7 @@ void main() async {
   group('7 ▸ Edge Cases & Robustness', () {
     test('Extreme windowing values stay safe', () async {
       final files = await loadSeries(seriesPath);
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       await controller.load(DicomSource.file(files.first.path));
       controller.setWindow(const DicomWindow(center: 1e12, width: 8000));
@@ -250,7 +251,7 @@ void main() async {
 
     test('Double reset does not crash', () async {
       final files = await loadSeries(seriesPath);
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       await controller.load(DicomSource.file(files.first.path));
       controller.reset();
@@ -259,7 +260,7 @@ void main() async {
     });
 
     test('Missing file surfaces a typed error', () async {
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       try {
         await controller.load(const DicomSource.file('nope.dcm'));
@@ -277,7 +278,7 @@ void main() async {
   group('8 ▸ Sequential Burst (Fast-Consecutive Loads)', () {
     test('Reload same file repeatedly (no stale state)', () async {
       final files = await loadSeries(seriesPath);
-      final controller = DefaultDicomViewerController();
+      final controller = DefaultDicomViewerController(parser: const RustDicomParser());
       addTearDown(controller.dispose);
       for (var i = 0; i < 10; i++) {
         await controller.load(DicomSource.file(files.first.path));

@@ -118,19 +118,29 @@ class MyMedicalApp extends StatefulWidget {
 }
 
 class _MyMedicalAppState extends State<MyMedicalApp> {
-  final _controller = DefaultDicomViewerController();
+  late final _engineFuture = DicomEngine.create();
+  DefaultDicomViewerController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller.load(const DicomSource.file('/sdcard/scans/head_ct.dcm'));
+    _engineFuture.then((final engine) {
+      _controller = DefaultDicomViewerController(parser: engine.parser);
+      _controller!.load(const DicomSource.file('/sdcard/scans/head_ct.dcm'));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       body: DicomViewer(
-        controller: _controller,
+        controller: controller,
         overlays: const [
           ScaleBarOverlay(),
           OrientationOverlay(),
@@ -142,7 +152,7 @@ class _MyMedicalAppState extends State<MyMedicalApp> {
 
   @override
   void dispose() {
-    _controller.dispose(); // Critical: frees GPU textures
+    _controller?.dispose(); // Critical: frees GPU textures
     super.dispose();
   }
 }
@@ -176,7 +186,7 @@ final seriesDoc = await engine.open(DicomSource.files(paths));
 
 // Parse ≠ decode: fetch frames lazily, never 400 buffers at once.
 final frame = await doc.frames.get(0);
-final pixels = await doc.decodeFrame(3);
+final third = await doc.frames.get(3);
 
 // Typed metadata with unknown-tag fallback.
 final name = doc.metadata.patientName ?? 'Anonymous';

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -63,6 +64,13 @@ class _DicomViewerState extends State<DicomViewer> {
   ui.FragmentShader? _shader;
   String? _shaderError;
   DicomPoint? _probeImagePoint;
+
+  // Gesture disambiguation: one pointer drives windowing, two drive
+  // zoom / pan / rotation. Pointer counting is manual so behavior does
+  // not depend on per-version ScaleDetails fields.
+  int _pointers = 0;
+  double _baseZoom = 1;
+  double _lastRotation = 0;
 
   @override
   void initState() {
@@ -138,59 +146,90 @@ class _DicomViewerState extends State<DicomViewer> {
           child: SizedBox(
             width: fitted.width,
             height: fitted.height,
-            child: GestureDetector(
-              onPanUpdate: widget.windowDrag
-                  ? (final details) {
-                      widget.controller.setWindow(
-                        state.window.copyWith(
-                          center: state.window.center + details.delta.dy * 1.5,
-                          width: state.window.width + details.delta.dx * 1.5,
-                        ),
-                      );
-                    }
-                  : null,
-              onDoubleTap: widget.controller.reset,
-              onTapDown: widget.probeInteraction
-                  ? (final details) => _setProbe(details.localPosition, fitted)
-                  : null,
-              child: MouseRegion(
-                onHover: widget.probeInteraction
-                    ? (final event) => _setProbe(event.localPosition, fitted)
+            child: Listener(
+              onPointerDown: (final _) {
+                _pointers++;
+                if (_pointers == 2) {
+                  _baseZoom = state.zoom;
+                  _lastRotation = 0;
+                }
+              },
+              onPointerUp: (final _) {
+                _pointers = (_pointers - 1).clamp(0, 10);
+              },
+              onPointerCancel: (final _) {
+                _pointers = (_pointers - 1).clamp(0, 10);
+              },
+              child: GestureDetector(
+                onScaleStart: (final _) {
+                  _baseZoom = state.zoom;
+                  _lastRotation = 0;
+                },
+                onScaleUpdate: (final details) =>
+                    _onScaleUpdate(details, state),
+                onDoubleTap: widget.controller.reset,
+                onTapDown: widget.probeInteraction
+                    ? (final details) => _setProbe(details.localPosition, fitted)
                     : null,
-                onExit: widget.probeInteraction
-                    ? (final _) => setState(() => _probeImagePoint = null)
-                    : null,
-                child: Stack(
-                  children: [
-                    CustomPaint(
-                      size: Size(fitted.width, fitted.height),
-                      painter: DicomImagePainter(
-                        texture: texture,
-                        shader: shader,
-                        window: state.window,
-                        slope: pixels.transform.rescaleSlope,
-                        intercept: pixels.transform.rescaleIntercept,
-                        invert: state.invert,
-                      ),
-                    ),
-                    CustomPaint(
-                      size: Size(fitted.width, fitted.height),
-                      painter: DicomOverlaysPainter(
-                        overlays: widget.overlays,
-                        context: DicomOverlayContext(
-                          viewport: DicomViewport(
-                            width: fitted.width,
-                            height: fitted.height,
+                child: MouseRegion(
+                  onHover: widget.probeInteraction
+                      ? (final event) => _setProbe(event.localPosition, fitted)
+                      : null,
+                  onExit: widget.probeInteraction
+                      ? (final _) => setState(() => _probeImagePoint = null)
+                      : null,
+                  child: Stack(
+                    children: [
+                      Transform(
+                        alignment: Alignment.center,
+                        // ignore: deprecated_member_use
+                        transform: Matrix4.identity()
+                          // ignore: deprecated_member_use
+                          ..translate(
+                            state.pan.dx,
+                            state.pan.dy,
+                          )
+                          ..rotateZ(state.rotation * math.pi / 180.0)
+                          // ignore: deprecated_member_use
+                          ..scale(
+                            state.zoom * (state.flipH ? -1 : 1),
+                            state.zoom * (state.flipV ? -1 : 1),
                           ),
-                          geometry: geometry,
-                          scale: state.zoom,
-                          probePoint: _probeImagePoint,
-                          pixels: pixels,
-                          window: state.window,
+                        child: CustomPaint(
+                          size: Size(fitted.width, fitted.height),
+                          painter: DicomImagePainter(
+                            texture: texture,
+                            shader: shader,
+                            window: state.window,
+                            slope: pixels.transform.rescaleSlope,
+                            intercept: pixels.transform.rescaleIntercept,
+                            invert: state.invert,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      CustomPaint(
+                        size: Size(fitted.width, fitted.height),
+                        painter: DicomOverlaysPainter(
+                          overlays: widget.overlays,
+                          context: DicomOverlayContext(
+                            viewport: DicomViewport(
+                              width: fitted.width,
+                              height: fitted.height,
+                            ),
+                            geometry: geometry,
+                            scale: state.zoom,
+                            probePoint: _probeImagePoint,
+                            pixels: pixels,
+                            window: state.window,
+                            rotation: state.rotation,
+                            pan: state.pan,
+                            flipH: state.flipH,
+                            flipV: state.flipV,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -200,16 +239,47 @@ class _DicomViewerState extends State<DicomViewer> {
     );
   }
 
+  void _onScaleUpdate(
+    final ScaleUpdateDetails details,
+    final DicomViewerState state,
+  ) {
+    if (_pointers <= 1) {
+      // Single-pointer drag adjusts windowing (horizontal → width,
+      // vertical → center), matching the clinical convention.
+      if (!widget.windowDrag) return;
+      widget.controller.setWindow(
+        state.window.copyWith(
+          center: state.window.center + details.focalPointDelta.dy * 1.5,
+          width: state.window.width + details.focalPointDelta.dx * 1.5,
+        ),
+      );
+      return;
+    }
+    widget.controller.zoom(_baseZoom * details.scale);
+    widget.controller.pan(
+      DicomOffset(
+        details.focalPointDelta.dx,
+        details.focalPointDelta.dy,
+      ),
+    );
+    final deltaRotation = details.rotation - _lastRotation;
+    _lastRotation = details.rotation;
+    if (deltaRotation != 0) {
+      // ScaleDetails.rotation is in radians; state keeps clockwise degrees.
+      widget.controller.rotate(deltaRotation * 180.0 / math.pi);
+    }
+  }
+
   void _setProbe(final Offset local, final Size fitted) {
     final pixels = widget.controller.pixels;
     if (pixels == null) return;
-    final px = (local.dx / fitted.width) * pixels.width;
-    final py = (local.dy / fitted.height) * pixels.height;
-    if (px < 0 || py < 0 || px >= pixels.width || py >= pixels.height) {
-      setState(() => _probeImagePoint = null);
-      return;
-    }
-    setState(() => _probeImagePoint = DicomPoint(px, py));
+    final imagePoint = widget.controller.state.viewTransform.screenToImage(
+      DicomPoint(local.dx, local.dy),
+      DicomViewport(width: fitted.width, height: fitted.height),
+      pixels.width,
+      pixels.height,
+    );
+    setState(() => _probeImagePoint = imagePoint);
   }
 
   Size _fitContain(

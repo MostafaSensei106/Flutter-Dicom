@@ -49,6 +49,8 @@ final class DicomViewerState {
     this.rotation = 0,
     this.zoom = 1,
     this.pan = const DicomOffset(0, 0),
+    this.flipH = false,
+    this.flipV = false,
   });
 
   /// Current viewer lifecycle status.
@@ -78,6 +80,21 @@ final class DicomViewerState {
   /// Pan offset applied to the image.
   final DicomOffset pan;
 
+  /// Whether the image is mirrored horizontally.
+  final bool flipH;
+
+  /// Whether the image is mirrored vertically.
+  final bool flipV;
+
+  /// View transform composed from zoom / pan / rotation / flip state.
+  DicomViewTransform get viewTransform => DicomViewTransform(
+        zoom: zoom,
+        pan: pan,
+        rotation: rotation,
+        flipH: flipH,
+        flipV: flipV,
+      );
+
   /// Returns a copy with the given fields replaced.
   DicomViewerState copyWith({
     final DicomViewerStatus? status,
@@ -89,6 +106,8 @@ final class DicomViewerState {
     final double? rotation,
     final double? zoom,
     final DicomOffset? pan,
+    final bool? flipH,
+    final bool? flipV,
   }) =>
       DicomViewerState(
         status: status ?? this.status,
@@ -100,6 +119,8 @@ final class DicomViewerState {
         rotation: rotation ?? this.rotation,
         zoom: zoom ?? this.zoom,
         pan: pan ?? this.pan,
+        flipH: flipH ?? this.flipH,
+        flipV: flipV ?? this.flipV,
       );
 }
 

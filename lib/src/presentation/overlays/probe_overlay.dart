@@ -20,10 +20,15 @@ final class PixelProbeOverlay implements DicomOverlay {
     final pixels = context.pixels;
     if (point == null || pixels == null) return;
 
-    final scaleX = context.viewport.width / pixels.width;
-    final scaleY = context.viewport.height / pixels.height;
-    final dx = point.x * scaleX;
-    final dy = point.y * scaleY;
+    // Marker tracks the same view transform as the painted image.
+    final screen = context.transform.imageToScreen(
+      point,
+      context.viewport,
+      pixels.width,
+      pixels.height,
+    );
+    final dx = screen.x;
+    final dy = screen.y;
 
     final marker = Paint()
       ..color = Colors.yellowAccent

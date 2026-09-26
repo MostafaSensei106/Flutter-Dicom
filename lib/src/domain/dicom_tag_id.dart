@@ -87,6 +87,15 @@ final class DicomTagId {
   /// Study Date (0008,0020).
   static const studyDate = DicomTagId(0x0008, 0x0020);
 
+  /// Study Instance UID (0020,000D).
+  static const studyInstanceUid = DicomTagId(0x0020, 0x000D);
+
+  /// Series Instance UID (0020,000E).
+  static const seriesInstanceUid = DicomTagId(0x0020, 0x000E);
+
+  /// SOP Instance UID (0008,0018).
+  static const sopInstanceUid = DicomTagId(0x0008, 0x0018);
+
   @override
   bool operator ==(final Object other) =>
       identical(this, other) ||

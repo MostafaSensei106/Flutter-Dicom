@@ -10,6 +10,7 @@ final class DicomProbeResult {
     required this.rawValue,
     required this.modalityValue,
     this.hu,
+    this.patientPosition,
   });
 
   /// Image-pixel coordinate that was probed.
@@ -23,6 +24,9 @@ final class DicomProbeResult {
 
   /// Hounsfield units, when CT semantics apply.
   final double? hu;
+
+  /// Patient coordinates in mm, when geometry is known.
+  final List<double>? patientPosition;
 }
 
 /// Probe port — an overlay displays the result; it never computes HU itself.

@@ -28,6 +28,10 @@ final class DicomOverlayContext {
     this.probePoint,
     this.pixels,
     this.window = const DicomWindow(center: 40, width: 400),
+    this.rotation = 0,
+    this.pan = const DicomOffset(0, 0),
+    this.flipH = false,
+    this.flipV = false,
   });
 
   /// Viewport extents in paint pixels.
@@ -47,6 +51,27 @@ final class DicomOverlayContext {
 
   /// Currently applied window.
   final DicomWindow window;
+
+  /// Clockwise rotation in degrees applied to the image.
+  final double rotation;
+
+  /// Pan offset in viewport pixels applied to the image.
+  final DicomOffset pan;
+
+  /// Whether the image is mirrored horizontally.
+  final bool flipH;
+
+  /// Whether the image is mirrored vertically.
+  final bool flipV;
+
+  /// View transform shared by data overlays (probe / ruler / annotations).
+  DicomViewTransform get transform => DicomViewTransform(
+        zoom: scale,
+        pan: pan,
+        rotation: rotation,
+        flipH: flipH,
+        flipV: flipV,
+      );
 }
 
 /// Base for overlays that also need a widget (tooltips, labels).
