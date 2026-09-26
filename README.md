@@ -9,13 +9,36 @@
 </p>
 
 <p align="center">
-  <a href="#-why-choose-flutter-dicom">Why?</a> •
   <a href="#-key-features">Key Features</a> •
+  <a href="#-why-choose-flutter-dicom">Why?</a> •
   <a href="#-installation">Installation</a> •
   <a href="#-basic-usage">Basic Usage</a> •
   <a href="#-advanced-usage">Advanced Usage</a> •
+  <a href="#-workstation-demo">Workstation Demo</a> •
   <a href="#-contributing">Contributing</a>
 </p>
+
+---
+
+## ✨ Key Features
+
+| Area | What you get |
+| :--- | :--- |
+| **Viewer** | GPU fragment-shader rendering, LRU frame cache + neighbor prefetch, frame scrubber, cine 1–60 fps with loop |
+| **Interaction** | One transform everywhere: zoom / pan / rotation / flip / invert — paint, gestures, and overlays share `DicomViewTransform` |
+| **Clinical tools** | Pixel probe (raw / HU / patient mm), scale bar, orientation markers, ruler, rectangle + ellipse ROI with statistics |
+| **Windowing** | Built-in presets (brain / bone / lung / abdomen / soft tissue), drag-to-window, custom preset store |
+| **Annotations** | Line / rectangle / ellipse / angle / arrow / text / freehand with undo / redo, painted through the view transform |
+| **Series → Volume** | Spatial sorting by Image Position/Orientation (not filenames), `DicomVolume` with voxel spacing and origin |
+| **MPR / MIP / 3D** | Nearest + trilinear reconstruction, crosshair mediator, MIP/MinIP on any axis, CPU composite volume renderer behind a GPU-ready port |
+| **Export** | Windowed PNG / JPEG / TIFF (`package:image` codecs) — rendered from the pipeline, never screenshots |
+| **DICOM writing** | Explicit-LE writer + dataset builder (Secondary Capture round-trips through the Rust reader), Structured Reports (Container/Text/Code/Num) |
+| **Segmentation** | Threshold / brush / flood-fill strategies, mask statistics, mask overlay |
+| **Fusion** | PET/CT blending with slice registration (identity / translation) |
+| **Network** | DICOMweb (QIDO/WADO/STOW) and DIMSE (assoc state machine + C-ECHO/C-STORE/C-FIND over Explicit LE) |
+| **Architecture** | Facade engine, hexagonal ports & adapters, DI — the viewer never imports Rust/FFI; no singletons |
+
+---
 
 ---
 
@@ -161,18 +184,26 @@ class _MyMedicalAppState extends State<MyMedicalApp> {
 ### 3. Adjusting Windowing Programmatically
 
 ```dart
-// Named clinical presets
+// Named clinical presets (the controller is the nullable field from §2).
 void applyBoneWindow() {
-  _controller.setWindow(DicomWindowPreset.bone);
+  _controller?.setWindow(DicomWindowPreset.bone);
+}
+
+// Custom presets persist through the store port.
+Future<void> saveMyLung(final DicomPresetStore presets) async {
+  await presets.save('My Lung', _controller!.state.window);
 }
 
 // Reset to file defaults
-void reset() => _controller.reset();
+void reset() => _controller?.reset();
 ```
 
 ---
 
 ## 🔬 Advanced Usage
+
+> Fragments below build on §2: `_controller` is the loaded, non-null viewer
+> controller, `pixels` the current frame, and `geometry` its spatial context.
 
 ### Any Source, Same Pipeline
 
@@ -200,21 +231,136 @@ final kvp = doc.metadata.tag<double>(const DicomTagId(0x0018, 0x0060));
 _controller.setWindow(DicomWindowPreset.lung);
 _controller.setWindow(doc.metadata.defaultWindow);
 
-// Cine playback over the document.
+// Frame navigation + cine playback over the document.
+await _controller.nextFrame();
 final cine = DefaultDicomCineController(onFrame: _controller.setFrame);
 await cine.play(frameCount: doc.frameCount);
 
-// Probing, ROI stats, and physical measurements share one HU owner.
-const probe = ModalityProbe();
-final result = probe.probe(pixels, const DicomPoint(128, 128));
+// One transform: zoom / pan / rotate / flip stay consistent across
+// paint, gestures, probe, ruler, ROI, and annotations.
+_controller.zoom(2);
+_controller.rotate(90);
+_controller.setFlipH(true);
+
+// Probing returns raw + HU + patient coordinates in millimeters.
+final result = _controller.probeAt(
+  const DicomPoint(100, 100),
+  const DicomViewport(width: 200, height: 200),
+);
 final stats = await DicomRoi(const DicomRect(0, 0, 64, 64)).analyze(pixels);
 final dist = const DicomRuler().measure(a, b, geometry);
 
-// PNG export of the windowed view.
-final png = await const PngDicomExporter().exportWindowed(
+// Multi-format export of the windowed view.
+final png = await engine.exporter.export(pixels, format: DicomExportFormat.png);
+final jpeg = await engine.exporter.export(
   pixels,
-  DicomWindowPreset.bone,
+  format: DicomExportFormat.jpeg,
+  options: const DicomExportOptions(quality: 90),
 );
+```
+
+### Series → Volume → MPR / MIP / 3D
+
+```dart
+// Spatially sorted series (Image Position/Orientation, not filenames).
+final series = await engine.openSeries(DicomSource.files(paths));
+await _controller.load(DicomSource.files(series.filePaths));
+
+// Assemble voxels, then reconstruct / project / render.
+final slices = <DicomPixelData>[];
+for (final path in series.filePaths) {
+  final sliceDoc = await engine.open(DicomSource.file(path));
+  slices.add((await sliceDoc.frames.get(0)).pixelData!);
+}
+final meta = DicomVolume.fromSeries(
+  series,
+  width: slices.first.width,
+  height: slices.first.height,
+);
+final volume = DicomVoxelVolume.assemble(meta: meta, slices: slices);
+
+final axial = await const NearestReconstruction()
+    .reconstruct(volume, DicomPlane.axial, 10);
+final mip = await const MipProjection().project(
+  volume,
+  const DicomProjectionOptions(),
+);
+// One crosshair moves axial + coronal + sagittal together.
+final crosshair = DefaultDicomMprCoordinator();
+crosshair.setPoint(const DicomMprPoint(64, 64, 10));
+final render = await const CpuCompositeVolumeRenderer().render(
+  volume,
+  const DicomVolumeRenderOptions(),
+);
+```
+
+### Writing & Structured Reports
+
+```dart
+// Secondary Capture of the current windowed view.
+final dataset = (DicomDatasetBuilder()
+      ..sop(
+        classUid: DicomSopClass.secondaryCapture,
+        instanceUid: DicomUid.generate(),
+      )
+      ..patient(name: 'Doe^John', id: '123')
+      ..study(studyUid: DicomUid.generate())
+      ..series(seriesUid: DicomUid.generate(), modality: 'OT')
+      ..image(rows: h, columns: w)
+      ..pixelData(gray8, bitsAllocated: 8))
+    .build();
+await DicomWriter.writeFile(dataset, '/tmp/view.dcm');
+
+// Measurements become a real SR document.
+final report = StructuredReport(
+  studyUid: DicomUid.generate(),
+  seriesUid: DicomUid.generate(),
+  sopUid: DicomUid.generate(),
+  items: [
+    SrContainer(
+      concept: const DicomCode(scheme: 'DCM', value: '121071', meaning: 'Finding'),
+      items: [
+        SrText(concept: finding, value: 'Nodule in right upper lobe'),
+        SrNum(concept: finding, value: 12.5, units: mmCode),
+      ],
+    ),
+  ],
+);
+await DicomWriter.writeFile(report.toDataset(), '/tmp/report.dcm');
+```
+
+### Segmentation, Fusion & Network
+
+```dart
+// Threshold / brush / flood-fill share one algorithm port.
+final mask = await const ThresholdSegmentation(lower: 200, upper: 800)
+    .segment(pixels);
+final segStats = DicomSegmentationStats.compute(
+  mask,
+  spacing: geometry.pixelSpacing,
+);
+
+// PET/CT fusion with slice registration.
+final fused = await const DicomFusionRenderer().render(
+  ct: ctPixels,
+  ctWindow: DicomWindowPreset.softTissue,
+  pet: petPixels,
+  petWindow: const DicomWindow(center: 5, width: 10),
+);
+
+// DICOMweb: QIDO search, WADO retrieve, STOW store.
+final web = HttpDicomWebClient(baseUrl: Uri.parse('http://pacs:8080/dicom-web'));
+final studies = await web.searchStudies(const DicomStudyQuery(modality: 'CT'));
+await web.storeInstance(await File('/tmp/view.dcm').readAsBytes());
+
+// DIMSE: associate, then Echo / Store / Find as commands.
+final dimse = DefaultDicomDimseClient(parser: engine.parser);
+await dimse.associate(host: '127.0.0.1', port: 104, calledAe: 'PACS');
+final rtt = await dimse.execute(const DimseEchoCommand()) as Duration;
+final found = await dimse.execute(
+  const DimseFindCommand(DicomStudyQuery()),
+) as List<DicomFindResult>;
+await dimse.release();
 ```
 
 ### Precision Texture Unpacking (GLSL)
@@ -284,10 +430,44 @@ DicomViewer(
 ```
 
 Public surface (`package:flutter_dicom/flutter_dicom.dart`): `dicom_engine.dart`,
-`domain/` (source, metadata, tag id, pixel data, window, color map, geometry),
-application ports, `analysis/`, `series/`, `volume/`, `annotations/`, `cine/`,
-`network/`, `export` ports. Rust internals and FRB-generated models are not
-part of the public contract.
+`domain/` (source, frame, metadata, tag id, pixel data, window, color map,
+geometry), application ports (parser, decoder, renderer, exporter, cache,
+viewer state), `analysis/` (probe, ruler, ROI, segmentation),
+`series/` (series + ordering strategies), `volume/` (volume, voxels, MPR,
+projection, CPU renderer), `annotations/`, `cine/`, `export/` (PNG/JPEG/TIFF),
+`writing/` (dataset, writer, structured reports), `fusion/`, `network/`
+(DICOMweb, DIMSE PDU + client), presentation overlays, errors.
+Rust internals and FRB-generated models are not part of the public contract.
+
+Core patterns (each solves one problem, nothing decorative): Strategy for
+decoders/renderers/windowing/reconstruction/projection/segmentation, State
+for viewer/cine/association lifecycle, Adapter at the Rust boundary, Factory
+for sources/exporters, Composite for annotations/overlays/SR, Mediator for
+the MPR crosshair, Facade (`DicomEngine`), Repository for series/network
+data, Proxy for lazy frames, LRU cache, Command for undoable/network ops,
+Observer for reactive state. No singletons — lifetimes stay injectable.
+
+---
+
+## 🖥️ Workstation Demo
+
+`example/` is a four-tab workstation exercising every milestone against the
+public API only (one shared `DicomViewerController`, dumb widgets):
+
+| Tab | Covers |
+| :--- | :--- |
+| **Viewer** | Open file / bytes / spatially-sorted series; presets + custom preset store; level/width; flip / rotate / zoom / invert; frames + cine + FPS; metadata grid |
+| **Measure** | Tap probe readout (px / raw / HU / patient mm); two-tap ruler; rect/ellipse ROI + statistics; annotations (line/rect/arrow/text + undo/redo); threshold segmentation + mask overlay |
+| **Volume** | Series assembly with progress; MPR (axial/coronal/sagittal, nearest/trilinear); MIP/MinIP on any axis; CPU 3D render; PET/CT fusion with overlay picker — all previewed as in-memory PNGs |
+| **Share** | PNG/JPEG/TIFF export; Secondary Capture + Structured Report writing; DICOMweb search + STOW; DIMSE associate / C-ECHO / C-FIND / C-STORE / release |
+
+```bash
+cd example
+flutter run
+```
+
+> A widget smoke test (`example/test/workstation_smoke_test.dart`) builds all
+> four tabs with an injected fake engine — no native bridge required.
 
 ---
 
