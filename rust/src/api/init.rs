@@ -1,6 +1,10 @@
 use crate::api::core::{
     config::dicom_config::DicomConfig, models::dicom_frame_result::DicomFrameResult,
-    utils::process_dicom_file::{process_dicom_file, process_dicom_from_bytes},
+    utils::process_dicom_file::{
+        dicom_tags_for_bytes, dicom_tags_for_path, pixel_stats_for_bytes,
+        pixel_stats_for_path, process_dicom_file, process_dicom_from_bytes,
+        DicomTagEntry, PixelStats,
+    },
 };
 
 /// Initializes the high-performance Rust backend.
@@ -48,4 +52,24 @@ pub fn load_dicom_series_from_dir(dir_path: String) -> anyhow::Result<Vec<crate:
 /// Automatically groups and sorts slices.
 pub fn load_dicom_series_from_files(paths: Vec<String>) -> anyhow::Result<Vec<crate::api::core::models::dicom_series::DicomSeries>> {
     crate::api::core::utils::series_loader::SeriesLoader::load_files(paths)
+}
+
+/// Returns min / max / mean of the stored pixels (for auto-windowing UIs).
+pub fn dicom_pixel_stats(path: String, config: DicomConfig) -> anyhow::Result<PixelStats> {
+    pixel_stats_for_path(&path, &config)
+}
+
+/// Pixel statistics from in-memory bytes (Web path).
+pub fn dicom_pixel_stats_from_bytes(bytes: Vec<u8>, config: DicomConfig) -> anyhow::Result<PixelStats> {
+    pixel_stats_for_bytes(&bytes, &config)
+}
+
+/// Flattens top-level DICOM tags for debugging / tag-dump UIs.
+pub fn dicom_tags(path: String) -> anyhow::Result<Vec<DicomTagEntry>> {
+    dicom_tags_for_path(&path)
+}
+
+/// Tag dump from in-memory bytes (Web path).
+pub fn dicom_tags_from_bytes(bytes: Vec<u8>) -> anyhow::Result<Vec<DicomTagEntry>> {
+    dicom_tags_for_bytes(&bytes)
 }

@@ -9,7 +9,8 @@ import '../models/dicom_frame_result.dart';
 import '../models/dicom_metadata.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `align_window_center`, `convert_pixels`, `extract_metadata`, `extract_pixel_data`, `get_float_tag`, `get_int_tag`, `get_str_tag`, `process_dicom_object`
+// These functions are ignored because they are not marked as `pub`: `align_window_center`, `convert_pixels`, `extract_metadata`, `extract_pixel_data`, `flatten_tags`, `get_float_tag`, `get_int_tag`, `get_str_tag`, `pixel_stats_of`, `process_dicom_object`, `select_frame_bytes`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`
 
 /// Internal utility function for parsing a DICOM file and extracting its metadata and pixels.
 ///
@@ -34,3 +35,84 @@ Future<DicomFrameResult> processDicomFromBytes(
         {required List<int> bytes, required DicomConfig config}) =>
     RustLib.instance.api.crateApiCoreUtilsProcessDicomFileProcessDicomFromBytes(
         bytes: bytes, config: config);
+
+/// Computes statistics without allocating a full frame result.
+Future<PixelStats> pixelStatsForPath(
+        {required String path, required DicomConfig config}) =>
+    RustLib.instance.api.crateApiCoreUtilsProcessDicomFilePixelStatsForPath(
+        path: path, config: config);
+
+/// Computes statistics from in-memory bytes (Web path).
+Future<PixelStats> pixelStatsForBytes(
+        {required List<int> bytes, required DicomConfig config}) =>
+    RustLib.instance.api.crateApiCoreUtilsProcessDicomFilePixelStatsForBytes(
+        bytes: bytes, config: config);
+
+/// Flattens top-level dataset tags (skips bulky pixel data payloads).
+Future<List<DicomTagEntry>> dicomTagsForPath({required String path}) =>
+    RustLib.instance.api
+        .crateApiCoreUtilsProcessDicomFileDicomTagsForPath(path: path);
+
+/// Tag dump from in-memory bytes (Web path).
+Future<List<DicomTagEntry>> dicomTagsForBytes({required List<int> bytes}) =>
+    RustLib.instance.api
+        .crateApiCoreUtilsProcessDicomFileDicomTagsForBytes(bytes: bytes);
+
+/// A single flattened DICOM tag for debugging / tag-dump UIs.
+/// Pixel Data values are truncated to keep the bridge payload small.
+class DicomTagEntry {
+  final int group;
+  final int element;
+  final String keyword;
+  final String value;
+
+  const DicomTagEntry({
+    required this.group,
+    required this.element,
+    required this.keyword,
+    required this.value,
+  });
+
+  @override
+  int get hashCode =>
+      group.hashCode ^ element.hashCode ^ keyword.hashCode ^ value.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DicomTagEntry &&
+          runtimeType == other.runtimeType &&
+          group == other.group &&
+          element == other.element &&
+          keyword == other.keyword &&
+          value == other.value;
+}
+
+/// Min / max / mean of the stored pixel buffer (for auto-windowing UIs).
+class PixelStats {
+  final int min;
+  final int max;
+  final double mean;
+  final int count;
+
+  const PixelStats({
+    required this.min,
+    required this.max,
+    required this.mean,
+    required this.count,
+  });
+
+  @override
+  int get hashCode =>
+      min.hashCode ^ max.hashCode ^ mean.hashCode ^ count.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PixelStats &&
+          runtimeType == other.runtimeType &&
+          min == other.min &&
+          max == other.max &&
+          mean == other.mean &&
+          count == other.count;
+}

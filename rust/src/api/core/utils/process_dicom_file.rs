@@ -4,7 +4,9 @@ use crate::api::core::{
 };
 use anyhow::{Context, Result};
 use dicom::core::Tag;
-use dicom::dictionary_std::tags;
+use dicom::core::dictionary::DataDictionary;
+use dicom::core::header::Header;
+use dicom::dictionary_std::{tags, StandardDataDictionary};
 use dicom::object::{open_file, DefaultDicomObject};
 use dicom::core::value::Value as DicomValue;
 use dicom::pixeldata::PixelDecoder;
@@ -48,16 +50,19 @@ fn process_dicom_object(obj: DefaultDicomObject, config: &DicomConfig) -> Result
     if !config.skip_pixels {
         #[cfg(debug_assertions)]
         eprintln!("[RUST] metadata built, starting pixel extraction...");
-        pixel_data = extract_pixel_data(&obj, &metadata);
+        pixel_data = extract_pixel_data(&obj, &metadata, config.frame_index);
     }
 
     #[cfg(debug_assertions)]
     eprintln!("[RUST] pixel_data.len={} (i16 elements) window_center={} window_width={}",
         pixel_data.len(), metadata.window_center, metadata.window_width);
 
-    // If the DICOM header did not provide window center/width, compute sensible
-    // defaults from the actual pixel data range so the image is immediately visible.
-    if metadata.window_width == 0.0 && !pixel_data.is_empty() {
+    // Window defaults: recompute from the decoded pixels when the header
+    // has no windowing OR when auto_normalize explicitly requests it.
+    // This finally gives `auto_normalize` a real effect (previously dead).
+    if !pixel_data.is_empty()
+        && (metadata.window_width == 0.0 || config.auto_normalize)
+    {
         if let (Some(&min), Some(&max)) = (pixel_data.iter().min(), pixel_data.iter().max()) {
             metadata.window_width = (max as f32 - min as f32).max(1.0);
             metadata.window_center = (min as f32 + max as f32) / 2.0;
@@ -155,7 +160,11 @@ fn extract_metadata(obj: &DefaultDicomObject) -> DicomMetadata {
     }
 }
 
-fn extract_pixel_data(obj: &DefaultDicomObject, metadata: &DicomMetadata) -> Vec<i16> {
+fn extract_pixel_data(
+    obj: &DefaultDicomObject,
+    metadata: &DicomMetadata,
+    frame_index: u32,
+) -> Vec<i16> {
     let mut pixel_data = Vec::new();
     let bytes_per_sample = (metadata.bits_allocated as usize).div_ceil(8);
     let samples_per_frame = (metadata.width as usize) * (metadata.height as usize) * (metadata.samples_per_pixel as usize);
@@ -164,14 +173,17 @@ fn extract_pixel_data(obj: &DefaultDicomObject, metadata: &DicomMetadata) -> Vec
     let raw_element = obj.element(tags::PIXEL_DATA).ok();
     let is_encapsulated = raw_element.as_ref().map(|e| matches!(e.value(), DicomValue::PixelSequence(_))).unwrap_or(false);
 
+    // Selects the requested frame slice; falls back to frame 0 when the
+    // index is out of range (backwards compatible with single-frame files).
+
     // PATH 1: raw element read (works for native/uncompressed data).
     if !is_encapsulated {
         if let Some(ref elem) = raw_element {
             if let Ok(raw_bytes) = elem.to_bytes() {
                 let raw_slice = raw_bytes.as_ref();
                 if !raw_slice.is_empty() && frame_bytes > 0 {
-                    let first_frame = if raw_slice.len() > frame_bytes { &raw_slice[..frame_bytes] } else { raw_slice };
-                    pixel_data = convert_pixels(first_frame, metadata.bits_allocated, metadata.pixel_representation);
+                    let frame = select_frame_bytes(raw_slice, frame_bytes, frame_index);
+                    pixel_data = convert_pixels(frame, metadata.bits_allocated, metadata.pixel_representation);
                 }
             }
         }
@@ -180,15 +192,134 @@ fn extract_pixel_data(obj: &DefaultDicomObject, metadata: &DicomMetadata) -> Vec
     // PATH 2: compressed — use full decoder
     if pixel_data.is_empty() {
         if let Ok(decoded) = obj.decode_pixel_data() {
+            // Prefer the decoded frame count API when available; fall back
+            // to byte-slicing the concatenated buffer.
+            let frame_count = decoded.number_of_frames() as usize;
             let raw_bytes = decoded.data();
             if !raw_bytes.is_empty() && frame_bytes > 0 {
-                let first_frame = if raw_bytes.len() > frame_bytes { &raw_bytes[..frame_bytes] } else { raw_bytes };
-                pixel_data = convert_pixels(first_frame, metadata.bits_allocated, metadata.pixel_representation);
+                let frame = if frame_count > 1 {
+                    select_frame_bytes(raw_bytes, frame_bytes, frame_index)
+                } else if raw_bytes.len() > frame_bytes {
+                    &raw_bytes[..frame_bytes]
+                } else {
+                    raw_bytes
+                };
+                pixel_data = convert_pixels(frame, metadata.bits_allocated, metadata.pixel_representation);
             }
         }
     }
 
     pixel_data
+}
+
+/// Returns the byte window for [frame_index], falling back to frame 0 when
+/// the index is out of range (backwards compatible with single-frame files).
+fn select_frame_bytes(buf: &[u8], frame_bytes: usize, frame_index: u32) -> &[u8] {
+    if frame_bytes == 0 || buf.is_empty() {
+        return &[];
+    }
+    let offset = (frame_index as usize).saturating_mul(frame_bytes);
+    if offset >= buf.len() {
+        if buf.len() > frame_bytes { &buf[..frame_bytes] } else { buf }
+    } else {
+        let end = (offset + frame_bytes).min(buf.len());
+        &buf[offset..end]
+    }
+}
+
+/// Min / max / mean of the stored pixel buffer (for auto-windowing UIs).
+#[derive(Debug, Clone)]
+pub struct PixelStats {
+    pub min: i16,
+    pub max: i16,
+    pub mean: f32,
+    pub count: u32,
+}
+
+/// Computes statistics without allocating a full frame result.
+pub fn pixel_stats_for_path(path: &str, config: &DicomConfig) -> Result<PixelStats> {
+    let result = process_dicom_file(path, config)?;
+    Ok(pixel_stats_of(&result.pixel_data))
+}
+
+/// Computes statistics from in-memory bytes (Web path).
+pub fn pixel_stats_for_bytes(bytes: &[u8], config: &DicomConfig) -> Result<PixelStats> {
+    let result = process_dicom_from_bytes(bytes, config)?;
+    Ok(pixel_stats_of(&result.pixel_data))
+}
+
+fn pixel_stats_of(pixels: &[i16]) -> PixelStats {
+    if pixels.is_empty() {
+        return PixelStats { min: 0, max: 0, mean: 0.0, count: 0 };
+    }
+    let min = *pixels.iter().min().unwrap_or(&0);
+    let max = *pixels.iter().max().unwrap_or(&0);
+    let sum: i64 = pixels.iter().map(|&v| v as i64).sum();
+    PixelStats {
+        min,
+        max,
+        mean: sum as f32 / pixels.len() as f32,
+        count: pixels.len() as u32,
+    }
+}
+
+/// A single flattened DICOM tag for debugging / tag-dump UIs.
+/// Pixel Data values are truncated to keep the bridge payload small.
+#[derive(Debug, Clone)]
+pub struct DicomTagEntry {
+    pub group: u16,
+    pub element: u16,
+    pub keyword: String,
+    pub value: String,
+}
+
+const TAG_VALUE_LIMIT: usize = 256;
+
+/// Flattens top-level dataset tags (skips bulky pixel data payloads).
+pub fn dicom_tags_for_path(path: &str) -> Result<Vec<DicomTagEntry>> {
+    let obj = open_file(path).context("Failed to open DICOM file")?;
+    Ok(flatten_tags(&obj))
+}
+
+/// Tag dump from in-memory bytes (Web path).
+pub fn dicom_tags_for_bytes(bytes: &[u8]) -> Result<Vec<DicomTagEntry>> {
+    let cursor = std::io::Cursor::new(bytes);
+    let obj = dicom::object::from_reader(cursor).context("Failed to read DICOM from bytes")?;
+    Ok(flatten_tags(&obj))
+}
+
+fn flatten_tags(obj: &DefaultDicomObject) -> Vec<DicomTagEntry> {
+    let mut out = Vec::new();
+    for elem in obj.iter() {
+        let tag = elem.header().tag();
+        // Never ship full pixel payloads over the bridge.
+        if tag == tags::PIXEL_DATA {
+            out.push(DicomTagEntry {
+                group: tag.group(),
+                element: tag.element(),
+                keyword: "PixelData".to_string(),
+                value: "<pixel data>".to_string(),
+            });
+            continue;
+        }
+        let keyword = StandardDataDictionary
+            .by_tag(tag)
+            .map(|e| e.alias.to_string())
+            .unwrap_or_else(|| format!("({:04X},{:04X})", tag.group(), tag.element()));
+        let mut value = elem.value().to_str().map(|c| c.to_string()).unwrap_or_default();
+        value = value.trim().to_string();
+        if value.len() > TAG_VALUE_LIMIT {
+            value.truncate(TAG_VALUE_LIMIT);
+            value.push_str("…");
+        }
+        out.push(DicomTagEntry {
+            group: tag.group(),
+            element: tag.element(),
+            keyword,
+            value,
+        });
+    }
+    out
 }
 
 // --- Helper Functions ---

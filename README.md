@@ -77,16 +77,17 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_dicom: ^0.1.0+2
+  flutter_dicom: ^0.2.0
 ```
 
 ---
 
 ## 🚀 Basic Usage
 
-### 1. Initialization
+### 1. Engine
 
-Initialize the library in your `main()` function before starting the app.
+Create the engine once — it initializes the native bridge, so you never
+touch FFI setup yourself.
 
 ```dart
 import 'package:flutter/material.dart';
@@ -94,48 +95,54 @@ import 'package:flutter_dicom/flutter_dicom.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Load the native Rust binary into memory
-  await RustLib.init();
-  
+  await DicomEngine.create();
+
   runApp(const MyApp());
 }
 ```
 
 ### 2. Loading and Displaying DICOM
 
-The `DicomController` is the brain of your Viewer. Pair it with the `DicomViewer` widget for an instant medical-grade experience.
+Open any source into a document (metadata now, pixels lazily), drive it
+with a viewer controller, and render with the dumb `DicomViewer` widget.
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_dicom/flutter_dicom.dart';
 
 class MyMedicalApp extends StatefulWidget {
+  const MyMedicalApp({super.key});
+
   @override
   State<MyMedicalApp> createState() => _MyMedicalAppState();
 }
 
 class _MyMedicalAppState extends State<MyMedicalApp> {
-  final _controller = DicomController();
+  final _controller = DefaultDicomViewerController();
 
   @override
   void initState() {
     super.initState();
-    // Initialize shaders and load a file
-    _controller.initialize().then((_) {
-      _controller.loadFromFile(filePath: '/sdcard/scans/head_ct.dcm');
-    });
+    _controller.load(const DicomSource.file('/sdcard/scans/head_ct.dcm'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DicomViewer(controller: _controller),
+      body: DicomViewer(
+        controller: _controller,
+        overlays: const [
+          ScaleBarOverlay(),
+          OrientationOverlay(),
+          PixelProbeOverlay(),
+        ],
+      ),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Critical: Free GPU textures
+    _controller.dispose(); // Critical: frees GPU textures
     super.dispose();
   }
 }
@@ -144,43 +151,60 @@ class _MyMedicalAppState extends State<MyMedicalApp> {
 ### 3. Adjusting Windowing Programmatically
 
 ```dart
-// Manually set Window Center and Width
+// Named clinical presets
 void applyBoneWindow() {
-  _controller.adjustWindowing(deltaX: 1500, deltaY: 300);
+  _controller.setWindow(DicomWindowPreset.bone);
 }
 
 // Reset to file defaults
-void reset() => _controller.resetWindowing();
+void reset() => _controller.reset();
 ```
 
 ---
 
 ## 🔬 Advanced Usage
 
-### Custom Rust Logic with `DicomConfig`
-
-You can tune the Rust engine for specific use cases, such as fast-loading metadata while skipping expensive pixel processing.
+### Any Source, Same Pipeline
 
 ```dart
-await _controller.loadFromFile(
-  filePath: path,
-  config: DicomConfig(
-    autoNormalize: true, 
-    skipPixels: true, // Meta-data only mode
-  ),
-);
+final engine = await DicomEngine.create();
+
+// Local file, in-memory bytes (Web / PACS), or file lists (series).
+final doc = await engine.open(const DicomSource.file('scan.dcm'));
+final webDoc = await engine.open(DicomSource.bytes(bytes));
+final seriesDoc = await engine.open(DicomSource.files(paths));
+
+// Parse ≠ decode: fetch frames lazily, never 400 buffers at once.
+final frame = await doc.frames.get(0);
+final pixels = await doc.decodeFrame(3);
+
+// Typed metadata with unknown-tag fallback.
+final name = doc.metadata.patientName ?? 'Anonymous';
+final kvp = doc.metadata.tag<double>(const DicomTagId(0x0018, 0x0060));
 ```
 
-### Dependency Injection (DI) Architecture
-
-For enterprise apps, inject a custom `DicomService` to handle different storage backends (S3, local cache, etc.).
+### Windowing, Cine & Analysis
 
 ```dart
-// 1. Define the service with a specific loader
-final service = DicomService(loader: FileDicomLoader());
+// Window presets + modality-aware default.
+_controller.setWindow(DicomWindowPreset.lung);
+_controller.setWindow(doc.metadata.defaultWindow);
 
-// 2. Inject into the controller
-final controller = DicomController(service: service);
+// Cine playback over the document.
+final cine = DefaultDicomCineController(onFrame: _controller.setFrame);
+await cine.play(frameCount: doc.frameCount);
+
+// Probing, ROI stats, and physical measurements share one HU owner.
+const probe = ModalityProbe();
+final result = probe.probe(pixels, const DicomPoint(128, 128));
+final stats = await DicomRoi(const DicomRect(0, 0, 64, 64)).analyze(pixels);
+final dist = const DicomRuler().measure(a, b, geometry);
+
+// PNG export of the windowed view.
+final png = await const PngDicomExporter().exportWindowed(
+  pixels,
+  DicomWindowPreset.bone,
+);
 ```
 
 ### Precision Texture Unpacking (GLSL)
@@ -203,6 +227,60 @@ void main() {
 ```
 ---
 
+## 🏛️ Architecture (v0.2.0+)
+
+The library is being rebuilt as a workstation-grade toolkit in layers, so new
+features extend abstractions instead of adding `if/else` to the viewer:
+
+```text
+Flutter UI (Viewer / Overlays)
+Application (Controllers / Commands / State / Cine / Cache)
+Domain (Image / Geometry / Windowing / Pixel — pure Dart, no FFI)
+Infrastructure (Rust FFI / Filesystem / DICOMweb adapters)
+Native Core (Rust + dicom crate + GPU)
+```
+
+Key entry points (v0.2.0 contract — Dart-first, Rust/FFI stays an implementation detail):
+
+```dart
+// Engine facade: orchestration only.
+final engine = await DicomEngine.create();
+final doc = await engine.open(const DicomSource.file('/sdcard/scan.dcm'));
+// Parse once, decode lazily — never 400 frames in memory.
+final frame = await doc.frames.get(0);
+
+// Any source ends at the same pipeline.
+final webDoc = await engine.open(DicomSource.bytes(bytes)); // Web/PACS
+final seriesDoc = await engine.open(DicomSource.files(paths)); // Series
+
+// Clinical presets + inversion.
+controller.setWindow(DicomWindowPreset.bone);
+controller.setInvert(true);
+
+// One HU math owner: DicomPixelTransform.
+final probe = const ModalityProbe().probe(pixels, point);
+
+// Composable overlays instead of viewer properties.
+DicomViewer(
+  controller: controller,
+  loadingBuilder: (ctx) => const CircularProgressIndicator(),
+  errorBuilder: (ctx, err) => Text('$err'),
+  overlays: const [
+    ScaleBarOverlay(),
+    OrientationOverlay(),
+    PixelProbeOverlay(),
+  ],
+);
+```
+
+Public surface (`package:flutter_dicom/flutter_dicom.dart`): `dicom_engine.dart`,
+`domain/` (source, metadata, tag id, pixel data, window, color map, geometry),
+application ports, `analysis/`, `series/`, `volume/`, `annotations/`, `cine/`,
+`network/`, `export` ports. Rust internals and FRB-generated models are not
+part of the public contract.
+
+---
+
 ## ⚡ Performance Benchmarks
 
 The **Flutter-Dicom** library is meticulously optimized for both blistering speed and strict memory efficiency. The following benchmarks were executed on an **AMD Ryzen™ 7 5800H (16 Threads)** using a clinical dataset of **267 DICOM frames**. 
@@ -212,20 +290,20 @@ The results highlight the massive performance overhead provided by our Rust + GP
 
 | Metric | Performance | Status |
 | :--- | :--- | :--- |
-| **Max Throughput** | **~296 FPS** | ✅ Ultra Fast |
-| **Pipeline Latency** | **3.73 ms / frame** | ✅ Sub-16ms |
-| **Windowing Speed** | **3,402 Ops/s** | ✅ Real-time |
-| **Scrubbing Speed** | **323 Ops/s** | ✅ Fluid |
-| **Stability (p99)** | **6.00 ms** | ✅ Consistent |
+| **Max Throughput** | **~461 FPS** | ✅ Ultra Fast |
+| **Pipeline Latency** | **2.16 ms / frame** | ✅ Sub-16ms |
+| **Windowing Speed** | **~1.4M Ops/s** | ✅ Real-time |
+| **Scrubbing Speed** | **266 Ops/s** | ✅ Fluid |
+| **Stability (p99)** | **4.74 ms** | ✅ Consistent |
 
 ---
 
 ### 🔬 Detailed Deep Dive
 
 #### 🚀 1. Raw Rendering & Latency Distribution
-FFI bridge ensures that frame data flows from disk to GPU without bogging down the Dart isolate. Averaging **296.2 FPS**, the engine delivers rock-solid consistency. 
+FFI bridge ensures that frame data flows from disk to GPU without bogging down the Dart isolate. Averaging **461 FPS** on the 267-frame series, the engine delivers rock-solid consistency.
 
-**Latency Distribution:** Out of 801 sampled frames, the mean processing time was **2.68 ms**. Even the 99th percentile (p99) maxed out at just **6.00 ms**, keeping us well below the 16.6ms threshold required for 60 FPS.
+**Latency Distribution:** Out of 801 sampled frames, the median processing time was **1.82 ms**. Even the 99th percentile (p99) maxed out at just **4.74 ms**, keeping us well below the 16.6ms threshold required for 60 FPS.
 
 ```text
 ▶ LATENCY DISTRIBUTION (801 Samples)

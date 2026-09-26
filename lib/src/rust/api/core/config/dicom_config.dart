@@ -12,8 +12,9 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 ///
 /// Use this struct to tune the balance between precision and performance.
 class DicomConfig {
-  /// If true, the pixel values will be automatically normalized into standard ranges
-  /// based on the metadata found in the DICOM headers.
+  /// Recompute window center/width from the decoded pixel histogram even
+  /// when the header provides values. Useful for modalities with missing
+  /// or unreliable windowing tags (MR, XA, US).
   final bool autoNormalize;
 
   /// If true, the Rust engine will only parse the file metadata (tags) and
@@ -21,19 +22,26 @@ class DicomConfig {
   /// fast metadata viewers or file explorers.
   final bool skipPixels;
 
+  /// Zero-based frame index for multi-frame files (NumberOfFrames > 1).
+  /// Out-of-range values fall back to frame 0.
+  final int frameIndex;
+
   const DicomConfig({
     required this.autoNormalize,
     required this.skipPixels,
+    required this.frameIndex,
   });
 
   /// Provides the standard production-ready defaults:
-  /// - auto_normalize: true
+  /// - auto_normalize: false
   /// - skip_pixels: false
+  /// - frame_index: 0
   static Future<DicomConfig> default_() =>
       RustLib.instance.api.crateApiCoreConfigDicomConfigDicomConfigDefault();
 
   @override
-  int get hashCode => autoNormalize.hashCode ^ skipPixels.hashCode;
+  int get hashCode =>
+      autoNormalize.hashCode ^ skipPixels.hashCode ^ frameIndex.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -41,5 +49,6 @@ class DicomConfig {
       other is DicomConfig &&
           runtimeType == other.runtimeType &&
           autoNormalize == other.autoNormalize &&
-          skipPixels == other.skipPixels;
+          skipPixels == other.skipPixels &&
+          frameIndex == other.frameIndex;
 }

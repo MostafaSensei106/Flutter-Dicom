@@ -1,0 +1,143 @@
+import 'dart:typed_data';
+
+import '../../domain/dicom_geometry.dart';
+import '../../domain/dicom_metadata.dart';
+import '../../domain/dicom_pixel_data.dart';
+import '../../domain/dicom_windowing.dart';
+import '../../rust/api/core/models/dicom_frame_result.dart' as rust;
+import '../../rust/api/core/models/dicom_metadata.dart' as rust;
+
+/// Maps FRB-generated structs onto domain contracts.
+///
+/// This is the only place that knows the generated shapes — the public API
+/// never imports `src/rust/`.
+abstract final class RustMetadataMapper {
+  /// Converts generated metadata to the domain contract.
+  static DicomMetadata toDomain(rust.DicomMetadata m) {
+    final spacing = _parseSpacing(m.pixelSpacing);
+    final orientation = _parseOrientation(m.imageOrientationPatient);
+    final position = _parsePosition(m.imagePositionPatient);
+    final presets = m.windowWidth > 0
+        ? [
+            DicomWindow(
+              center: m.windowCenter.toDouble(),
+              width: m.windowWidth.toDouble(),
+            ),
+          ]
+        : <DicomWindow>[];
+    return DicomMetadata(
+      patientName: _clean(m.patientName),
+      patientId: _clean(m.patientId),
+      modality: m.modality == 'Unknown'
+          ? null
+          : DicomModality.parse(m.modality),
+      rows: m.height,
+      columns: m.width,
+      bitsAllocated: m.bitsAllocated,
+      bitsStored: m.bitsStored,
+      highBit: m.highBit,
+      pixelRepresentation: DicomPixelRepresentation.fromRaw(
+        m.pixelRepresentation,
+      ),
+      samplesPerPixel: m.samplesPerPixel,
+      photometricInterpretation: DicomPhotometricInterpretation.parse(
+        m.photometricInterpretation,
+      ),
+      numberOfFrames: m.numberOfFrames,
+      pixelSpacing: spacing,
+      imageOrientationPatient: orientation,
+      imagePositionPatient: position,
+      windowPresets: presets,
+    );
+  }
+
+  /// Converts a decoded frame buffer to the sealed pixel hierarchy.
+  static DicomPixelData toPixels({
+    required rust.DicomFrameResult result,
+    required int frameIndex,
+  }) {
+    final m = result.metadata;
+    final transform = DicomPixelTransform(
+      rescaleSlope: m.rescaleSlope.toDouble(),
+      rescaleIntercept: m.rescaleIntercept.toDouble(),
+      representation: DicomPixelRepresentation.fromRaw(
+        m.pixelRepresentation,
+      ),
+      bitsAllocated: m.bitsAllocated,
+    );
+    if (m.samplesPerPixel == 3) {
+      final bytes = Uint8List(result.pixelData.length);
+      for (var i = 0; i < result.pixelData.length; i++) {
+        bytes[i] = result.pixelData[i].clamp(0, 255);
+      }
+      return DicomRgbPixelData(
+        buffer: bytes,
+        width: m.width,
+        height: m.height,
+        frameIndex: frameIndex,
+        transform: transform,
+      );
+    }
+    if (m.pixelRepresentation == 0 && m.bitsAllocated <= 8) {
+      final bytes = Uint8List(result.pixelData.length);
+      for (var i = 0; i < result.pixelData.length; i++) {
+        bytes[i] = result.pixelData[i].clamp(0, 255);
+      }
+      return DicomUint8PixelData(
+        buffer: bytes,
+        width: m.width,
+        height: m.height,
+        frameIndex: frameIndex,
+        transform: transform,
+      );
+    }
+    return DicomInt16PixelData(
+      buffer: result.pixelData,
+      width: m.width,
+      height: m.height,
+      frameIndex: frameIndex,
+      transform: transform,
+    );
+  }
+
+  static String? _clean(String value) {
+    final v = value.trim();
+    return v.isEmpty || v == 'Unknown' ? null : v;
+  }
+
+  static DicomPixelSpacing? _parseSpacing(String raw) {
+    final parts = raw.split('\\');
+    if (parts.length < 2) return null;
+    final row = double.tryParse(parts[0].trim());
+    final col = double.tryParse(parts[1].trim());
+    if (row == null || col == null || row <= 0 || col <= 0) return null;
+    return DicomPixelSpacing(row, col);
+  }
+
+  static List<double>? _parseDoubles(String raw, int count) {
+    final parts = raw.split('\\');
+    if (parts.length < count) return null;
+    final out = <double>[];
+    for (final p in parts.take(count)) {
+      final v = double.tryParse(p.trim());
+      if (v == null) return null;
+      out.add(v);
+    }
+    return out;
+  }
+
+  static DicomOrientation? _parseOrientation(String raw) {
+    final v = _parseDoubles(raw, 6);
+    if (v == null) return null;
+    return DicomOrientation(
+      rowCosines: v.sublist(0, 3),
+      columnCosines: v.sublist(3, 6),
+    );
+  }
+
+  static DicomPosition? _parsePosition(String raw) {
+    final v = _parseDoubles(raw, 3);
+    if (v == null) return null;
+    return DicomPosition(v[0], v[1], v[2]);
+  }
+}

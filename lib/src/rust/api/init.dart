@@ -8,6 +8,7 @@ import 'core/config/dicom_config.dart';
 import 'core/models/dicom_frame_result.dart';
 import 'core/models/dicom_metadata.dart';
 import 'core/models/dicom_series.dart';
+import 'core/utils/process_dicom_file.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// The primary entry point for loading and parsing a DICOM file from the local file system.
@@ -45,3 +46,23 @@ Future<List<DicomSeries>> loadDicomSeriesFromDir({required String dirPath}) =>
 Future<List<DicomSeries>> loadDicomSeriesFromFiles(
         {required List<String> paths}) =>
     RustLib.instance.api.crateApiInitLoadDicomSeriesFromFiles(paths: paths);
+
+/// Returns min / max / mean of the stored pixels (for auto-windowing UIs).
+Future<PixelStats> dicomPixelStats(
+        {required String path, required DicomConfig config}) =>
+    RustLib.instance.api
+        .crateApiInitDicomPixelStats(path: path, config: config);
+
+/// Pixel statistics from in-memory bytes (Web path).
+Future<PixelStats> dicomPixelStatsFromBytes(
+        {required List<int> bytes, required DicomConfig config}) =>
+    RustLib.instance.api
+        .crateApiInitDicomPixelStatsFromBytes(bytes: bytes, config: config);
+
+/// Flattens top-level DICOM tags for debugging / tag-dump UIs.
+Future<List<DicomTagEntry>> dicomTags({required String path}) =>
+    RustLib.instance.api.crateApiInitDicomTags(path: path);
+
+/// Tag dump from in-memory bytes (Web path).
+Future<List<DicomTagEntry>> dicomTagsFromBytes({required List<int> bytes}) =>
+    RustLib.instance.api.crateApiInitDicomTagsFromBytes(bytes: bytes);

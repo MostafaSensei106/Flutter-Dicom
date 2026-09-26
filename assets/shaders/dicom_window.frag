@@ -5,6 +5,7 @@ uniform float u_window_center;
 uniform float u_window_width;
 uniform float u_rescale_intercept;
 uniform float u_rescale_slope;
+uniform float u_invert;
 
 uniform sampler2D u_texture;
 
@@ -32,6 +33,11 @@ void main() {
     
     // Clamp to [0, 1] for display
     mapped_color = clamp(mapped_color, 0.0, 1.0);
-    
+
+    // MONOCHROME1 (minimum displayed as white) + user invert toggle.
+    if (u_invert > 0.5) {
+        mapped_color = 1.0 - mapped_color;
+    }
+
     fragColor = vec4(mapped_color, mapped_color, mapped_color, 1.0);
 }
