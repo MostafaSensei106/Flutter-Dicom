@@ -22,6 +22,7 @@ import 'painting.dart';
 /// )
 /// ```
 class DicomViewer extends StatefulWidget {
+  /// Creates a dumb DICOM viewer driven by [controller].
   const DicomViewer({
     required this.controller,
     super.key,
@@ -33,9 +34,16 @@ class DicomViewer extends StatefulWidget {
     this.probeInteraction = true,
   });
 
+  /// Controller owning viewer state and textures.
   final DicomViewerController controller;
+
+  /// Builder for the loading state.
   final Widget Function(BuildContext context)? loadingBuilder;
+
+  /// Builder for the error state.
   final Widget Function(BuildContext context, Object error)? errorBuilder;
+
+  /// Builder for the empty state.
   final Widget Function(BuildContext context)? emptyBuilder;
 
   /// Paint-based decorations drawn over the image.

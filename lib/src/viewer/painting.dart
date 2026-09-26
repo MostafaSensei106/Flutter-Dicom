@@ -111,6 +111,7 @@ Future<ui.Image> pixelsToTexture(final DicomPixelData pixels) {
 
 /// GPU painter applying windowing + rescale + inversion.
 final class DicomImagePainter extends CustomPainter {
+  /// Creates a GPU painter for [texture] with windowing parameters.
   DicomImagePainter({
     required this.texture,
     required this.shader,
@@ -120,11 +121,22 @@ final class DicomImagePainter extends CustomPainter {
     required this.invert,
   });
 
+  /// GPU texture holding the decoded frame.
   final ui.Image texture;
+
+  /// Windowing fragment shader.
   final ui.FragmentShader shader;
+
+  /// Window applied during painting.
   final DicomWindow window;
+
+  /// Rescale slope applied during painting.
   final double slope;
+
+  /// Rescale intercept applied during painting.
   final double intercept;
+
+  /// Whether monochrome output is inverted.
   final bool invert;
 
   @override
@@ -156,12 +168,16 @@ final class DicomImagePainter extends CustomPainter {
 
 /// Paints every composed overlay over the rendered image.
 final class DicomOverlaysPainter extends CustomPainter {
+  /// Creates an overlay painter for [overlays] with [context].
   DicomOverlaysPainter({
     required this.overlays,
     required this.context,
   });
 
+  /// Decorations drawn over the image.
   final List<DicomOverlay> overlays;
+
+  /// Shared context passed to every overlay.
   final DicomOverlayContext context;
 
   @override

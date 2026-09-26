@@ -7,6 +7,7 @@ import 'dicom_overlay.dart';
 /// Chooses the largest "nice" length (1/5/10/50/100/500 mm) fitting ~40%
 /// of the viewport width. Renders nothing when spacing is unknown.
 final class ScaleBarOverlay implements DicomOverlay {
+  /// Creates a physical scale bar overlay.
   const ScaleBarOverlay();
 
   static const _candidates = [1.0, 5.0, 10.0, 50.0, 100.0, 500.0];

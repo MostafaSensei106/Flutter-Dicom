@@ -1,18 +1,28 @@
 /// A single window (level / width pair) with an optional label.
 final class DicomWindow {
+  /// Creates a window with the given center and width.
   const DicomWindow({required this.center, required this.width, this.label})
       : assert(width > 0, 'window width must be positive');
 
+  /// Window center (level).
   final double center;
+
+  /// Window width.
   final double width;
+
+  /// Optional preset label.
   final String? label;
 
+  /// Lower bound of the window.
   double get min => center - width / 2.0;
+
+  /// Upper bound of the window.
   double get max => center + width / 2.0;
 
   /// Linear windowing map of a modality value to [0, 1].
   double apply(final double value) => ((value - min) / (max - min)).clamp(0.0, 1.0);
 
+  /// Copies this window with replaced values.
   DicomWindow copyWith(
           {final double? center, final double? width, final String? Function()? label}) =>
       DicomWindow(
@@ -134,18 +144,25 @@ abstract final class DicomWindowPreset {
 
 /// User-defined window preset storage (custom presets, not built-ins).
 abstract interface class DicomPresetStore {
+  /// Loads stored presets.
   Future<List<DicomWindow>> load();
+
+  /// Saves [window] under [name].
   Future<void> save(final String name, final DicomWindow window);
+
+  /// Deletes the preset named [name].
   Future<void> delete(final String name);
 }
 
 /// Strategy hook for future non-linear mappings (sigmoid / custom VOI LUT).
 abstract interface class WindowingStrategy {
+  /// Maps [value] through [window] to a normalized output.
   double map(final double value, final DicomWindow window);
 }
 
 /// Default linear mapping used by the GPU shader.
 final class LinearWindowing implements WindowingStrategy {
+  /// Creates the default linear mapping.
   const LinearWindowing();
   @override
   double map(final double value, final DicomWindow window) => window.apply(value);

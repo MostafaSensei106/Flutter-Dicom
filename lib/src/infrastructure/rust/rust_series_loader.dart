@@ -10,6 +10,7 @@ import 'rust_metadata_mapper.dart';
 /// Files are grouped by Series Instance UID in Rust; the largest group wins
 /// (multi-series directories should be split by callers via QIDO/worklist).
 final class RustDicomSeriesLoader implements DicomSeriesLoader {
+  /// Creates a Rust-backed series loader.
   const RustDicomSeriesLoader();
 
   @override

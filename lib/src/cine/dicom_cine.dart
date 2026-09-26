@@ -36,6 +36,7 @@ abstract interface class DicomCineScheduler {
 
 /// Wall-clock scheduler backed by [Stream.periodic].
 final class TimerDicomCineScheduler implements DicomCineScheduler {
+  /// Creates a wall-clock cine scheduler.
   const TimerDicomCineScheduler();
 
   @override

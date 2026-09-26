@@ -10,6 +10,7 @@ import '../../errors/dicom_exception.dart';
 /// custom providers) without pixels cannot be decoded — fetch them through
 /// a provider instead.
 final class RustDicomDecoder implements DicomDecoder {
+  /// Creates a Rust-backed decoder.
   const RustDicomDecoder();
 
   @override

@@ -54,6 +54,7 @@ enum DicomTransferSyntax {
 /// mapped to this via the infrastructure adapter, so the public API never
 /// depends on codegen output.
 final class DicomMetadata implements HasModality {
+  /// Creates domain metadata with typed header values.
   const DicomMetadata({
     required this.rows, required this.columns, required this.bitsAllocated, required this.bitsStored, required this.highBit, required this.pixelRepresentation, required this.samplesPerPixel, required this.photometricInterpretation, required this.numberOfFrames, this.patientName,
     this.patientId,
@@ -68,26 +69,60 @@ final class DicomMetadata implements HasModality {
     this.extraTags = const {},
   });
 
+  /// Patient name (0010,0010).
   final String? patientName;
+
+  /// Patient ID (0010,0020).
   final String? patientId;
+
+  /// Patient sex (0010,0040).
   final String? patientSex;
+
   final DicomModality? modality;
+
+  /// Image rows (0028,0010).
   final int rows;
+
+  /// Image columns (0028,0011).
   final int columns;
+
+  /// Bits allocated (0028,0100).
   final int bitsAllocated;
+
+  /// Bits stored (0028,0101).
   final int bitsStored;
+
+  /// High bit (0028,0102).
   final int highBit;
+
+  /// Signedness of stored pixels (0028,0103).
   final DicomPixelRepresentation pixelRepresentation;
+
+  /// Samples per pixel (0028,0002).
   final int samplesPerPixel;
+
+  /// Photometric interpretation (0028,0004).
   final DicomPhotometricInterpretation photometricInterpretation;
+
+  /// Number of frames (0028,0008).
   final int numberOfFrames;
+
+  /// Pixel Spacing (0028,0030), when present.
   final DicomPixelSpacing? pixelSpacing;
+
+  /// Imager Pixel Spacing (0018,1164), when present.
   final DicomPixelSpacing? imagerPixelSpacing;
+
+  /// Image orientation (0020,0037), when present.
   final DicomOrientation? imageOrientationPatient;
+
+  /// Image position (0020,0032), when present.
   final DicomPosition? imagePositionPatient;
 
   /// All window center/width pairs from the header (VM 2+ preserved).
   final List<DicomWindow> windowPresets;
+
+  /// Transfer syntax of the dataset.
   final DicomTransferSyntax transferSyntax;
 
   /// Raw tag fallback for vendor / unknown tags.
@@ -108,6 +143,9 @@ final class DicomMetadata implements HasModality {
   /// Best available acquisition date, when supplied by the adapter.
   DateTime? get bestDate => tag<DateTime>(DicomTagId.studyDate);
 
+  /// Image width in pixels (columns).
   int get width => columns;
+
+  /// Image height in pixels (rows).
   int get height => rows;
 }

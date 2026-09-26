@@ -1,38 +1,67 @@
 
 /// Point in any 2D DICOM coordinate space (screen / viewport / image).
 final class DicomPoint {
+  /// Creates a point at ([x], [y]).
   const DicomPoint(this.x, this.y);
+
+  /// Horizontal coordinate.
   final double x;
+
+  /// Vertical coordinate.
   final double y;
 }
 
 /// Pan offset in viewport pixels.
 final class DicomOffset {
+  /// Creates an offset of ([dx], [dy]).
   const DicomOffset(this.dx, this.dy);
+
+  /// Horizontal offset.
   final double dx;
+
+  /// Vertical offset.
   final double dy;
 }
 
 /// Rectangle in image-pixel coordinates (ROI / annotations).
 final class DicomRect {
+  /// Creates a rectangle with the given bounds.
   const DicomRect(this.left, this.top, this.width, this.height);
+
+  /// Left edge in pixels.
   final double left;
+
+  /// Top edge in pixels.
   final double top;
+
+  /// Width in pixels.
   final double width;
+
+  /// Height in pixels.
   final double height;
 }
 
 /// Current viewport extents handed to geometry mapping.
 final class DicomViewport {
+  /// Creates a viewport with the given extents.
   const DicomViewport({required this.width, required this.height});
+
+  /// Viewport width in pixels.
   final double width;
+
+  /// Viewport height in pixels.
   final double height;
 }
 
 /// Pixel spacing in mm: (row, column).
 final class DicomPixelSpacing {
+  /// Creates pixel spacing in mm.
   const DicomPixelSpacing(this.row, this.column);
+
+  /// Row spacing in mm.
   final double row;
+
+  /// Column spacing in mm.
   final double column;
 
   /// Parses DICOM `Pixel Spacing` (`"0.5\\0.5"`). `null` when absent.
@@ -48,9 +77,14 @@ final class DicomPixelSpacing {
 
 /// Image orientation (0020,0037): row + column direction cosines.
 final class DicomOrientation {
+  /// Creates orientation from direction cosines.
   const DicomOrientation(
       {required this.rowCosines, required this.columnCosines});
+
+  /// Row direction cosines.
   final List<double> rowCosines;
+
+  /// Column direction cosines.
   final List<double> columnCosines;
 
   /// Slice normal = row × column.
@@ -67,9 +101,16 @@ final class DicomOrientation {
 
 /// Image position (0020,0032): top-left voxel in patient mm.
 final class DicomPosition {
+  /// Creates a patient-space position.
   const DicomPosition(this.x, this.y, this.z);
+
+  /// X coordinate in mm.
   final double x;
+
+  /// Y coordinate in mm.
   final double y;
+
+  /// Z coordinate in mm.
   final double z;
 }
 
@@ -78,6 +119,7 @@ final class DicomPosition {
 ///
 /// Coordinate chain: `Screen -> Viewport -> Image -> Patient`.
 final class DicomGeometry {
+  /// Creates spatial context for an image.
   const DicomGeometry({
     required this.imageWidth,
     required this.imageHeight,
@@ -87,11 +129,22 @@ final class DicomGeometry {
     this.position,
   });
 
+  /// Image width in pixels.
   final int imageWidth;
+
+  /// Image height in pixels.
   final int imageHeight;
+
+  /// Pixel Spacing (0028,0030), when present.
   final DicomPixelSpacing? pixelSpacing;
+
+  /// Imager Pixel Spacing (0018,1164), when present.
   final DicomPixelSpacing? imagerPixelSpacing;
+
+  /// Image orientation (0020,0037), when present.
   final DicomOrientation? orientation;
+
+  /// Image position (0020,0032), when present.
   final DicomPosition? position;
 
   /// Viewport tap → image pixel. `null` when outside the image.

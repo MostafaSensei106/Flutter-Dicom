@@ -47,13 +47,17 @@ final class DicomParseResult {
 
 /// Lazy multi-frame access — never `List<Pixels>` for 400-frame files.
 abstract interface class DicomFrameProvider {
+  /// Total number of frames exposed by this provider.
   int get frameCount;
+
+  /// Fetches the frame at [index], decoding pixels on demand.
   Future<DicomFrame> get(final int index);
 }
 
 /// Caching provider — wraps any [DicomFrameProvider] with an LRU-style
 /// [DicomFrameCache] so scrubbing never re-decodes visible frames.
 final class CachedFrameProvider implements DicomFrameProvider {
+  /// Creates a caching provider wrapping [inner] with an optional [cache].
   CachedFrameProvider(
       {required final DicomFrameProvider inner, final DicomFrameCache<DicomFrame>? cache})
       : _inner = inner,

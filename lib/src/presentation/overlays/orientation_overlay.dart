@@ -7,6 +7,7 @@ import 'dicom_overlay.dart';
 /// Maps the dominant patient axis of each image edge to R/L/A/P/H/F.
 /// Renders nothing when orientation is unknown.
 final class OrientationOverlay implements DicomOverlay {
+  /// Creates an anatomical orientation marker overlay.
   const OrientationOverlay();
 
   @override

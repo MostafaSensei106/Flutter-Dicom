@@ -18,28 +18,55 @@ import 'painting.dart';
 ///
 /// Implementations emit [DicomViewerState] snapshots; the widget stays dumb.
 abstract interface class DicomViewerController {
+  /// Current viewer snapshot.
   DicomViewerState get state;
+
+  /// Stream of viewer snapshots.
   Stream<DicomViewerState> get states;
 
   /// Render model accessors used by the viewer (not part of the mutation
   /// surface, but every controller must expose what it renders).
+  ///
+  /// Opened document, or null before load.
   DicomDocument? get document;
+
+  /// Currently displayed pixel data, or null before load.
   DicomPixelData? get pixels;
+
+  /// GPU texture for the current frame, or null before load.
   ui.Image? get texture;
+
+  /// Geometry derived from metadata and pixels, or null before load.
   DicomGeometry? get geometry;
 
+  /// Loads [source] and shows its first frame.
   Future<void> load(final DicomSource source);
+
+  /// Displays the frame at [index].
   Future<void> setFrame(final int index);
 
+  /// Replaces the active windowing preset.
   void setWindow(final DicomWindow window);
+
+  /// Applies a new color map.
   void setColorMap(final DicomColorMap colorMap);
+
+  /// Enables or disables inversion.
   void setInvert(final bool value);
 
+  /// Rotates the image by [degrees].
   void rotate(final double degrees);
+
+  /// Sets the zoom factor to [scale].
   void zoom(final double scale);
+
+  /// Pans the image by [offset].
   void pan(final DicomOffset offset);
 
+  /// Restores default windowing, transform, and color map.
   void reset();
+
+  /// Releases textures and state resources.
   void dispose();
 }
 
@@ -48,6 +75,7 @@ abstract interface class DicomViewerController {
 /// Frame textures are cached (LRU, 8 entries) so cine scrubbing never
 /// re-uploads the visible stack.
 final class DefaultDicomViewerController implements DicomViewerController {
+  /// Creates a controller backed by an optional [parser].
   DefaultDicomViewerController({final DicomParser? parser})
       : _parser = parser ?? const RustDicomParser();
 

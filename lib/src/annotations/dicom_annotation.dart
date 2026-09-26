@@ -2,43 +2,69 @@ import '../domain/dicom_geometry.dart';
 
 /// Annotation style shared by all annotation kinds.
 final class DicomAnnotationStyle {
+  /// Creates an annotation style with a color and line width.
   const DicomAnnotationStyle({this.color = 0xFFFFFFFF, this.lineWidth = 2});
+
+  /// ARGB color of the annotation stroke/text.
   final int color;
+
+  /// Stroke width in logical pixels.
   final double lineWidth;
 }
 
 /// Closed annotation hierarchy — new kinds (e.g. `ArrowAnnotation`) extend
 /// without touching the renderer, serializer, or controller.
 sealed class DicomAnnotation {
+  /// Creates an annotation with an [id] and rendering [style].
   const DicomAnnotation(
       {required this.id, this.style = const DicomAnnotationStyle()});
+
+  /// Unique identifier of the annotation.
   final String id;
+
+  /// Rendering style of the annotation.
   final DicomAnnotationStyle style;
 }
 
+/// Straight line between two image points.
 final class LineAnnotation extends DicomAnnotation {
+  /// Creates a line annotation from [start] to [end].
   const LineAnnotation({
     required super.id,
     required this.start,
     required this.end,
     super.style,
   });
+
+  /// Line start in image-pixel coordinates.
   final DicomPoint start;
+
+  /// Line end in image-pixel coordinates.
   final DicomPoint end;
 }
 
+/// Axis-aligned rectangle annotation.
 final class RectangleAnnotation extends DicomAnnotation {
+  /// Creates a rectangle annotation covering [rect].
   const RectangleAnnotation(
       {required super.id, required this.rect, super.style});
+
+  /// Rectangle bounds in image-pixel coordinates.
   final DicomRect rect;
 }
 
+/// Ellipse inscribed in a bounding rectangle.
 final class EllipseAnnotation extends DicomAnnotation {
+  /// Creates an ellipse annotation inscribed in [rect].
   const EllipseAnnotation({required super.id, required this.rect, super.style});
+
+  /// Bounding rectangle in image-pixel coordinates.
   final DicomRect rect;
 }
 
+/// Angle formed by two arms sharing a vertex.
 final class AngleAnnotation extends DicomAnnotation {
+  /// Creates an angle annotation at [vertex] with arms [armA] and [armB].
   const AngleAnnotation({
     required super.id,
     required this.vertex,
@@ -46,30 +72,55 @@ final class AngleAnnotation extends DicomAnnotation {
     required this.armB,
     super.style,
   });
+
+  /// Angle vertex in image-pixel coordinates.
   final DicomPoint vertex;
+
+  /// End of the first arm in image-pixel coordinates.
   final DicomPoint armA;
+
+  /// End of the second arm in image-pixel coordinates.
   final DicomPoint armB;
 }
 
+/// Free text label anchored at a point.
 final class TextAnnotation extends DicomAnnotation {
+  /// Creates a text annotation showing [text] at [position].
   const TextAnnotation({
     required super.id,
     required this.position,
     required this.text,
     super.style,
   });
+
+  /// Anchor position in image-pixel coordinates.
   final DicomPoint position;
+
+  /// Label text to display.
   final String text;
 }
 
 /// Annotation controller with undo / redo history.
 abstract interface class DicomAnnotationController {
+  /// Currently stored annotations.
   List<DicomAnnotation> get annotations;
+
+  /// Adds [annotation] to the store.
   void add(final DicomAnnotation annotation);
+
+  /// Replaces the stored annotation with the same id.
   void update(final DicomAnnotation annotation);
+
+  /// Removes the annotation with [id].
   void remove(final String id);
+
+  /// Reverts the most recent change.
   void undo();
+
+  /// Reapplies the most recently undone change.
   void redo();
+
+  /// Releases resources held by the controller.
   void dispose();
 }
 

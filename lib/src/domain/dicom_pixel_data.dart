@@ -2,9 +2,13 @@ import 'dart:typed_data';
 
 /// Signedness of stored pixels (0028,0103).
 enum DicomPixelRepresentation {
+  /// Unsigned stored pixels.
   unsigned,
+
+  /// Signed stored pixels.
   signed;
 
+  /// Resolves raw Pixel Representation to its enum value.
   static DicomPixelRepresentation fromRaw(final int raw) => raw == 1
       ? DicomPixelRepresentation.signed
       : DicomPixelRepresentation.unsigned;
@@ -12,15 +16,25 @@ enum DicomPixelRepresentation {
 
 /// Photometric interpretation relevant for display.
 enum DicomPhotometricInterpretation {
+  /// Minimum values display as white (inversion required).
   monochrome1,
+
+  /// Minimum values display as black.
   monochrome2,
+
+  /// Interleaved RGB color.
   rgb,
+
+  /// Palette color LUT.
   palette,
+
+  /// Unknown or unsupported interpretation.
   unknown;
 
   /// `true` when minimum values display as white (inversion required).
   bool get isInverted => this == DicomPhotometricInterpretation.monochrome1;
 
+  /// Parses a Photometric Interpretation string.
   static DicomPhotometricInterpretation parse(final String? raw) {
     final v = (raw ?? '').trim().toUpperCase();
     return switch (v) {
@@ -37,10 +51,19 @@ enum DicomPhotometricInterpretation {
 
 /// Decoded pixel buffer kind.
 enum DicomPixelFormat {
+  /// Signed 16-bit monochrome.
   int16,
+
+  /// Unsigned 8-bit monochrome.
   uint8,
+
+  /// Unsigned 16-bit monochrome.
   uint16,
+
+  /// Interleaved 8-bit RGB.
   rgb8,
+
+  /// 32-bit float samples.
   float32,
 }
 
@@ -48,6 +71,7 @@ enum DicomPixelFormat {
 /// representation). The viewer, ROI, and probe share this — HU math lives in
 /// exactly one place.
 final class DicomPixelTransform {
+  /// Creates a stored-to-modality value transform.
   const DicomPixelTransform({
     this.rescaleSlope = 1.0,
     this.rescaleIntercept = 0.0,
@@ -55,9 +79,16 @@ final class DicomPixelTransform {
     this.bitsAllocated = 16,
   });
 
+  /// Rescale slope (0028,1053).
   final double rescaleSlope;
+
+  /// Rescale intercept (0028,1052).
   final double rescaleIntercept;
+
+  /// Signedness of stored pixels.
   final DicomPixelRepresentation representation;
+
+  /// Bits allocated per sample.
   final int bitsAllocated;
 
   /// `true` for unsigned 16-bit data stored with the `-32768` offset.
@@ -76,11 +107,22 @@ final class DicomPixelTransform {
 sealed class DicomPixelData {
   const DicomPixelData();
 
+  /// Image width in pixels.
   int get width;
+
+  /// Image height in pixels.
   int get height;
+
+  /// Zero-based frame index.
   int get frameIndex;
+
+  /// Decoded buffer kind.
   DicomPixelFormat get format;
+
+  /// Pixel count (RGB counts pixels, not components).
   int get length;
+
+  /// Stored-to-modality value transform.
   DicomPixelTransform get transform;
 
   /// Modality value at flat [index].
@@ -89,6 +131,7 @@ sealed class DicomPixelData {
 
 /// 16-bit monochrome frame (the common diagnostic case).
 final class DicomInt16PixelData extends DicomPixelData {
+  /// Creates 16-bit monochrome pixel data.
   const DicomInt16PixelData({
     required this.buffer,
     required this.width,
@@ -97,6 +140,7 @@ final class DicomInt16PixelData extends DicomPixelData {
     this.transform = const DicomPixelTransform(),
   });
 
+  /// Raw 16-bit pixel buffer.
   final Int16List buffer;
 
   @override
@@ -122,6 +166,7 @@ final class DicomInt16PixelData extends DicomPixelData {
 
 /// 8-bit monochrome frame.
 final class DicomUint8PixelData extends DicomPixelData {
+  /// Creates 8-bit monochrome pixel data.
   const DicomUint8PixelData({
     required this.buffer,
     required this.width,
@@ -130,6 +175,7 @@ final class DicomUint8PixelData extends DicomPixelData {
     this.transform = const DicomPixelTransform(bitsAllocated: 8),
   });
 
+  /// Raw 8-bit pixel buffer.
   final Uint8List buffer;
 
   @override
@@ -155,6 +201,7 @@ final class DicomUint8PixelData extends DicomPixelData {
 
 /// Interleaved RGB frame.
 final class DicomRgbPixelData extends DicomPixelData {
+  /// Creates interleaved RGB pixel data.
   const DicomRgbPixelData({
     required this.buffer,
     required this.width,
@@ -163,6 +210,7 @@ final class DicomRgbPixelData extends DicomPixelData {
     this.transform = const DicomPixelTransform(bitsAllocated: 8),
   });
 
+  /// Raw interleaved RGB buffer.
   final Uint8List buffer;
 
   @override
@@ -192,6 +240,7 @@ final class DicomRgbPixelData extends DicomPixelData {
 
 /// Unsigned 16-bit frame (e.g. some MR / XA encodings).
 final class DicomUint16PixelData extends DicomPixelData {
+  /// Creates unsigned 16-bit pixel data.
   const DicomUint16PixelData({
     required this.buffer,
     required this.width,
@@ -200,6 +249,7 @@ final class DicomUint16PixelData extends DicomPixelData {
     this.transform = const DicomPixelTransform(),
   });
 
+  /// Raw unsigned 16-bit pixel buffer.
   final Uint16List buffer;
 
   @override
@@ -225,6 +275,7 @@ final class DicomUint16PixelData extends DicomPixelData {
 
 /// 32-bit float frame (e.g. parametric maps).
 final class DicomFloat32PixelData extends DicomPixelData {
+  /// Creates 32-bit float pixel data.
   const DicomFloat32PixelData({
     required this.buffer,
     required this.width,
@@ -233,6 +284,7 @@ final class DicomFloat32PixelData extends DicomPixelData {
     this.transform = const DicomPixelTransform(bitsAllocated: 32),
   });
 
+  /// Raw 32-bit float pixel buffer.
   final Float32List buffer;
 
   @override

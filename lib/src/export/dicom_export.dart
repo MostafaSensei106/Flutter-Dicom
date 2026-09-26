@@ -11,6 +11,7 @@ import '../domain/dicom_windowing.dart';
 /// normalization when no window is supplied — pass an explicit window via
 /// [PngDicomExporter.exportWindowed] for clinical exports.
 final class PngDicomExporter implements DicomExporter {
+  /// Creates a PNG exporter.
   const PngDicomExporter();
 
   @override

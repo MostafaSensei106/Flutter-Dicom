@@ -20,6 +20,7 @@ const _metaConfig = DicomConfig(
 /// `parse` never decodes pixel buffers; the returned provider fetches each
 /// frame through the FRB bridge only when `get(index)` is called.
 final class RustDicomParser implements DicomParser {
+  /// Creates a Rust-backed lazy parser.
   const RustDicomParser();
 
   @override

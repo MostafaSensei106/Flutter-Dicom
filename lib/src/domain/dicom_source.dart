@@ -1,3 +1,4 @@
+
 import 'dart:typed_data';
 
 /// Input API — every acquisition path ends at the same pipeline.
@@ -25,24 +26,36 @@ sealed class DicomSource {
 
 /// Single file on disk.
 final class DicomFileSource extends DicomSource {
+  /// Creates a file source for [path].
   const DicomFileSource(this.path);
+
+  /// File path on disk.
   final String path;
 }
 
 /// Single file in memory.
 final class DicomBytesSource extends DicomSource {
+  /// Creates an in-memory source from [bytes].
   const DicomBytesSource(this.bytes);
+
+  /// Raw file bytes.
   final Uint8List bytes;
 }
 
 /// Explicit file list forming a series / volume.
 final class DicomFilesSource extends DicomSource {
+  /// Creates a file-list source from [paths].
   const DicomFilesSource(this.paths);
+
+  /// File paths forming the series.
   final List<String> paths;
 }
 
 /// In-memory file list forming a series / volume.
 final class DicomBytesListSource extends DicomSource {
+  /// Creates an in-memory file-list source from [files].
   const DicomBytesListSource(this.files);
+
+  /// Raw file bytes forming the series.
   final List<Uint8List> files;
 }

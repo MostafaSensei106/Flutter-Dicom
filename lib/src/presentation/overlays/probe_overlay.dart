@@ -8,8 +8,10 @@ import 'dicom_overlay.dart';
 /// Probing is pure domain logic ([DicomProbe]); this overlay only draws the
 /// crosshair and the HU readout box. Renders nothing without a probe point.
 final class PixelProbeOverlay implements DicomOverlay {
+  /// Creates a probe overlay using [probe] for the readout values.
   const PixelProbeOverlay({this.probe = const ModalityProbe()});
 
+  /// Domain probe used to compute readout values.
   final DicomProbe probe;
 
   @override

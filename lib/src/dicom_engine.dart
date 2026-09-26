@@ -15,27 +15,37 @@ import 'rust/frb_generated.dart';
 
 /// Engine configuration (dependency injection root).
 final class DicomEngineConfig {
+  /// Creates the engine configuration.
   const DicomEngineConfig();
 }
 
 /// Open tuning.
 final class DicomOpenOptions {
+  /// Creates open tuning with parse and decode options.
   const DicomOpenOptions({
     this.parseOptions = const DicomParseOptions(),
     this.decodeOptions = const DicomDecodeOptions(),
   });
 
+  /// Options forwarded to the parser.
   final DicomParseOptions parseOptions;
+
+  /// Options forwarded to the decoder.
   final DicomDecodeOptions decodeOptions;
 }
 
 /// Opened document — metadata now, pixels on demand.
 final class DicomDocument {
+  /// Creates an opened document with [metadata] and [frames].
   const DicomDocument({required this.metadata, required this.frames});
 
+  /// Dataset metadata.
   final DicomMetadata metadata;
+
+  /// Lazy provider for per-frame pixel data.
   final DicomFrameProvider frames;
 
+  /// Total number of frames in the document.
   int get frameCount => frames.frameCount;
 }
 
@@ -48,18 +58,28 @@ final class DicomDocument {
 ///
 /// `create` initializes the native bridge, so callers never touch `RustLib`.
 abstract interface class DicomEngine {
+  /// Parser used to open DICOM sources.
   DicomParser get parser;
+
+  /// Decoder used for frame pixel data.
   DicomDecoder get decoder;
+
+  /// Renderer used for off-screen rendering.
   DicomRenderer get renderer;
+
+  /// Exporter used for encoded output.
   DicomExporter get exporter;
 
+  /// Opens [source] into a lazily decoded document.
   Future<DicomDocument> open(
     final DicomSource source, {
     final DicomOpenOptions options = const DicomOpenOptions(),
   });
 
+  /// Releases engine resources.
   Future<void> dispose();
 
+  /// Creates a Rust-backed engine, initializing the native bridge once.
   static Future<DicomEngine> create({
     final DicomEngineConfig config = const DicomEngineConfig(),
   }) async {

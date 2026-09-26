@@ -14,11 +14,13 @@ import '../../domain/dicom_windowing.dart';
 /// )
 /// ```
 abstract interface class DicomOverlay {
+  /// Paints the decoration onto [canvas] using [context].
   void paint(final Canvas canvas, final DicomOverlayContext context);
 }
 
 /// Read-only snapshot handed to every overlay.
 final class DicomOverlayContext {
+  /// Creates a read-only overlay snapshot for the current frame.
   const DicomOverlayContext({
     required this.viewport,
     required this.geometry,
@@ -49,5 +51,6 @@ final class DicomOverlayContext {
 
 /// Base for overlays that also need a widget (tooltips, labels).
 abstract interface class DicomWidgetOverlay {
+  /// Builds the overlay widget for [ctx].
   Widget build(final BuildContext context, final DicomOverlayContext ctx);
 }
