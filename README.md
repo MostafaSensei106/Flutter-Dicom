@@ -4,8 +4,15 @@
 </p>
 
 <p align="center">
-  <strong>An advanced medical imaging and DICOM processing library for Flutter, poIred by a high-performance Rust core and GPU Shaders.</strong><br>
+  <strong>An advanced medical imaging and DICOM processing library for Flutter, powered by a high-performance Rust core and GPU Shaders.</strong><br>
   Go beyond basic image loading. Deliver <i>workstation-grade</i> rendering, <i>16-bit precision</i>, and <i>real-time windowing</i> in your medical apps.
+</p>
+
+<p align="center">
+  <a href="https://pub.dev/packages/flutter_dicom"><img src="https://img.shields.io/pub/v/flutter_dicom.svg" alt="pub version"></a>
+  <a href="https://pub.dev/packages/flutter_dicom/score"><img src="https://img.shields.io/pub/points/flutter_dicom.svg" alt="pub points"></a>
+  <img src="https://img.shields.io/badge/platforms-android%20%7C%20ios%20%7C%20linux%20%7C%20macos%20%7C%20windows-blue" alt="Platforms">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue" alt="License: GPL-3.0"></a>
 </p>
 
 <p align="center">
@@ -37,8 +44,6 @@
 | **Fusion** | PET/CT blending with slice registration (identity / translation) |
 | **Network** | DICOMweb (QIDO/WADO/STOW) and DIMSE (assoc state machine + C-ECHO/C-STORE/C-FIND over Explicit LE) |
 | **Architecture** | Facade engine, hexagonal ports & adapters, DI — the viewer never imports Rust/FFI; no singletons |
-
----
 
 ---
 
@@ -77,8 +82,7 @@ Most image libraries in Flutter are designed for JPEGs and PNGs. They clamp your
 
 ## 📦 Installation
 
-> [!TIP]
-> **Don't worry about the "Rust Core"!**
+> **Tip — Don't worry about the "Rust Core"!**
 > Adding **Flutter-Dicom** to your project is designed to be as simple as adding any other Flutter package. While it uses a high-performance Rust engine, you don't need to be a Rust expert or manage complex builds manually. You just install the language once, and the library handles all the heavy lifting, compiling itself automatically for whatever platform (Android, iOS, macOS, Windows, Linux) or architecture you are targeting.
 
 ### 1. Prerequisites (The Rust Toolchain)
@@ -91,16 +95,25 @@ Since this library uses a high-speed bridge to connect Flutter and Rust, you nee
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   ```
 
-> [!IMPORTANT]
-> Once Rust is installed, the build system will automatically detect your Flutter target and compile the Rust core into a high-performance native shared library. You only need to set this up once!
+> **Note:** Once Rust is installed, the build system will automatically detect your Flutter target and compile the Rust core into a high-performance native shared library. You only need to set this up once!
 
 ### 2. Add the Dependency
 
-Add the package to your `pubspec.yaml`:
+```bash
+flutter pub add flutter_dicom
+```
+
+Or add it manually to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
   flutter_dicom: ^0.2.0
+```
+
+Then fetch packages:
+
+```bash
+flutter pub get
 ```
 
 ---
