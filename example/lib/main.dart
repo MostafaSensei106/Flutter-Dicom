@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dicom/flutter_dicom.dart';
@@ -35,8 +37,12 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
   late final DefaultDicomViewerController _controller =
       DefaultDicomViewerController();
   late final DefaultDicomCineController _cine = DefaultDicomCineController(
-    onFrame: (index) => _controller.setFrame(index),
+    onFrame: (final index) => _controller.setFrame(index),
   );
+
+  RoiStatistics? _roiStats;
+  bool _busyRoi = false;
+  double _fps = 24;
 
   @override
   void dispose() {
@@ -45,22 +51,107 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
     super.dispose();
   }
 
-  Future<void> _pickAndLoadFile() async {
-    final files = await FilePicker.pickFiles(type: FileType.any);
+  void _showError(final Object e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error loading DICOM: $e'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
 
-    if (files.isNotEmpty && files.single.path != null) {
-      try {
-        await _controller.load(DicomSource.file(files.single.path!));
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error loading DICOM: $e'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+  /// Opens a single file through the file-system path source.
+  Future<void> _pickFile() async {
+    final files = await FilePicker.pickFiles(type: FileType.any);
+    if (files.isEmpty || files.single.path == null) return;
+    try {
+      await _controller.load(DicomSource.file(files.single.path!));
+      _clearAnalysis();
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  /// Opens a single file through the in-memory bytes source (Web / PACS path).
+  Future<void> _pickFileAsBytes() async {
+    final files = await FilePicker.pickFiles(type: FileType.any);
+    if (files.isEmpty) return;
+    try {
+      final picked = files.single;
+      final bytes = await picked.xFile.readAsBytes();
+      await _controller.load(DicomSource.bytes(bytes));
+      _clearAnalysis();
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  /// Opens a folder of slices as one scrub-able series document.
+  Future<void> _pickSeriesFolder() async {
+    final dirPath = await FilePicker.getDirectoryPath();
+    if (dirPath == null) return;
+    try {
+      final paths = Directory(dirPath)
+          .listSync()
+          .whereType<File>()
+          .map((final f) => f.path)
+          .where((final p) => p.toLowerCase().endsWith('.dcm'))
+          .toList()
+        ..sort();
+      if (paths.isEmpty) {
+        throw const DicomProcessingException('No .dcm files found');
       }
+      await _controller.load(DicomSource.files(paths));
+      _clearAnalysis();
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  void _clearAnalysis() {
+    setState(() => _roiStats = null);
+  }
+
+  /// Analyzes the central quarter as an ROI (min / max / mean / std-dev).
+  Future<void> _analyzeCenterRoi() async {
+    final pixels = _controller.pixels;
+    if (pixels == null) return;
+    setState(() => _busyRoi = true);
+    try {
+      final roi = DicomRoi(
+        DicomRect(
+          pixels.width / 4,
+          pixels.height / 4,
+          pixels.width / 2,
+          pixels.height / 2,
+        ),
+      );
+      final stats = await roi.analyze(pixels);
+      if (mounted) setState(() => _roiStats = stats);
+    } finally {
+      if (mounted) setState(() => _busyRoi = false);
+    }
+  }
+
+  /// Exports the current windowed view as a grayscale PNG to temp storage.
+  Future<void> _exportPng() async {
+    final pixels = _controller.pixels;
+    if (pixels == null || !mounted) return;
+    try {
+      final png = await const PngDicomExporter().exportWindowed(
+        pixels,
+        _controller.state.window,
+      );
+      final path =
+          '${Directory.systemTemp.path}/dicom_frame_${_controller.state.currentFrame}.png';
+      await File(path).writeAsBytes(png);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Exported PNG: $path')));
+    } catch (e) {
+      _showError(e);
     }
   }
 
@@ -72,10 +163,22 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: _pickAndLoadFile,
+            tooltip: 'Open file',
+            onPressed: _pickFile,
             icon: const Icon(Icons.file_open_rounded),
           ),
           IconButton(
+            tooltip: 'Open as bytes',
+            onPressed: _pickFileAsBytes,
+            icon: const Icon(Icons.memory_rounded),
+          ),
+          IconButton(
+            tooltip: 'Open series folder',
+            onPressed: _pickSeriesFolder,
+            icon: const Icon(Icons.folder_open_rounded),
+          ),
+          IconButton(
+            tooltip: 'Reset viewer',
             onPressed: () => _controller.reset(),
             icon: const Icon(Icons.restore_rounded),
           ),
@@ -85,7 +188,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
       body: StreamBuilder<DicomViewerState>(
         stream: _controller.states,
         initialData: _controller.state,
-        builder: (context, snapshot) {
+        builder: (final context, final snapshot) {
           final state = snapshot.data ?? _controller.state;
           final ready = state.status is DicomViewerReady;
           return Column(
@@ -149,7 +252,9 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                                   if (_cine.playing) {
                                     _cine.pause();
                                   } else {
-                                    _cine.play(frameCount: state.frameCount);
+                                    _cine.play(
+                                      frameCount: state.frameCount,
+                                    );
                                   }
                                   setState(() {});
                                 },
@@ -163,10 +268,29 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                                   min: 0,
                                   max: (state.frameCount - 1).toDouble(),
                                   divisions: state.frameCount - 1,
-                                  onChanged: (v) =>
+                                  onChanged: (final v) =>
                                       _controller.setFrame(v.toInt()),
                                 ),
                               ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text('FPS'),
+                              Expanded(
+                                child: Slider(
+                                  value: _fps,
+                                  min: 1,
+                                  max: 60,
+                                  divisions: 59,
+                                  label: _fps.toStringAsFixed(0),
+                                  onChanged: (final v) {
+                                    setState(() => _fps = v);
+                                    _cine.setFps(v);
+                                  },
+                                ),
+                              ),
+                              Text(_fps.toStringAsFixed(0)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -178,22 +302,44 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                             for (final preset in DicomWindowPreset.all)
                               ActionChip(
                                 label: Text(preset.label ?? ''),
-                                onPressed: () => _controller.setWindow(preset),
+                                onPressed: () =>
+                                    _controller.setWindow(preset),
                               ),
                             ActionChip(
-                              label: Text(state.invert ? 'Uninvert' : 'Invert'),
+                              label: Text(
+                                state.invert ? 'Uninvert' : 'Invert',
+                              ),
                               onPressed: () =>
                                   _controller.setInvert(!state.invert),
                             ),
+                            ActionChip(
+                              avatar: _busyRoi
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.analytics_outlined),
+                              label: const Text('Center ROI'),
+                              onPressed: _busyRoi ? null : _analyzeCenterRoi,
+                            ),
+                            ActionChip(
+                              avatar: const Icon(Icons.ios_share_rounded),
+                              label: const Text('Export PNG'),
+                              onPressed: _exportPng,
+                            ),
                           ],
                         ),
+                        if (_roiStats != null) _RoiCard(stats: _roiStats!),
                         const SizedBox(height: 8),
                         _buildSlider(
                           'Level',
                           state.window.center,
                           -1000,
                           2000,
-                          (v) => _controller.setWindow(
+                          (final v) => _controller.setWindow(
                             state.window.copyWith(center: v),
                           ),
                         ),
@@ -202,7 +348,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                           state.window.width,
                           1,
                           4000,
-                          (v) => _controller.setWindow(
+                          (final v) => _controller.setWindow(
                             state.window.copyWith(width: v),
                           ),
                         ),
@@ -216,7 +362,9 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
                           ),
                         ),
                         const Divider(height: 32),
-                        _MetadataGrid(metadata: _controller.document!.metadata),
+                        _MetadataGrid(
+                          metadata: _controller.document!.metadata,
+                        ),
                       ],
                     ),
                   ),
@@ -229,11 +377,11 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
   }
 
   Widget _buildSlider(
-    String label,
-    double value,
-    double min,
-    double max,
-    ValueChanged<double> onChanged,
+    final String label,
+    final double value,
+    final double min,
+    final double max,
+    final ValueChanged<double> onChanged,
   ) {
     return Column(
       children: [
@@ -261,6 +409,52 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
           min: min,
           max: max,
           onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _RoiCard extends StatelessWidget {
+  const _RoiCard({required this.stats});
+
+  final RoiStatistics stats;
+
+  @override
+  Widget build(BuildContext context) {
+    String fmt(final double v) => v.toStringAsFixed(1);
+    return Card(
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _stat(context, 'Pixels', '${stats.pixelCount}'),
+            _stat(context, 'Min', fmt(stats.min)),
+            _stat(context, 'Max', fmt(stats.max)),
+            _stat(context, 'Mean', fmt(stats.mean)),
+            _stat(context, 'StdDev', fmt(stats.stdDev)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(final BuildContext context, final String key, final String val) {
+    return Column(
+      children: [
+        Text(
+          key,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          val,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -306,7 +500,10 @@ class _MetadataGrid extends StatelessWidget {
     );
   }
 
-  Widget _metaTile(BuildContext context, MapEntry<String, String> entry) {
+  Widget _metaTile(
+    final BuildContext context,
+    final MapEntry<String, String> entry,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
