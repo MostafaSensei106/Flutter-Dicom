@@ -78,6 +78,7 @@ final class DicomMetadata implements HasModality {
   /// Patient sex (0010,0040).
   final String? patientSex;
 
+  @override
   final DicomModality? modality;
 
   /// Image rows (0028,0010).
