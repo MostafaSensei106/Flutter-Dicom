@@ -38,7 +38,7 @@ final class DicomTagId {
   static const studyDate = DicomTagId(0x0008, 0x0020);
 
   @override
-  bool operator ==(Object other) =>
+  bool operator ==(final Object other) =>
       identical(this, other) ||
       other is DicomTagId &&
           runtimeType == other.runtimeType &&

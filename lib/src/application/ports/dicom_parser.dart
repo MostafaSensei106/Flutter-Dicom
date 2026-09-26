@@ -8,8 +8,8 @@ import '../cache/frame_cache.dart';
 /// pixel buffers. The public API never mentions Rust / FFI / WASM.
 abstract interface class DicomParser {
   Future<DicomParseResult> parse(
-    DicomSource source, {
-    DicomParseOptions options = const DicomParseOptions(),
+    final DicomSource source, {
+    final DicomParseOptions options = const DicomParseOptions(),
   });
 }
 
@@ -22,12 +22,12 @@ final class DicomParseResult {
 
   int get frameCount => frames.frameCount;
 
-  DicomFrame frame(int index) => DicomFrame(index: index, metadata: metadata);
+  DicomFrame frame(final int index) => DicomFrame(index: index, metadata: metadata);
 
   /// Decodes one frame through the provider (pixels attached on return).
   Future<DicomPixelData> decodeFrame(
-    int index, {
-    DicomDecodeOptions options = const DicomDecodeOptions(),
+    final int index, {
+    final DicomDecodeOptions options = const DicomDecodeOptions(),
   }) async {
     final frame = await frames.get(index);
     final pixels = frame.pixelData;
@@ -41,14 +41,14 @@ final class DicomParseResult {
 /// Lazy multi-frame access — never `List<Pixels>` for 400-frame files.
 abstract interface class DicomFrameProvider {
   int get frameCount;
-  Future<DicomFrame> get(int index);
+  Future<DicomFrame> get(final int index);
 }
 
 /// Caching provider — wraps any [DicomFrameProvider] with an LRU-style
 /// [DicomFrameCache] so scrubbing never re-decodes visible frames.
 final class CachedFrameProvider implements DicomFrameProvider {
   CachedFrameProvider(
-      {required DicomFrameProvider inner, DicomFrameCache<DicomFrame>? cache})
+      {required final DicomFrameProvider inner, final DicomFrameCache<DicomFrame>? cache})
       : _inner = inner,
         _cache = cache ?? LruFrameCache<DicomFrame>();
 
@@ -59,7 +59,7 @@ final class CachedFrameProvider implements DicomFrameProvider {
   int get frameCount => _inner.frameCount;
 
   @override
-  Future<DicomFrame> get(int index) async {
+  Future<DicomFrame> get(final int index) async {
     final hit = _cache.get(index);
     if (hit != null) return hit;
     final frame = await _inner.get(index);

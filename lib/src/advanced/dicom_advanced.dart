@@ -17,7 +17,7 @@ final class DicomSegmentationMask {
 
 /// Segmentation algorithm port — AI is a strategy, not core.
 abstract interface class DicomSegmentationAlgorithm {
-  Future<DicomSegmentationMask> segment(DicomPixelData image);
+  Future<DicomSegmentationMask> segment(final DicomPixelData image);
 }
 
 /// Multi-modal fusion model.
@@ -40,5 +40,5 @@ final class DicomRegistration {
 
 /// Registration strategy port (identity / rigid / affine / deformable).
 abstract interface class DicomRegistrationStrategy {
-  Future<DicomRegistration> register(DicomVolume source, DicomVolume target);
+  Future<DicomRegistration> register(final DicomVolume source, final DicomVolume target);
 }

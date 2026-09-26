@@ -12,7 +12,7 @@ final class ScaleBarOverlay implements DicomOverlay {
   static const _candidates = [1.0, 5.0, 10.0, 50.0, 100.0, 500.0];
 
   @override
-  void paint(Canvas canvas, DicomOverlayContext context) {
+  void paint(final Canvas canvas, final DicomOverlayContext context) {
     final spacing =
         context.geometry.pixelSpacing ?? context.geometry.imagerPixelSpacing;
     if (spacing == null) return;

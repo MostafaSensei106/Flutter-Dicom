@@ -17,8 +17,8 @@ final class DicomRoi {
 
   /// Analyzes pixels inside [bounds].
   Future<RoiStatistics> analyze(
-    DicomPixelData pixels, {
-    DicomMeasurementUnit unit = DicomMeasurementUnit.modalityValue,
+    final DicomPixelData pixels, {
+    final DicomMeasurementUnit unit = DicomMeasurementUnit.modalityValue,
   }) async {
     final x0 = bounds.left.toInt().clamp(0, pixels.width - 1);
     final y0 = bounds.top.toInt().clamp(0, pixels.height - 1);
@@ -39,7 +39,7 @@ final class DicomRoi {
     return RoiStatistics.fromValues(values);
   }
 
-  double _rawAt(DicomPixelData pixels, int index) {
+  double _rawAt(final DicomPixelData pixels, final int index) {
     return switch (pixels) {
       DicomInt16PixelData(:final buffer) => buffer[index].toDouble(),
       DicomUint8PixelData(:final buffer) => buffer[index].toDouble(),
@@ -63,14 +63,7 @@ final class RoiStatistics {
     required this.median,
   });
 
-  final int pixelCount;
-  final double min;
-  final double max;
-  final double mean;
-  final double stdDev;
-  final double median;
-
-  factory RoiStatistics.fromValues(List<double> values) {
+  factory RoiStatistics.fromValues(final List<double> values) {
     if (values.isEmpty) {
       return const RoiStatistics(
         pixelCount: 0,
@@ -82,7 +75,7 @@ final class RoiStatistics {
       );
     }
     final sorted = List<double>.of(values)..sort();
-    final mean = values.reduce((a, b) => a + b) / values.length;
+    final mean = values.reduce((final a, final b) => a + b) / values.length;
     var variance = 0.0;
     for (final v in values) {
       variance += (v - mean) * (v - mean);
@@ -101,4 +94,11 @@ final class RoiStatistics {
       median: median,
     );
   }
+
+  final int pixelCount;
+  final double min;
+  final double max;
+  final double mean;
+  final double stdDev;
+  final double median;
 }

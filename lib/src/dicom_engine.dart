@@ -54,14 +54,14 @@ abstract interface class DicomEngine {
   DicomExporter get exporter;
 
   Future<DicomDocument> open(
-    DicomSource source, {
-    DicomOpenOptions options = const DicomOpenOptions(),
+    final DicomSource source, {
+    final DicomOpenOptions options = const DicomOpenOptions(),
   });
 
   Future<void> dispose();
 
   static Future<DicomEngine> create({
-    DicomEngineConfig config = const DicomEngineConfig(),
+    final DicomEngineConfig config = const DicomEngineConfig(),
   }) async {
     await _Bridge.ensureInitialized();
     return const _DefaultDicomEngine();
@@ -97,8 +97,8 @@ final class _DefaultDicomEngine implements DicomEngine {
 
   @override
   Future<DicomDocument> open(
-    DicomSource source, {
-    DicomOpenOptions options = const DicomOpenOptions(),
+    final DicomSource source, {
+    final DicomOpenOptions options = const DicomOpenOptions(),
   }) async {
     final result = await parser.parse(source, options: options.parseOptions);
     return DicomDocument(metadata: result.metadata, frames: result.frames);
@@ -116,8 +116,8 @@ final class _ViewerOwnedRenderer implements DicomRenderer {
 
   @override
   Future<DicomRenderResult> render(
-    DicomPixelData pixels, {
-    DicomRenderOptions options = const DicomRenderOptions(),
+    final DicomPixelData pixels, {
+    final DicomRenderOptions options = const DicomRenderOptions(),
   }) =>
       throw UnimplementedError(
         'Off-screen rendering is not implemented; '

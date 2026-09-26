@@ -13,7 +13,7 @@ import '../../rust/api/core/models/dicom_metadata.dart' as rust;
 /// never imports `src/rust/`.
 abstract final class RustMetadataMapper {
   /// Converts generated metadata to the domain contract.
-  static DicomMetadata toDomain(rust.DicomMetadata m) {
+  static DicomMetadata toDomain(final rust.DicomMetadata m) {
     final spacing = _parseSpacing(m.pixelSpacing);
     final orientation = _parseOrientation(m.imageOrientationPatient);
     final position = _parsePosition(m.imagePositionPatient);
@@ -52,8 +52,8 @@ abstract final class RustMetadataMapper {
 
   /// Converts a decoded frame buffer to the sealed pixel hierarchy.
   static DicomPixelData toPixels({
-    required rust.DicomFrameResult result,
-    required int frameIndex,
+    required final rust.DicomFrameResult result,
+    required final int frameIndex,
   }) {
     final m = result.metadata;
     final transform = DicomPixelTransform(
@@ -99,12 +99,12 @@ abstract final class RustMetadataMapper {
     );
   }
 
-  static String? _clean(String value) {
+  static String? _clean(final String value) {
     final v = value.trim();
     return v.isEmpty || v == 'Unknown' ? null : v;
   }
 
-  static DicomPixelSpacing? _parseSpacing(String raw) {
+  static DicomPixelSpacing? _parseSpacing(final String raw) {
     final parts = raw.split('\\');
     if (parts.length < 2) return null;
     final row = double.tryParse(parts[0].trim());
@@ -113,7 +113,7 @@ abstract final class RustMetadataMapper {
     return DicomPixelSpacing(row, col);
   }
 
-  static List<double>? _parseDoubles(String raw, int count) {
+  static List<double>? _parseDoubles(final String raw, final int count) {
     final parts = raw.split('\\');
     if (parts.length < count) return null;
     final out = <double>[];
@@ -125,7 +125,7 @@ abstract final class RustMetadataMapper {
     return out;
   }
 
-  static DicomOrientation? _parseOrientation(String raw) {
+  static DicomOrientation? _parseOrientation(final String raw) {
     final v = _parseDoubles(raw, 6);
     if (v == null) return null;
     return DicomOrientation(
@@ -134,7 +134,7 @@ abstract final class RustMetadataMapper {
     );
   }
 
-  static DicomPosition? _parsePosition(String raw) {
+  static DicomPosition? _parsePosition(final String raw) {
     final v = _parseDoubles(raw, 3);
     if (v == null) return null;
     return DicomPosition(v[0], v[1], v[2]);

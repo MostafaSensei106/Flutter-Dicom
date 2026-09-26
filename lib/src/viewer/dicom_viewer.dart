@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../application/viewer/viewer_state.dart';
 import '../domain/dicom_geometry.dart';
-import '../domain/dicom_pixel_data.dart';
 import '../presentation/overlays/dicom_overlay.dart';
 import 'dicom_viewer_controller.dart';
 import 'painting.dart';
@@ -60,21 +59,21 @@ class _DicomViewerState extends State<DicomViewer> {
   void initState() {
     super.initState();
     loadDicomShader().then(
-      (shader) {
+      (final shader) {
         if (mounted) setState(() => _shader = shader);
       },
-      onError: (Object e) {
+      onError: (final Object e) {
         if (mounted) setState(() => _shaderError = e.toString());
       },
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return StreamBuilder<DicomViewerState>(
       stream: widget.controller.states,
       initialData: widget.controller.state,
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         final state = snapshot.data ?? widget.controller.state;
         return switch (state.status) {
           DicomViewerLoading() => widget.loadingBuilder?.call(context) ??
@@ -95,7 +94,7 @@ class _DicomViewerState extends State<DicomViewer> {
     );
   }
 
-  Widget _buildReady(BuildContext context, DicomViewerState state) {
+  Widget _buildReady(final BuildContext context, final DicomViewerState state) {
     if (_shaderError != null) {
       return widget.errorBuilder?.call(context, _shaderError!) ??
           Center(
@@ -118,7 +117,7 @@ class _DicomViewerState extends State<DicomViewer> {
     }
     final aspect = pixels.width / pixels.height;
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (final context, final constraints) {
         final fitted = _fitContain(
           constraints.maxWidth,
           constraints.maxHeight,
@@ -130,7 +129,7 @@ class _DicomViewerState extends State<DicomViewer> {
             height: fitted.height,
             child: GestureDetector(
               onPanUpdate: widget.windowDrag
-                  ? (details) {
+                  ? (final details) {
                       widget.controller.setWindow(
                         state.window.copyWith(
                           center: state.window.center + details.delta.dy * 1.5,
@@ -141,14 +140,14 @@ class _DicomViewerState extends State<DicomViewer> {
                   : null,
               onDoubleTap: widget.controller.reset,
               onTapDown: widget.probeInteraction
-                  ? (details) => _setProbe(details.localPosition, fitted)
+                  ? (final details) => _setProbe(details.localPosition, fitted)
                   : null,
               child: MouseRegion(
                 onHover: widget.probeInteraction
-                    ? (event) => _setProbe(event.localPosition, fitted)
+                    ? (final event) => _setProbe(event.localPosition, fitted)
                     : null,
                 onExit: widget.probeInteraction
-                    ? (_) => setState(() => _probeImagePoint = null)
+                    ? (final _) => setState(() => _probeImagePoint = null)
                     : null,
                 child: Stack(
                   children: [
@@ -190,7 +189,7 @@ class _DicomViewerState extends State<DicomViewer> {
     );
   }
 
-  void _setProbe(Offset local, Size fitted) {
+  void _setProbe(final Offset local, final Size fitted) {
     final pixels = widget.controller.pixels;
     if (pixels == null) return;
     final px = (local.dx / fitted.width) * pixels.width;
@@ -202,7 +201,7 @@ class _DicomViewerState extends State<DicomViewer> {
     setState(() => _probeImagePoint = DicomPoint(px, py));
   }
 
-  Size _fitContain(double maxWidth, double maxHeight, double aspect) {
+  Size _fitContain(final double maxWidth, final double maxHeight, final double aspect) {
     if (!maxWidth.isFinite || !maxHeight.isFinite || aspect <= 0) {
       return const Size(300, 300);
     }

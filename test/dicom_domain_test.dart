@@ -116,17 +116,13 @@ void main() {
   group('DicomPixelTransform', () {
     test('maps stored values to modality values', () {
       const signed = DicomPixelTransform(
-        rescaleSlope: 1,
         rescaleIntercept: -1024,
         representation: DicomPixelRepresentation.signed,
       );
       expect(signed.toModalityValue(100), -924.0);
 
       const unsigned = DicomPixelTransform(
-        rescaleSlope: 1,
         rescaleIntercept: -1024,
-        representation: DicomPixelRepresentation.unsigned,
-        bitsAllocated: 16,
       );
       expect(unsigned.toModalityValue(-32768), -1024.0);
       expect(unsigned.toModalityValue(0), 31744.0);
@@ -140,7 +136,6 @@ void main() {
         width: 2,
         height: 1,
         transform: const DicomPixelTransform(
-          rescaleSlope: 1,
           rescaleIntercept: -1024,
           representation: DicomPixelRepresentation.signed,
         ),
@@ -203,7 +198,6 @@ void main() {
           width: 4,
           height: 4,
           transform: const DicomPixelTransform(
-            rescaleSlope: 1,
             rescaleIntercept: -1024,
             representation: DicomPixelRepresentation.signed,
           ),

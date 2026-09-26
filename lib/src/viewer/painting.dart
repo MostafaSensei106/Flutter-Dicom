@@ -32,7 +32,7 @@ Future<ui.FragmentShader> loadDicomShader() async {
 /// 16-bit integrity is preserved by splitting each value across R (high)
 /// and G (low); the shader reconstructs the stored value. Color frames are
 /// reduced to luminance for the monochrome pipeline.
-Future<ui.Image> pixelsToTexture(DicomPixelData pixels) {
+Future<ui.Image> pixelsToTexture(final DicomPixelData pixels) {
   final width = pixels.width;
   final height = pixels.height;
   if (width <= 0 || height <= 0) {
@@ -104,7 +104,7 @@ Future<ui.Image> pixelsToTexture(DicomPixelData pixels) {
     width,
     height,
     ui.PixelFormat.rgba8888,
-    (ui.Image image) => completer.complete(image),
+    (final ui.Image image) => completer.complete(image),
   );
   return completer.future;
 }
@@ -128,7 +128,7 @@ final class DicomImagePainter extends CustomPainter {
   final bool invert;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     shader
       ..setFloat(0, size.width)
       ..setFloat(1, size.height)
@@ -145,7 +145,7 @@ final class DicomImagePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant DicomImagePainter oldDelegate) {
+  bool shouldRepaint(covariant final DicomImagePainter oldDelegate) {
     return oldDelegate.texture != texture ||
         oldDelegate.window != window ||
         oldDelegate.invert != invert ||
@@ -165,14 +165,14 @@ final class DicomOverlaysPainter extends CustomPainter {
   final DicomOverlayContext context;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     for (final overlay in overlays) {
       overlay.paint(canvas, context);
     }
   }
 
   @override
-  bool shouldRepaint(covariant DicomOverlaysPainter oldDelegate) {
+  bool shouldRepaint(covariant final DicomOverlaysPainter oldDelegate) {
     return oldDelegate.overlays != overlays || oldDelegate.context != context;
   }
 }

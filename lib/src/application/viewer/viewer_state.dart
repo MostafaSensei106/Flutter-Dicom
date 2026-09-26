@@ -1,7 +1,7 @@
-import '../../errors/dicom_exception.dart';
 import '../../domain/dicom_color_map.dart';
 import '../../domain/dicom_geometry.dart';
 import '../../domain/dicom_windowing.dart';
+import '../../errors/dicom_exception.dart';
 
 /// Viewer lifecycle.
 sealed class DicomViewerStatus {
@@ -50,15 +50,15 @@ final class DicomViewerState {
   final DicomOffset pan;
 
   DicomViewerState copyWith({
-    DicomViewerStatus? status,
-    int? currentFrame,
-    int? frameCount,
-    DicomWindow? window,
-    DicomColorMap? colorMap,
-    bool? invert,
-    double? rotation,
-    double? zoom,
-    DicomOffset? pan,
+    final DicomViewerStatus? status,
+    final int? currentFrame,
+    final int? frameCount,
+    final DicomWindow? window,
+    final DicomColorMap? colorMap,
+    final bool? invert,
+    final double? rotation,
+    final double? zoom,
+    final DicomOffset? pan,
   }) =>
       DicomViewerState(
         status: status ?? this.status,
@@ -76,7 +76,7 @@ final class DicomViewerState {
 /// Command — every viewer mutation goes through one of these so undo /
 /// redo / replay can be added without touching the controller.
 abstract interface class DicomViewerCommand {
-  DicomViewerState execute(DicomViewerState state);
+  DicomViewerState execute(final DicomViewerState state);
 }
 
 final class SetWindowCommand implements DicomViewerCommand {
@@ -85,7 +85,7 @@ final class SetWindowCommand implements DicomViewerCommand {
   final double? width;
 
   @override
-  DicomViewerState execute(DicomViewerState state) => state.copyWith(
+  DicomViewerState execute(final DicomViewerState state) => state.copyWith(
         window: state.window.copyWith(center: center, width: width),
       );
 }
@@ -95,7 +95,7 @@ final class ResetWindowCommand implements DicomViewerCommand {
   final DicomWindow defaults;
 
   @override
-  DicomViewerState execute(DicomViewerState state) =>
+  DicomViewerState execute(final DicomViewerState state) =>
       state.copyWith(window: defaults);
 }
 
@@ -104,7 +104,7 @@ final class SetFrameCommand implements DicomViewerCommand {
   final int index;
 
   @override
-  DicomViewerState execute(DicomViewerState state) =>
+  DicomViewerState execute(final DicomViewerState state) =>
       state.copyWith(currentFrame: index);
 }
 
@@ -113,7 +113,7 @@ final class SetColorMapCommand implements DicomViewerCommand {
   final DicomColorMap colorMap;
 
   @override
-  DicomViewerState execute(DicomViewerState state) =>
+  DicomViewerState execute(final DicomViewerState state) =>
       state.copyWith(colorMap: colorMap);
 }
 
@@ -121,6 +121,6 @@ final class ToggleInvertCommand implements DicomViewerCommand {
   const ToggleInvertCommand();
 
   @override
-  DicomViewerState execute(DicomViewerState state) =>
+  DicomViewerState execute(final DicomViewerState state) =>
       state.copyWith(invert: !state.invert);
 }

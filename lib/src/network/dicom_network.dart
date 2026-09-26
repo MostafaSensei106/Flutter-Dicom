@@ -17,13 +17,13 @@ final class DicomStudy {
 
 /// DICOMweb client port — the application layer never sees HTTP.
 abstract interface class DicomWebClient {
-  Future<List<DicomStudy>> searchStudies(DicomStudyQuery query);
-  Future<DicomSeries> retrieveSeries(String studyUid, String seriesUid);
+  Future<List<DicomStudy>> searchStudies(final DicomStudyQuery query);
+  Future<DicomSeries> retrieveSeries(final String studyUid, final String seriesUid);
 }
 
 /// DIMSE client port — the application layer never sees TCP/association.
 abstract interface class DicomDimseClient {
-  Future<void> store(Object object);
-  Future<List<DicomStudy>> find(Object query);
-  Future<void> move(Object request);
+  Future<void> store(final Object object);
+  Future<List<DicomStudy>> find(final Object query);
+  Future<void> move(final Object request);
 }

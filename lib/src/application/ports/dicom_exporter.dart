@@ -23,8 +23,8 @@ final class DicomExportOptions {
 /// Exporter port — one strategy per format, no format `switch` in callers.
 abstract interface class DicomExporter {
   Future<Uint8List> export(
-    DicomPixelData pixels, {
-    required DicomExportFormat format,
-    DicomExportOptions options = const DicomExportOptions(),
+    final DicomPixelData pixels, {
+    required final DicomExportFormat format,
+    final DicomExportOptions options = const DicomExportOptions(),
   });
 }

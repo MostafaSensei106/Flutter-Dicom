@@ -37,7 +37,7 @@ final class DicomVolume {
   final int depth;
   final DicomVolumeGeometry geometry;
 
-  Future<DicomVolumeSlice> sample(DicomPlane plane, double position) async =>
+  Future<DicomVolumeSlice> sample(final DicomPlane plane, final double position) async =>
       DicomVolumeSlice(plane: plane, position: position);
 }
 
@@ -58,17 +58,17 @@ final class DicomVolumeGeometry {
 /// MPR reconstruction strategy (nearest / trilinear / …).
 abstract interface class DicomReconstructionStrategy {
   Future<DicomPixelData> reconstruct(
-    DicomVolume volume,
-    DicomPlane plane,
-    double position,
+    final DicomVolume volume,
+    final DicomPlane plane,
+    final double position,
   );
 }
 
 /// MIP / MinIP projection strategy — same pipeline, both flavors.
 abstract interface class DicomProjectionStrategy {
   Future<DicomPixelData> project(
-    DicomVolume volume,
-    DicomProjectionOptions options,
+    final DicomVolume volume,
+    final DicomProjectionOptions options,
   );
 }
 
@@ -87,8 +87,8 @@ final class DicomProjectionOptions {
 abstract interface class DicomMprController {
   DicomPlane get plane;
   double get position;
-  Future<void> setPlane(DicomPlane plane);
-  Future<void> setPosition(double position);
+  Future<void> setPlane(final DicomPlane plane);
+  Future<void> setPosition(final double position);
   void dispose();
 }
 

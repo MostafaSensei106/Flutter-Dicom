@@ -13,7 +13,7 @@ final class PixelProbeOverlay implements DicomOverlay {
   final DicomProbe probe;
 
   @override
-  void paint(Canvas canvas, DicomOverlayContext context) {
+  void paint(final Canvas canvas, final DicomOverlayContext context) {
     final point = context.probePoint;
     final pixels = context.pixels;
     if (point == null || pixels == null) return;

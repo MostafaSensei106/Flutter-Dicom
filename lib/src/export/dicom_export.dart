@@ -15,9 +15,9 @@ final class PngDicomExporter implements DicomExporter {
 
   @override
   Future<Uint8List> export(
-    DicomPixelData pixels, {
-    required DicomExportFormat format,
-    DicomExportOptions options = const DicomExportOptions(),
+    final DicomPixelData pixels, {
+    required final DicomExportFormat format,
+    final DicomExportOptions options = const DicomExportOptions(),
   }) {
     if (format != DicomExportFormat.png) {
       throw UnimplementedError('$format export is not implemented yet');
@@ -27,8 +27,8 @@ final class PngDicomExporter implements DicomExporter {
 
   /// Exports [pixels] through [window] as an 8-bit grayscale PNG.
   Future<Uint8List> exportWindowed(
-    DicomPixelData pixels,
-    DicomWindow window,
+    final DicomPixelData pixels,
+    final DicomWindow window,
   ) async {
     final width = pixels.width;
     final height = pixels.height;
@@ -42,14 +42,14 @@ final class PngDicomExporter implements DicomExporter {
 
   /// Minimal 8-bit grayscale PNG encoder (no external dependencies).
   static Uint8List _encodeGrayscalePng(
-    int width,
-    int height,
-    Uint8List gray,
+    final int width,
+    final int height,
+    final Uint8List gray,
   ) {
     final out = BytesBuilder();
     out.add([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
 
-    void chunk(String type, List<int> data) {
+    void chunk(final String type, final List<int> data) {
       final typeBytes = type.codeUnits;
       out.add(_u32(data.length));
       out.add(typeBytes);
@@ -81,7 +81,7 @@ final class PngDicomExporter implements DicomExporter {
   /// The SDK flavor in use ships `dart:convert` without zlib, so compression
   /// is implemented directly (RFC 1950 wrapper + RFC 1951 stored blocks +
   /// Adler-32). Output is a fully valid zlib stream decoders accept.
-  static Uint8List _zlibStored(Uint8List data) {
+  static Uint8List _zlibStored(final Uint8List data) {
     final out = BytesBuilder();
     out.add([0x78, 0x01]); // CMF/FLG: deflate, 32K window, FCHECK valid
     var offset = 0;
@@ -111,13 +111,13 @@ final class PngDicomExporter implements DicomExporter {
     return out.toBytes();
   }
 
-  static List<int> _u32(int v) =>
+  static List<int> _u32(final int v) =>
       [(v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
 }
 
 /// CRC-32 (ISO 3309) used by PNG chunks.
 final class _Crc32 {
-  static final List<int> _table = List.generate(256, (n) {
+  static final List<int> _table = List.generate(256, (final n) {
     var c = n;
     for (var k = 0; k < 8; k++) {
       c = (c & 1) != 0 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
@@ -127,7 +127,7 @@ final class _Crc32 {
 
   int _crc = 0xFFFFFFFF;
 
-  void add(List<int> bytes) {
+  void add(final List<int> bytes) {
     for (final b in bytes) {
       _crc = _table[(_crc ^ b) & 0xFF] ^ (_crc >>> 8);
     }

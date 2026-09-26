@@ -16,7 +16,7 @@ enum DicomModality {
   nm,
   unknown;
 
-  static DicomModality parse(String? raw) {
+  static DicomModality parse(final String? raw) {
     return switch (raw?.trim().toUpperCase()) {
       'CT' => DicomModality.ct,
       'MR' => DicomModality.mr,
@@ -44,7 +44,7 @@ enum DicomTransferSyntax {
   rle,
   unknown;
 
-  static DicomTransferSyntax parse(String? uid) {
+  static DicomTransferSyntax parse(final String? uid) {
     return switch (uid?.trim()) {
       '1.2.840.10008.1.2' => DicomTransferSyntax.implicitLittleEndian,
       '1.2.840.10008.1.2.1' => DicomTransferSyntax.explicitLittleEndian,
@@ -66,19 +66,10 @@ enum DicomTransferSyntax {
 /// depends on codegen output.
 final class DicomMetadata {
   const DicomMetadata({
-    this.patientName,
+    required this.rows, required this.columns, required this.bitsAllocated, required this.bitsStored, required this.highBit, required this.pixelRepresentation, required this.samplesPerPixel, required this.photometricInterpretation, required this.numberOfFrames, this.patientName,
     this.patientId,
     this.patientSex,
     this.modality,
-    required this.rows,
-    required this.columns,
-    required this.bitsAllocated,
-    required this.bitsStored,
-    required this.highBit,
-    required this.pixelRepresentation,
-    required this.samplesPerPixel,
-    required this.photometricInterpretation,
-    required this.numberOfFrames,
     this.pixelSpacing,
     this.imagerPixelSpacing,
     this.imageOrientationPatient,
@@ -120,7 +111,7 @@ final class DicomMetadata {
           const DicomWindow(center: 40, width: 400));
 
   /// Unknown-tag access without growing this class.
-  T? tag<T>(DicomTagId id) {
+  T? tag<T>(final DicomTagId id) {
     final value = extraTags[id];
     return value is T ? value : null;
   }

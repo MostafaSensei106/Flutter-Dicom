@@ -4,15 +4,14 @@ import 'dart:ui' as ui;
 
 import '../application/ports/dicom_parser.dart';
 import '../application/viewer/viewer_state.dart';
+import '../dicom_engine.dart';
 import '../domain/dicom_color_map.dart';
 import '../domain/dicom_geometry.dart';
-import '../domain/dicom_metadata.dart';
 import '../domain/dicom_pixel_data.dart';
 import '../domain/dicom_source.dart';
 import '../domain/dicom_windowing.dart';
 import '../errors/dicom_exception.dart';
 import '../infrastructure/rust/rust_dicom_parser.dart';
-import '../dicom_engine.dart';
 import 'painting.dart';
 
 /// Viewer controller contract — reactive state in, commands out.
@@ -29,16 +28,16 @@ abstract interface class DicomViewerController {
   ui.Image? get texture;
   DicomGeometry? get geometry;
 
-  Future<void> load(DicomSource source);
-  Future<void> setFrame(int index);
+  Future<void> load(final DicomSource source);
+  Future<void> setFrame(final int index);
 
-  void setWindow(DicomWindow window);
-  void setColorMap(DicomColorMap colorMap);
-  void setInvert(bool value);
+  void setWindow(final DicomWindow window);
+  void setColorMap(final DicomColorMap colorMap);
+  void setInvert(final bool value);
 
-  void rotate(double degrees);
-  void zoom(double scale);
-  void pan(DicomOffset offset);
+  void rotate(final double degrees);
+  void zoom(final double scale);
+  void pan(final DicomOffset offset);
 
   void reset();
   void dispose();
@@ -49,7 +48,7 @@ abstract interface class DicomViewerController {
 /// Frame textures are cached (LRU, 8 entries) so cine scrubbing never
 /// re-uploads the visible stack.
 final class DefaultDicomViewerController implements DicomViewerController {
-  DefaultDicomViewerController({DicomParser? parser})
+  DefaultDicomViewerController({final DicomParser? parser})
       : _parser = parser ?? const RustDicomParser();
 
   final DicomParser _parser;
@@ -130,7 +129,7 @@ final class DefaultDicomViewerController implements DicomViewerController {
   }
 
   Future<void> _showFrame(final int index,
-      {required DicomWindow window}) async {
+      {required final DicomWindow window}) async {
     final doc = _document!;
     final frame = await doc.frames.get(index);
     final pixels = frame.pixelData;

@@ -10,16 +10,16 @@ sealed class DicomSource {
   const DicomSource();
 
   /// Single file on disk (mobile / desktop).
-  const factory DicomSource.file(String path) = DicomFileSource;
+  const factory DicomSource.file(final String path) = DicomFileSource;
 
   /// Single file in memory (Web, PACS download, cache).
-  const factory DicomSource.bytes(Uint8List bytes) = DicomBytesSource;
+  const factory DicomSource.bytes(final Uint8List bytes) = DicomBytesSource;
 
   /// Explicit file list forming a series / volume.
-  const factory DicomSource.files(List<String> paths) = DicomFilesSource;
+  const factory DicomSource.files(final List<String> paths) = DicomFilesSource;
 
   /// In-memory file list forming a series / volume.
-  const factory DicomSource.bytesList(List<Uint8List> files) =
+  const factory DicomSource.bytesList(final List<Uint8List> files) =
       DicomBytesListSource;
 }
 

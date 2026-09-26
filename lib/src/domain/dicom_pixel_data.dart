@@ -5,7 +5,7 @@ enum DicomPixelRepresentation {
   unsigned,
   signed;
 
-  static DicomPixelRepresentation fromRaw(int raw) => raw == 1
+  static DicomPixelRepresentation fromRaw(final int raw) => raw == 1
       ? DicomPixelRepresentation.signed
       : DicomPixelRepresentation.unsigned;
 }
@@ -21,14 +21,14 @@ enum DicomPhotometricInterpretation {
   /// `true` when minimum values display as white (inversion required).
   bool get isInverted => this == DicomPhotometricInterpretation.monochrome1;
 
-  static DicomPhotometricInterpretation parse(String? raw) {
+  static DicomPhotometricInterpretation parse(final String? raw) {
     final v = (raw ?? '').trim().toUpperCase();
     return switch (v) {
       'MONOCHROME1' => DicomPhotometricInterpretation.monochrome1,
       'MONOCHROME2' => DicomPhotometricInterpretation.monochrome2,
-      var s when s.startsWith('RGB') || s.startsWith('YBR') =>
+      final s when s.startsWith('RGB') || s.startsWith('YBR') =>
         DicomPhotometricInterpretation.rgb,
-      var s when s.startsWith('PALETTE') =>
+      final s when s.startsWith('PALETTE') =>
         DicomPhotometricInterpretation.palette,
       _ => DicomPhotometricInterpretation.unknown,
     };
@@ -65,7 +65,7 @@ final class DicomPixelTransform {
       representation == DicomPixelRepresentation.unsigned && bitsAllocated > 8;
 
   /// Maps a stored value to its modality value (HU for CT).
-  double toModalityValue(double raw) {
+  double toModalityValue(final double raw) {
     final trueValue = isOffsetUnsigned16 ? raw + 32768.0 : raw;
     return trueValue * rescaleSlope + rescaleIntercept;
   }
@@ -84,7 +84,7 @@ sealed class DicomPixelData {
   DicomPixelTransform get transform;
 
   /// Modality value at flat [index].
-  double modalityAt(int index);
+  double modalityAt(final int index);
 }
 
 /// 16-bit monochrome frame (the common diagnostic case).
@@ -115,7 +115,7 @@ final class DicomInt16PixelData extends DicomPixelData {
   int get length => buffer.length;
 
   @override
-  double modalityAt(int index) => transform.toModalityValue(
+  double modalityAt(final int index) => transform.toModalityValue(
         buffer[index].toDouble(),
       );
 }
@@ -148,7 +148,7 @@ final class DicomUint8PixelData extends DicomPixelData {
   int get length => buffer.length;
 
   @override
-  double modalityAt(int index) => transform.toModalityValue(
+  double modalityAt(final int index) => transform.toModalityValue(
         buffer[index].toDouble(),
       );
 }
@@ -182,7 +182,7 @@ final class DicomRgbPixelData extends DicomPixelData {
 
   /// Luminance-derived modality value at pixel [index].
   @override
-  double modalityAt(int index) {
+  double modalityAt(final int index) {
     final r = buffer[index * 3].toDouble();
     final g = buffer[index * 3 + 1].toDouble();
     final b = buffer[index * 3 + 2].toDouble();
@@ -218,7 +218,7 @@ final class DicomUint16PixelData extends DicomPixelData {
   int get length => buffer.length;
 
   @override
-  double modalityAt(int index) => transform.toModalityValue(
+  double modalityAt(final int index) => transform.toModalityValue(
         buffer[index].toDouble(),
       );
 }
@@ -251,7 +251,7 @@ final class DicomFloat32PixelData extends DicomPixelData {
   int get length => buffer.length;
 
   @override
-  double modalityAt(int index) => transform.toModalityValue(
+  double modalityAt(final int index) => transform.toModalityValue(
         buffer[index].toDouble(),
       );
 }

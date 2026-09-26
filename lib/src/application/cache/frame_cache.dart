@@ -3,9 +3,9 @@ import 'dart:collection';
 /// Frame cache abstraction — the controller depends on this interface,
 /// never on `Map<int, Frame>` directly.
 abstract interface class DicomFrameCache<T> {
-  T? get(int index);
-  void put(int index, T frame);
-  void evict(int index);
+  T? get(final int index);
+  void put(final int index, final T frame);
+  void evict(final int index);
   void clear();
   int get length;
 }
@@ -13,11 +13,11 @@ abstract interface class DicomFrameCache<T> {
 /// No caching (memory-constrained devices, tests).
 final class NoOpFrameCache<T> implements DicomFrameCache<T> {
   @override
-  T? get(int index) => null;
+  T? get(final int index) => null;
   @override
-  void put(int index, T frame) {}
+  void put(final int index, final T frame) {}
   @override
-  void evict(int index) {}
+  void evict(final int index) {}
   @override
   void clear() {}
   @override
@@ -32,7 +32,7 @@ final class LruFrameCache<T> implements DicomFrameCache<T> {
   final LinkedHashMap<int, T> _entries = LinkedHashMap();
 
   @override
-  T? get(int index) {
+  T? get(final int index) {
     final value = _entries.remove(index);
     if (value == null) return null;
     _entries[index] = value; // mark most-recently-used
@@ -40,7 +40,7 @@ final class LruFrameCache<T> implements DicomFrameCache<T> {
   }
 
   @override
-  void put(int index, T frame) {
+  void put(final int index, final T frame) {
     _entries.remove(index);
     _entries[index] = frame;
     while (_entries.length > capacity) {
@@ -49,7 +49,7 @@ final class LruFrameCache<T> implements DicomFrameCache<T> {
   }
 
   @override
-  void evict(int index) => _entries.remove(index);
+  void evict(final int index) => _entries.remove(index);
 
   @override
   void clear() => _entries.clear();

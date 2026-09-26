@@ -7,9 +7,9 @@ final class DicomRuler {
   const DicomRuler();
 
   DicomMeasurement measure(
-    DicomPoint start,
-    DicomPoint end,
-    DicomGeometry geometry,
+    final DicomPoint start,
+    final DicomPoint end,
+    final DicomGeometry geometry,
   ) {
     final dx = end.x - start.x;
     final dy = end.y - start.y;

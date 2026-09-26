@@ -65,9 +65,9 @@ final class TextAnnotation extends DicomAnnotation {
 /// Annotation controller with undo / redo history.
 abstract interface class DicomAnnotationController {
   List<DicomAnnotation> get annotations;
-  void add(DicomAnnotation annotation);
-  void update(DicomAnnotation annotation);
-  void remove(String id);
+  void add(final DicomAnnotation annotation);
+  void update(final DicomAnnotation annotation);
+  void remove(final String id);
   void undo();
   void redo();
   void dispose();
@@ -84,20 +84,20 @@ final class InMemoryDicomAnnotationController
   List<DicomAnnotation> get annotations => List.unmodifiable(_items.values);
 
   @override
-  void add(DicomAnnotation annotation) {
+  void add(final DicomAnnotation annotation) {
     _checkpoint();
     _items[annotation.id] = annotation;
   }
 
   @override
-  void update(DicomAnnotation annotation) {
+  void update(final DicomAnnotation annotation) {
     if (!_items.containsKey(annotation.id)) return;
     _checkpoint();
     _items[annotation.id] = annotation;
   }
 
   @override
-  void remove(String id) {
+  void remove(final String id) {
     if (!_items.containsKey(id)) return;
     _checkpoint();
     _items.remove(id);

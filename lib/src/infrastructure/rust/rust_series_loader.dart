@@ -1,5 +1,4 @@
 import '../../domain/dicom_frame.dart';
-import '../../domain/dicom_geometry.dart';
 import '../../domain/dicom_source.dart';
 import '../../errors/dicom_exception.dart';
 import '../../rust/api/init.dart';
@@ -15,8 +14,8 @@ final class RustDicomSeriesLoader implements DicomSeriesLoader {
 
   @override
   Future<DicomSeries> load(
-    DicomSource source, {
-    DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
+    final DicomSource source, {
+    final DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
   }) async {
     try {
       final paths = switch (source) {
@@ -32,7 +31,7 @@ final class RustDicomSeriesLoader implements DicomSeriesLoader {
       if (groups.isEmpty) {
         throw const DicomProcessingException('No DICOM series found');
       }
-      groups.sort((a, b) => b.slices.length.compareTo(a.slices.length));
+      groups.sort((final a, final b) => b.slices.length.compareTo(a.slices.length));
       final group = groups.first;
       final frames = <DicomFrameReference>[];
       final positions = <double>[];

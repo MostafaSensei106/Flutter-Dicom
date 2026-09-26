@@ -5,7 +5,7 @@ import '../../domain/dicom_pixel_data.dart';
 /// `MockDicomDecoder`) hide behind this interface.
 abstract interface class DicomDecoder {
   Future<DicomPixelData> decode(
-    DicomFrame frame, {
-    DicomDecodeOptions options = const DicomDecodeOptions(),
+    final DicomFrame frame, {
+    final DicomDecodeOptions options = const DicomDecodeOptions(),
   });
 }

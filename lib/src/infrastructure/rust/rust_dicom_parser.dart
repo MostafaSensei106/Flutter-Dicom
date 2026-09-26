@@ -24,8 +24,8 @@ final class RustDicomParser implements DicomParser {
 
   @override
   Future<DicomParseResult> parse(
-    DicomSource source, {
-    DicomParseOptions options = const DicomParseOptions(),
+    final DicomSource source, {
+    final DicomParseOptions options = const DicomParseOptions(),
   }) async {
     try {
       return await _parseInner(source);
@@ -34,7 +34,7 @@ final class RustDicomParser implements DicomParser {
     }
   }
 
-  Future<DicomParseResult> _parseInner(DicomSource source) async {
+  Future<DicomParseResult> _parseInner(final DicomSource source) async {
     switch (source) {
       case DicomFileSource(:final path):
         final result = await loadDicom(path: path, config: _metaConfig);
@@ -89,7 +89,7 @@ final class RustDicomParser implements DicomParser {
   }
 
   /// A file list behaves as one multi-frame dataset.
-  DicomMetadata _asFileList(DicomMetadata first, int count) {
+  DicomMetadata _asFileList(final DicomMetadata first, final int count) {
     return DicomMetadata(
       patientName: first.patientName,
       patientId: first.patientId,
@@ -126,7 +126,7 @@ final class _RustFrameProvider implements DicomFrameProvider {
   int get frameCount => metadata.numberOfFrames;
 
   @override
-  Future<DicomFrame> get(int index) async {
+  Future<DicomFrame> get(final int index) async {
     if (index < 0 || index >= frameCount) {
       throw DicomConfigurationException('Frame $index out of range');
     }
@@ -136,8 +136,8 @@ final class _RustFrameProvider implements DicomFrameProvider {
 
   /// Shared fetch used by the provider (and tests).
   static Future<DicomPixelData> fetchPixels(
-    DicomSource source,
-    int index,
+    final DicomSource source,
+    final int index,
   ) async {
     try {
       switch (source) {

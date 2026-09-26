@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 
 /// Point in any 2D DICOM coordinate space (screen / viewport / image).
 final class DicomPoint {
@@ -37,7 +36,7 @@ final class DicomPixelSpacing {
   final double column;
 
   /// Parses DICOM `Pixel Spacing` (`"0.5\\0.5"`). `null` when absent.
-  static DicomPixelSpacing? tryParse(String raw) {
+  static DicomPixelSpacing? tryParse(final String raw) {
     final parts = raw.split('\\');
     if (parts.length < 2) return null;
     final row = double.tryParse(parts[0].trim());
@@ -96,7 +95,7 @@ final class DicomGeometry {
   final DicomPosition? position;
 
   /// Viewport tap → image pixel. `null` when outside the image.
-  DicomPoint? screenToImage(DicomPoint point, DicomViewport viewport) {
+  DicomPoint? screenToImage(final DicomPoint point, final DicomViewport viewport) {
     if (viewport.width <= 0 || viewport.height <= 0) return null;
     final px = (point.x / viewport.width) * imageWidth;
     final py = (point.y / viewport.height) * imageHeight;
@@ -107,7 +106,7 @@ final class DicomGeometry {
   }
 
   /// Image pixel → patient coordinates in mm. `null` without orientation.
-  List<double>? imageToPatient(DicomPoint point) {
+  List<double>? imageToPatient(final DicomPoint point) {
     final o = orientation;
     final p = position;
     final s = pixelSpacing ?? imagerPixelSpacing;
@@ -126,7 +125,7 @@ final class DicomGeometry {
   }
 
   /// Pixel distance → millimeters (column spacing as reference).
-  double? pixelsToMillimeters(double pixels) {
+  double? pixelsToMillimeters(final double pixels) {
     final s = pixelSpacing ?? imagerPixelSpacing;
     if (s == null) return null;
     return pixels * s.column;

@@ -14,7 +14,7 @@ import '../../domain/dicom_windowing.dart';
 /// )
 /// ```
 abstract interface class DicomOverlay {
-  void paint(Canvas canvas, DicomOverlayContext context);
+  void paint(final Canvas canvas, final DicomOverlayContext context);
 }
 
 /// Read-only snapshot handed to every overlay.
@@ -49,5 +49,5 @@ final class DicomOverlayContext {
 
 /// Base for overlays that also need a widget (tooltips, labels).
 abstract interface class DicomWidgetOverlay {
-  Widget build(BuildContext context, DicomOverlayContext ctx);
+  Widget build(final BuildContext context, final DicomOverlayContext ctx);
 }

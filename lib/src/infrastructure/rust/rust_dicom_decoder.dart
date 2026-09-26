@@ -14,8 +14,8 @@ final class RustDicomDecoder implements DicomDecoder {
 
   @override
   Future<DicomPixelData> decode(
-    DicomFrame frame, {
-    DicomDecodeOptions options = const DicomDecodeOptions(),
+    final DicomFrame frame, {
+    final DicomDecodeOptions options = const DicomDecodeOptions(),
   }) async {
     final pixels = frame.pixelData;
     if (pixels == null) {

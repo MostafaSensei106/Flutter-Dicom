@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter_dicom/flutter_dicom.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,7 +78,7 @@ void main() async {
       sw.stop();
 
       latencies.sort();
-      final avgUs = latencies.reduce((a, b) => a + b) / latencies.length;
+      final avgUs = latencies.reduce((final a, final b) => a + b) / latencies.length;
       final p99 = latencies[(latencies.length * 0.99).floor()];
       final fps = files.length / (sw.elapsedMicroseconds / 1e6);
       print(
@@ -111,7 +110,7 @@ void main() async {
         }
       }
       samples.sort();
-      double pct(double p) =>
+      double pct(final double p) =>
           samples[(samples.length * p).floor().clamp(0, samples.length - 1)] /
           1000;
       print('');
@@ -185,7 +184,7 @@ void main() async {
   group('5 ▸ Rapid Scrubbing Simulation', () {
     test('Bidirectional setFrame across files-source document', () async {
       final files = await loadSeries(seriesPath);
-      final paths = files.map((e) => e.path).toList();
+      final paths = files.map((final e) => e.path).toList();
       final controller = DefaultDicomViewerController();
       addTearDown(controller.dispose);
       await controller.load(DicomSource.files(paths));

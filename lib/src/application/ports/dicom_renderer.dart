@@ -5,8 +5,8 @@ import '../../domain/dicom_windowing.dart';
 /// Renderer port — backends (`Fragment` / GPU / software) hide here.
 abstract interface class DicomRenderer {
   Future<DicomRenderResult> render(
-    DicomPixelData pixels, {
-    DicomRenderOptions options = const DicomRenderOptions(),
+    final DicomPixelData pixels, {
+    final DicomRenderOptions options = const DicomRenderOptions(),
   });
 }
 

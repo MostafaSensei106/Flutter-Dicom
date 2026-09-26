@@ -11,10 +11,10 @@ final class DicomWindow {
   double get max => center + width / 2.0;
 
   /// Linear windowing map of a modality value to [0, 1].
-  double apply(double value) => ((value - min) / (max - min)).clamp(0.0, 1.0);
+  double apply(final double value) => ((value - min) / (max - min)).clamp(0.0, 1.0);
 
   DicomWindow copyWith(
-          {double? center, double? width, String? Function()? label}) =>
+          {final double? center, final double? width, final String? Function()? label}) =>
       DicomWindow(
         center: center ?? this.center,
         width: (width ?? this.width).clamp(1.0, 8000.0),
@@ -22,7 +22,7 @@ final class DicomWindow {
       );
 
   @override
-  bool operator ==(Object other) =>
+  bool operator ==(final Object other) =>
       identical(this, other) ||
       other is DicomWindow &&
           runtimeType == other.runtimeType &&
@@ -60,7 +60,7 @@ abstract final class DicomWindowPreset {
   static List<DicomWindow> get allWindows => all;
 
   /// Modality-aware default when the header carries no windowing.
-  static DicomWindow? forImage(Object metadata) {
+  static DicomWindow? forImage(final Object metadata) {
     // Implemented against the domain metadata without importing it
     // (avoids a domain import cycle): matches on modality name.
     final modality = (metadata as dynamic).modality?.name as String?;
@@ -75,18 +75,18 @@ abstract final class DicomWindowPreset {
 /// User-defined window preset storage (custom presets, not built-ins).
 abstract interface class DicomPresetStore {
   Future<List<DicomWindow>> load();
-  Future<void> save(String name, DicomWindow window);
-  Future<void> delete(String name);
+  Future<void> save(final String name, final DicomWindow window);
+  Future<void> delete(final String name);
 }
 
 /// Strategy hook for future non-linear mappings (sigmoid / custom VOI LUT).
 abstract interface class WindowingStrategy {
-  double map(double value, DicomWindow window);
+  double map(final double value, final DicomWindow window);
 }
 
 /// Default linear mapping used by the GPU shader.
 final class LinearWindowing implements WindowingStrategy {
   const LinearWindowing();
   @override
-  double map(double value, DicomWindow window) => window.apply(value);
+  double map(final double value, final DicomWindow window) => window.apply(value);
 }

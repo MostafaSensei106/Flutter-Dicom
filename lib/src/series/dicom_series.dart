@@ -17,7 +17,7 @@ final class DicomSeries {
 
   int get sliceCount => frames.length;
 
-  DicomFrameReference slice(int index) => frames[index];
+  DicomFrameReference slice(final int index) => frames[index];
 }
 
 /// Spatial context of a series (slice positions along the normal).
@@ -30,7 +30,7 @@ final class DicomSeriesGeometry {
 /// Series loader port — filesystem / DICOMweb adapters hide here.
 abstract interface class DicomSeriesLoader {
   Future<DicomSeries> load(
-    DicomSource source, {
-    DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
+    final DicomSource source, {
+    final DicomSeriesLoadOptions options = const DicomSeriesLoadOptions(),
   });
 }

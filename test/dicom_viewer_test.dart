@@ -24,8 +24,8 @@ class FakeParser implements DicomParser {
 
   @override
   Future<DicomParseResult> parse(
-    DicomSource source, {
-    DicomParseOptions options = const DicomParseOptions(),
+    final DicomSource source, {
+    final DicomParseOptions options = const DicomParseOptions(),
   }) async {
     if (fail) throw const DicomProcessingException('parse failed');
     return DicomParseResult(metadata: meta, frames: _FakeProvider());
@@ -37,7 +37,7 @@ class _FakeProvider implements DicomFrameProvider {
   int get frameCount => 2;
 
   @override
-  Future<DicomFrame> get(int index) async => DicomFrame(
+  Future<DicomFrame> get(final int index) async => DicomFrame(
         index: index,
         metadata: FakeParser.meta,
         pixelData: DicomInt16PixelData(
@@ -50,7 +50,7 @@ class _FakeProvider implements DicomFrameProvider {
 
 void main() {
   group('DicomViewer', () {
-    testWidgets('renders loading then image', (tester) async {
+    testWidgets('renders loading then image', (final tester) async {
       final controller = DefaultDicomViewerController(parser: FakeParser());
       addTearDown(controller.dispose);
 
@@ -68,7 +68,7 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('shows error view on failure', (tester) async {
+    testWidgets('shows error view on failure', (final tester) async {
       final controller = DefaultDicomViewerController(
         parser: FakeParser(fail: true),
       );
@@ -88,7 +88,7 @@ void main() {
       expect(find.textContaining('parse failed'), findsOneWidget);
     });
 
-    testWidgets('custom builders override defaults', (tester) async {
+    testWidgets('custom builders override defaults', (final tester) async {
       final controller = DefaultDicomViewerController(
         parser: FakeParser(fail: true),
       );
@@ -99,7 +99,7 @@ void main() {
           home: Scaffold(
             body: DicomViewer(
               controller: controller,
-              errorBuilder: (context, error) => const Text('custom error view'),
+              errorBuilder: (final context, final error) => const Text('custom error view'),
             ),
           ),
         ),

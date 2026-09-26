@@ -10,7 +10,7 @@ final class OrientationOverlay implements DicomOverlay {
   const OrientationOverlay();
 
   @override
-  void paint(Canvas canvas, DicomOverlayContext context) {
+  void paint(final Canvas canvas, final DicomOverlayContext context) {
     final orientation = context.geometry.orientation;
     if (orientation == null) return;
     final row = _axisLetter(orientation.rowCosines);
@@ -28,7 +28,7 @@ final class OrientationOverlay implements DicomOverlay {
   }
 
   /// Dominant patient axis of a direction cosine vector.
-  String? _axisLetter(List<double> cosines) {
+  String? _axisLetter(final List<double> cosines) {
     if (cosines.length < 3) return null;
     var dominant = 0;
     for (var i = 1; i < 3; i++) {
@@ -46,7 +46,7 @@ final class OrientationOverlay implements DicomOverlay {
     };
   }
 
-  String _negate(String letter) => switch (letter) {
+  String _negate(final String letter) => switch (letter) {
         'L' => 'R',
         'R' => 'L',
         'A' => 'P',
@@ -56,14 +56,14 @@ final class OrientationOverlay implements DicomOverlay {
         _ => letter,
       };
 
-  void _draw(Canvas canvas, String letter, Offset center) {
+  void _draw(final Canvas canvas, final String letter, final Offset center) {
     final span = TextSpan(
       text: letter,
       style: const TextStyle(
         color: Colors.white,
         fontSize: 14,
         fontWeight: FontWeight.bold,
-        shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+        shadows: [Shadow(blurRadius: 4)],
       ),
     );
     final tp = TextPainter(

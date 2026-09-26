@@ -4,19 +4,19 @@ import 'dart:async';
 abstract interface class DicomCineController {
   bool get playing;
   double get fps;
-  Future<void> play({required int frameCount, bool loop = true});
+  Future<void> play({required final int frameCount, final bool loop = true});
   void pause();
   void stop();
-  void setFps(double fps);
+  void setFps(final double fps);
   void dispose();
 }
 
 /// Cine frame scheduler — deterministic and testable.
 abstract interface class DicomCineScheduler {
   Stream<int> frames({
-    required int frameCount,
-    required double fps,
-    required bool loop,
+    required final int frameCount,
+    required final double fps,
+    required final bool loop,
   });
 }
 
@@ -26,9 +26,9 @@ final class TimerDicomCineScheduler implements DicomCineScheduler {
 
   @override
   Stream<int> frames({
-    required int frameCount,
-    required double fps,
-    required bool loop,
+    required final int frameCount,
+    required final double fps,
+    required final bool loop,
   }) async* {
     if (frameCount <= 0 || fps <= 0) return;
     final period = Duration(microseconds: (1000000 / fps).round());
@@ -47,8 +47,7 @@ final class TimerDicomCineScheduler implements DicomCineScheduler {
 /// Default cine controller driving frame callbacks from the scheduler.
 final class DefaultDicomCineController implements DicomCineController {
   DefaultDicomCineController({
-    DicomCineScheduler? scheduler,
-    required this.onFrame,
+    final required this.onFrame, final DicomCineScheduler? scheduler,
   }) : _scheduler = scheduler ?? const TimerDicomCineScheduler();
 
   final DicomCineScheduler _scheduler;
@@ -66,11 +65,11 @@ final class DefaultDicomCineController implements DicomCineController {
   double get fps => _fps;
 
   @override
-  Future<void> play({required int frameCount, bool loop = true}) async {
+  Future<void> play({required final int frameCount, final bool loop = true}) async {
     await stop();
     _subscription = _scheduler
         .frames(frameCount: frameCount, fps: _fps, loop: loop)
-        .listen((index) => onFrame(index));
+        .listen((final index) => onFrame(index));
   }
 
   @override
@@ -86,7 +85,7 @@ final class DefaultDicomCineController implements DicomCineController {
   }
 
   @override
-  void setFps(double fps) {
+  void setFps(final double fps) {
     if (fps <= 0) return;
     _fps = fps.clamp(1.0, 120.0);
   }
