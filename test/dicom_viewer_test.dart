@@ -99,7 +99,8 @@ void main() {
           home: Scaffold(
             body: DicomViewer(
               controller: controller,
-              errorBuilder: (final context, final error) => const Text('custom error view'),
+              errorBuilder: (final context, final error) =>
+                  const Text('custom error view'),
             ),
           ),
         ),

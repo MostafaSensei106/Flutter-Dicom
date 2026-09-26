@@ -59,5 +59,6 @@ final class DicomRegistration {
 /// Registration strategy port (identity / rigid / affine / deformable).
 abstract interface class DicomRegistrationStrategy {
   /// Registers [source] onto [target] and returns the transform.
-  Future<DicomRegistration> register(final DicomVolume source, final DicomVolume target);
+  Future<DicomRegistration> register(
+      final DicomVolume source, final DicomVolume target);
 }

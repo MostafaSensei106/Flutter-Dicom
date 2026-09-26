@@ -28,7 +28,8 @@ final class DicomProbeResult {
 /// Probe port — an overlay displays the result; it never computes HU itself.
 abstract interface class DicomProbe {
   /// Samples [pixels] at [imagePoint] and returns the probe result.
-  DicomProbeResult probe(final DicomPixelData pixels, final DicomPoint imagePoint);
+  DicomProbeResult probe(
+      final DicomPixelData pixels, final DicomPoint imagePoint);
 }
 
 /// Default probe using the shared [DicomPixelTransform].
@@ -40,7 +41,8 @@ final class ModalityProbe implements DicomProbe {
   final bool reportHu;
 
   @override
-  DicomProbeResult probe(final DicomPixelData pixels, final DicomPoint imagePoint) {
+  DicomProbeResult probe(
+      final DicomPixelData pixels, final DicomPoint imagePoint) {
     final x = imagePoint.x.toInt().clamp(0, pixels.width - 1);
     final y = imagePoint.y.toInt().clamp(0, pixels.height - 1);
     final index = y * pixels.width + x;

@@ -1,4 +1,3 @@
-
 /// Strongly-typed DICOM tag identifiers.
 ///
 /// Unknown / vendor tags stay reachable via [DicomMetadata.tag] instead of

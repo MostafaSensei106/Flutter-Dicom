@@ -33,7 +33,8 @@ abstract interface class DicomWebClient {
   Future<List<DicomStudy>> searchStudies(final DicomStudyQuery query);
 
   /// Retrieves the series [seriesUid] within study [studyUid].
-  Future<DicomSeries> retrieveSeries(final String studyUid, final String seriesUid);
+  Future<DicomSeries> retrieveSeries(
+      final String studyUid, final String seriesUid);
 }
 
 /// DIMSE client port — the application layer never sees TCP/association.

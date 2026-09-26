@@ -32,7 +32,8 @@ final class RustDicomSeriesLoader implements DicomSeriesLoader {
       if (groups.isEmpty) {
         throw const DicomProcessingException('No DICOM series found');
       }
-      groups.sort((final a, final b) => b.slices.length.compareTo(a.slices.length));
+      groups.sort(
+          (final a, final b) => b.slices.length.compareTo(a.slices.length));
       final group = groups.first;
       final frames = <DicomFrameReference>[];
       final positions = <double>[];

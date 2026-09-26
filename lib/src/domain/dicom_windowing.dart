@@ -20,11 +20,14 @@ final class DicomWindow {
   double get max => center + width / 2.0;
 
   /// Linear windowing map of a modality value to [0, 1].
-  double apply(final double value) => ((value - min) / (max - min)).clamp(0.0, 1.0);
+  double apply(final double value) =>
+      ((value - min) / (max - min)).clamp(0.0, 1.0);
 
   /// Copies this window with replaced values.
   DicomWindow copyWith(
-          {final double? center, final double? width, final String? Function()? label}) =>
+          {final double? center,
+          final double? width,
+          final String? Function()? label}) =>
       DicomWindow(
         center: center ?? this.center,
         width: (width ?? this.width).clamp(1.0, 8000.0),
@@ -101,22 +104,27 @@ enum DicomModality {
     };
   }
 }
+
 /// Well-known CT presets plus modality-aware default selection.
 ///
 /// User-defined presets live in [DicomPresetStore], not here.
 abstract final class DicomWindowPreset {
   /// Brain preset (narrow soft-tissue window).
   static const brain = DicomWindow(center: 40, width: 80, label: 'Brain');
+
   /// Soft-tissue preset.
   static const softTissue = DicomWindow(
     center: 60,
     width: 400,
     label: 'Soft tissue',
   );
+
   /// Bone preset (wide high-center window).
   static const bone = DicomWindow(center: 400, width: 1800, label: 'Bone');
+
   /// Lung preset (negative center for air contrast).
   static const lung = DicomWindow(center: -600, width: 1500, label: 'Lung');
+
   /// Abdominal soft-tissue preset.
   static const abdomen = DicomWindow(center: 60, width: 400, label: 'Abdomen');
 
@@ -165,5 +173,6 @@ final class LinearWindowing implements WindowingStrategy {
   /// Creates the default linear mapping.
   const LinearWindowing();
   @override
-  double map(final double value, final DicomWindow window) => window.apply(value);
+  double map(final double value, final DicomWindow window) =>
+      window.apply(value);
 }

@@ -1,4 +1,3 @@
-
 /// Point in any 2D DICOM coordinate space (screen / viewport / image).
 final class DicomPoint {
   /// Creates a point at ([x], [y]).
@@ -148,7 +147,8 @@ final class DicomGeometry {
   final DicomPosition? position;
 
   /// Viewport tap → image pixel. `null` when outside the image.
-  DicomPoint? screenToImage(final DicomPoint point, final DicomViewport viewport) {
+  DicomPoint? screenToImage(
+      final DicomPoint point, final DicomViewport viewport) {
     if (viewport.width <= 0 || viewport.height <= 0) return null;
     final px = (point.x / viewport.width) * imageWidth;
     final py = (point.y / viewport.height) * imageHeight;

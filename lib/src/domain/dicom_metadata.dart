@@ -56,7 +56,16 @@ enum DicomTransferSyntax {
 final class DicomMetadata implements HasModality {
   /// Creates domain metadata with typed header values.
   const DicomMetadata({
-    required this.rows, required this.columns, required this.bitsAllocated, required this.bitsStored, required this.highBit, required this.pixelRepresentation, required this.samplesPerPixel, required this.photometricInterpretation, required this.numberOfFrames, this.patientName,
+    required this.rows,
+    required this.columns,
+    required this.bitsAllocated,
+    required this.bitsStored,
+    required this.highBit,
+    required this.pixelRepresentation,
+    required this.samplesPerPixel,
+    required this.photometricInterpretation,
+    required this.numberOfFrames,
+    this.patientName,
     this.patientId,
     this.patientSex,
     this.modality,

@@ -59,7 +59,8 @@ final class DicomVolume {
   final DicomVolumeGeometry geometry;
 
   /// Samples a resampled [plane] slice at [position].
-  Future<DicomVolumeSlice> sample(final DicomPlane plane, final double position) async =>
+  Future<DicomVolumeSlice> sample(
+          final DicomPlane plane, final double position) async =>
       DicomVolumeSlice(plane: plane, position: position);
 }
 

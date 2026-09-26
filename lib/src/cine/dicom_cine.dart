@@ -82,7 +82,8 @@ final class DefaultDicomCineController implements DicomCineController {
   double get fps => _fps;
 
   @override
-  Future<void> play({required final int frameCount, final bool loop = true}) async {
+  Future<void> play(
+      {required final int frameCount, final bool loop = true}) async {
     await stop();
     _subscription = _scheduler
         .frames(frameCount: frameCount, fps: _fps, loop: loop)

@@ -1,4 +1,3 @@
-
 /// Display color maps applied after windowing.
 enum DicomColorMap {
   /// Standard grayscale display.

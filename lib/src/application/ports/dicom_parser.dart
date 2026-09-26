@@ -29,7 +29,8 @@ final class DicomParseResult {
   int get frameCount => frames.frameCount;
 
   /// Returns the frame handle at [index] without decoding pixels.
-  DicomFrame frame(final int index) => DicomFrame(index: index, metadata: metadata);
+  DicomFrame frame(final int index) =>
+      DicomFrame(index: index, metadata: metadata);
 
   /// Decodes one frame through the provider (pixels attached on return).
   Future<DicomPixelData> decodeFrame(
@@ -59,7 +60,8 @@ abstract interface class DicomFrameProvider {
 final class CachedFrameProvider implements DicomFrameProvider {
   /// Creates a caching provider wrapping [inner] with an optional [cache].
   CachedFrameProvider(
-      {required final DicomFrameProvider inner, final DicomFrameCache<DicomFrame>? cache})
+      {required final DicomFrameProvider inner,
+      final DicomFrameCache<DicomFrame>? cache})
       : _inner = inner,
         _cache = cache ?? LruFrameCache<DicomFrame>();
 

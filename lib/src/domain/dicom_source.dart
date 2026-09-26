@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 /// Input API — every acquisition path ends at the same pipeline.

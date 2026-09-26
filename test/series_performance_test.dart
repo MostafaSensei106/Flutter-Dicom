@@ -78,7 +78,8 @@ void main() async {
       sw.stop();
 
       latencies.sort();
-      final avgUs = latencies.reduce((final a, final b) => a + b) / latencies.length;
+      final avgUs =
+          latencies.reduce((final a, final b) => a + b) / latencies.length;
       final p99 = latencies[(latencies.length * 0.99).floor()];
       final fps = files.length / (sw.elapsedMicroseconds / 1e6);
       print(

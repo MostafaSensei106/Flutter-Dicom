@@ -212,7 +212,8 @@ class _DicomViewerState extends State<DicomViewer> {
     setState(() => _probeImagePoint = DicomPoint(px, py));
   }
 
-  Size _fitContain(final double maxWidth, final double maxHeight, final double aspect) {
+  Size _fitContain(
+      final double maxWidth, final double maxHeight, final double aspect) {
     if (!maxWidth.isFinite || !maxHeight.isFinite || aspect <= 0) {
       return const Size(300, 300);
     }
