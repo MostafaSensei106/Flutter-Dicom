@@ -5,14 +5,19 @@ import '../domain/dicom_pixel_data.dart';
 
 /// Measurement unit for ROI statistics.
 enum DicomMeasurementUnit {
+  /// Raw stored pixel values.
   raw,
+
+  /// Values after the modality (rescale) transform.
   modalityValue,
 }
 
 /// ROI bounds in image-pixel coordinates.
 final class DicomRoi {
+  /// Creates an ROI covering [bounds].
   const DicomRoi(this.bounds);
 
+  /// Bounds of the region in image-pixel coordinates.
   final DicomRect bounds;
 
   /// Analyzes pixels inside [bounds].
@@ -54,6 +59,7 @@ final class DicomRoi {
 
 /// Descriptive statistics over an ROI.
 final class RoiStatistics {
+  /// Creates statistics from precomputed aggregate values.
   const RoiStatistics({
     required this.pixelCount,
     required this.min,
@@ -63,6 +69,7 @@ final class RoiStatistics {
     required this.median,
   });
 
+  /// Computes statistics from raw [values].
   factory RoiStatistics.fromValues(final List<double> values) {
     if (values.isEmpty) {
       return const RoiStatistics(
@@ -95,10 +102,21 @@ final class RoiStatistics {
     );
   }
 
+  /// Number of pixels included in the statistics.
   final int pixelCount;
+
+  /// Minimum sampled value.
   final double min;
+
+  /// Maximum sampled value.
   final double max;
+
+  /// Arithmetic mean of sampled values.
   final double mean;
+
+  /// Population standard deviation of sampled values.
   final double stdDev;
+
+  /// Median of sampled values.
   final double median;
 }

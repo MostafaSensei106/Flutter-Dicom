@@ -3,47 +3,36 @@ import 'dicom_pixel_data.dart';
 import 'dicom_tag_id.dart';
 import 'dicom_windowing.dart';
 
-/// Imaging modality relevant for display defaults.
-enum DicomModality {
-  ct,
-  mr,
-  xa,
-  us,
-  cr,
-  dx,
-  mg,
-  pt,
-  nm,
-  unknown;
-
-  static DicomModality parse(final String? raw) {
-    return switch (raw?.trim().toUpperCase()) {
-      'CT' => DicomModality.ct,
-      'MR' => DicomModality.mr,
-      'XA' => DicomModality.xa,
-      'US' => DicomModality.us,
-      'CR' => DicomModality.cr,
-      'DX' => DicomModality.dx,
-      'MG' => DicomModality.mg,
-      'PT' => DicomModality.pt,
-      'NM' => DicomModality.nm,
-      _ => DicomModality.unknown,
-    };
-  }
-}
-
 /// Transfer syntax relevant for capability reporting.
 enum DicomTransferSyntax {
+  /// Implicit VR little endian (default).
   implicitLittleEndian,
+
+  /// Explicit VR little endian.
   explicitLittleEndian,
+
+  /// Explicit VR big endian (retired).
   explicitBigEndian,
+
+  /// JPEG baseline 8-bit lossy.
   jpegBaseline,
+
+  /// JPEG lossless.
   jpegLossless,
+
+  /// JPEG 2000 lossy.
   jpeg2000,
+
+  /// JPEG 2000 lossless.
   jpeg2000Lossless,
+
+  /// Run-length encoding.
   rle,
+
+  /// Unknown or unlisted UID.
   unknown;
 
+  /// Parses a Transfer Syntax UID (0002,0010).
   static DicomTransferSyntax parse(final String? uid) {
     return switch (uid?.trim()) {
       '1.2.840.10008.1.2' => DicomTransferSyntax.implicitLittleEndian,
@@ -64,7 +53,7 @@ enum DicomTransferSyntax {
 /// This is the public type. The FRB-generated struct stays internal and is
 /// mapped to this via the infrastructure adapter, so the public API never
 /// depends on codegen output.
-final class DicomMetadata {
+final class DicomMetadata implements HasModality {
   const DicomMetadata({
     required this.rows, required this.columns, required this.bitsAllocated, required this.bitsStored, required this.highBit, required this.pixelRepresentation, required this.samplesPerPixel, required this.photometricInterpretation, required this.numberOfFrames, this.patientName,
     this.patientId,

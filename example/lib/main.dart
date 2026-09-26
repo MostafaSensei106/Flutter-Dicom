@@ -46,11 +46,11 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
   }
 
   Future<void> _pickAndLoadFile() async {
-    final result = await FilePicker.pickFiles(type: FileType.any);
+    final files = await FilePicker.pickFiles(type: FileType.any);
 
-    if (result != null && result.files.single.path != null) {
+    if (files.isNotEmpty && files.single.path != null) {
       try {
-        await _controller.load(DicomSource.file(result.files.single.path!));
+        await _controller.load(DicomSource.file(files.single.path!));
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

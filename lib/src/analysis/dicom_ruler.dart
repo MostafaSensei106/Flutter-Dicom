@@ -4,8 +4,10 @@ import '../domain/dicom_geometry.dart';
 
 /// Point-to-point measurement (pixels + physical millimeters).
 final class DicomRuler {
+  /// Creates a stateless point-to-point ruler.
   const DicomRuler();
 
+  /// Measures the distance between [start] and [end] using [geometry].
   DicomMeasurement measure(
     final DicomPoint start,
     final DicomPoint end,
@@ -23,8 +25,10 @@ final class DicomRuler {
 
 /// A single distance measurement.
 final class DicomMeasurement {
+  /// Creates a measurement with a pixel distance and optional millimeters.
   const DicomMeasurement({required this.pixelDistance, this.millimeters});
 
+  /// Distance in image pixels.
   final double pixelDistance;
 
   /// `null` when pixel spacing is unknown.

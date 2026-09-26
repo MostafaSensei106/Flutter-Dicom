@@ -7,6 +7,7 @@ import '../cache/frame_cache.dart';
 /// Parser port — `parse` extracts metadata + frame handles, never full
 /// pixel buffers. The public API never mentions Rust / FFI / WASM.
 abstract interface class DicomParser {
+  /// Parses [source] into metadata plus lazy frame handles.
   Future<DicomParseResult> parse(
     final DicomSource source, {
     final DicomParseOptions options = const DicomParseOptions(),
@@ -15,13 +16,19 @@ abstract interface class DicomParser {
 
 /// Lazy parse result: metadata now, pixels on demand.
 final class DicomParseResult {
+  /// Creates a lazy parse result with [metadata] and [frames].
   const DicomParseResult({required this.metadata, required this.frames});
 
+  /// Parsed dataset metadata.
   final DicomMetadata metadata;
+
+  /// Lazy provider for per-frame pixel data.
   final DicomFrameProvider frames;
 
+  /// Total number of frames in the dataset.
   int get frameCount => frames.frameCount;
 
+  /// Returns the frame handle at [index] without decoding pixels.
   DicomFrame frame(final int index) => DicomFrame(index: index, metadata: metadata);
 
   /// Decodes one frame through the provider (pixels attached on return).

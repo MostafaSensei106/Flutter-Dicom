@@ -34,20 +34,83 @@ final class DicomWindow {
   int get hashCode => center.hashCode ^ width.hashCode ^ label.hashCode;
 }
 
+/// Structural source of modality for preset selection.
+///
+/// Implemented by [DicomMetadata]; keeps preset selection free of imports
+/// that would create a domain cycle.
+abstract interface class HasModality {
+  /// Imaging modality, when known.
+  DicomModality? get modality;
+}
+
+/// Imaging modality relevant for display defaults.
+enum DicomModality {
+  /// Computed tomography.
+  ct,
+
+  /// Magnetic resonance.
+  mr,
+
+  /// X-ray angiography.
+  xa,
+
+  /// Ultrasound.
+  us,
+
+  /// Computed radiography.
+  cr,
+
+  /// Digital radiography.
+  dx,
+
+  /// Mammography.
+  mg,
+
+  /// Positron emission tomography.
+  pt,
+
+  /// Nuclear medicine.
+  nm,
+
+  /// Unknown or unlisted modality.
+  unknown;
+
+  /// Parses a DICOM Modality value (0008,0060).
+  static DicomModality parse(final String? raw) {
+    return switch (raw?.trim().toUpperCase()) {
+      'CT' => DicomModality.ct,
+      'MR' => DicomModality.mr,
+      'XA' => DicomModality.xa,
+      'US' => DicomModality.us,
+      'CR' => DicomModality.cr,
+      'DX' => DicomModality.dx,
+      'MG' => DicomModality.mg,
+      'PT' => DicomModality.pt,
+      'NM' => DicomModality.nm,
+      _ => DicomModality.unknown,
+    };
+  }
+}
 /// Well-known CT presets plus modality-aware default selection.
 ///
 /// User-defined presets live in [DicomPresetStore], not here.
 abstract final class DicomWindowPreset {
+  /// Brain preset (narrow soft-tissue window).
   static const brain = DicomWindow(center: 40, width: 80, label: 'Brain');
+  /// Soft-tissue preset.
   static const softTissue = DicomWindow(
     center: 60,
     width: 400,
     label: 'Soft tissue',
   );
+  /// Bone preset (wide high-center window).
   static const bone = DicomWindow(center: 400, width: 1800, label: 'Bone');
+  /// Lung preset (negative center for air contrast).
   static const lung = DicomWindow(center: -600, width: 1500, label: 'Lung');
+  /// Abdominal soft-tissue preset.
   static const abdomen = DicomWindow(center: 60, width: 400, label: 'Abdomen');
 
+  /// All built-in presets.
   static const List<DicomWindow> all = [
     brain,
     softTissue,
@@ -60,13 +123,10 @@ abstract final class DicomWindowPreset {
   static List<DicomWindow> get allWindows => all;
 
   /// Modality-aware default when the header carries no windowing.
-  static DicomWindow? forImage(final Object metadata) {
-    // Implemented against the domain metadata without importing it
-    // (avoids a domain import cycle): matches on modality name.
-    final modality = (metadata as dynamic).modality?.name as String?;
-    return switch (modality) {
-      'ct' => softTissue,
-      'mr' => brain,
+  static DicomWindow? forImage(final HasModality image) {
+    return switch (image.modality) {
+      DicomModality.ct => softTissue,
+      DicomModality.mr => brain,
       _ => null,
     };
   }

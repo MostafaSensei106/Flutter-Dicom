@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -58,13 +59,15 @@ class _DicomViewerState extends State<DicomViewer> {
   @override
   void initState() {
     super.initState();
-    loadDicomShader().then(
-      (final shader) {
-        if (mounted) setState(() => _shader = shader);
-      },
-      onError: (final Object e) {
-        if (mounted) setState(() => _shaderError = e.toString());
-      },
+    unawaited(
+      loadDicomShader().then(
+        (final shader) {
+          if (mounted) setState(() => _shader = shader);
+        },
+        onError: (final Object e) {
+          if (mounted) setState(() => _shaderError = e.toString());
+        },
+      ),
     );
   }
 

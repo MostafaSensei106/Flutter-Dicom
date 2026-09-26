@@ -2,17 +2,31 @@ import 'dart:async';
 
 /// Cine playback controller — timing owned by the scheduler.
 abstract interface class DicomCineController {
+  /// Whether playback is currently running.
   bool get playing;
+
+  /// Playback rate in frames per second.
   double get fps;
+
+  /// Starts playback from the first frame.
   Future<void> play({required final int frameCount, final bool loop = true});
+
+  /// Pauses playback, keeping the current position.
   void pause();
+
+  /// Stops playback and releases the scheduler subscription.
   void stop();
+
+  /// Updates the playback rate, clamped to 1–120 fps.
   void setFps(final double fps);
+
+  /// Releases scheduler resources.
   void dispose();
 }
 
 /// Cine frame scheduler — deterministic and testable.
 abstract interface class DicomCineScheduler {
+  /// Emits frame indices at [fps], optionally looping.
   Stream<int> frames({
     required final int frameCount,
     required final double fps,
@@ -46,8 +60,10 @@ final class TimerDicomCineScheduler implements DicomCineScheduler {
 
 /// Default cine controller driving frame callbacks from the scheduler.
 final class DefaultDicomCineController implements DicomCineController {
+  /// Creates a controller emitting scheduled indices to [onFrame].
   DefaultDicomCineController({
-    final required this.onFrame, final DicomCineScheduler? scheduler,
+    required this.onFrame,
+    final DicomCineScheduler? scheduler,
   }) : _scheduler = scheduler ?? const TimerDicomCineScheduler();
 
   final DicomCineScheduler _scheduler;
@@ -74,7 +90,7 @@ final class DefaultDicomCineController implements DicomCineController {
 
   @override
   void pause() {
-    _subscription?.cancel();
+    unawaited(_subscription?.cancel());
     _subscription = null;
   }
 
@@ -92,7 +108,7 @@ final class DefaultDicomCineController implements DicomCineController {
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    unawaited(_subscription?.cancel());
     _subscription = null;
   }
 }

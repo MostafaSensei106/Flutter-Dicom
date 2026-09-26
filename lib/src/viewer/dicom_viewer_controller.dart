@@ -237,6 +237,6 @@ final class DefaultDicomViewerController implements DicomViewerController {
   @override
   void dispose() {
     _disposeTextures();
-    _states.close();
+    unawaited(_states.close());
   }
 }
