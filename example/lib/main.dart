@@ -11,7 +11,6 @@ import 'volume_tab.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // The engine initializes the native bridge — no RustLib handling here.
   _appEngine = await DicomEngine.create();
 
   runApp(const MyApp());
@@ -146,9 +145,10 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
       if (paths.isEmpty) {
         throw const DicomProcessingException('No .dcm files found');
       }
-      final series = await _workstation.engine.openSeries(DicomSource.files(paths));
-      await _workstation.controller
-          .load(DicomSource.files(series.filePaths));
+      final series = await _workstation.engine.openSeries(
+        DicomSource.files(paths),
+      );
+      await _workstation.controller.load(DicomSource.files(series.filePaths));
       setState(() => _workstation.documentPaths = series.filePaths);
     } catch (e) {
       _showError(e);
@@ -159,7 +159,7 @@ class _DicomDemoScreenState extends State<DicomDemoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DICOM Workstation'),
+        title: const Text('DICOM'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -270,9 +270,9 @@ class FrameControls extends StatelessWidget {
             Expanded(
               child: Slider(
                 value: state.currentFrame.toDouble().clamp(
-                      0,
-                      (state.frameCount - 1).toDouble(),
-                    ),
+                  0,
+                  (state.frameCount - 1).toDouble(),
+                ),
                 min: 0,
                 max: (state.frameCount - 1).toDouble(),
                 divisions: state.frameCount - 1,
@@ -376,8 +376,7 @@ class _ViewerTabState extends State<ViewerTab> {
                               Text(
                                 '${state.currentFrame + 1} / ${state.frameCount}',
                                 style: TextStyle(
-                                  color:
-                                      Colors.white.withValues(alpha: 0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                   fontSize: 12,
                                 ),
                               ),
@@ -544,9 +543,7 @@ class _ViewerControls extends StatelessWidget {
           state.window.center,
           -1000,
           2000,
-          (final v) => controller.setWindow(
-            state.window.copyWith(center: v),
-          ),
+          (final v) => controller.setWindow(state.window.copyWith(center: v)),
         ),
         _levelSlider(
           context,
@@ -554,9 +551,7 @@ class _ViewerControls extends StatelessWidget {
           state.window.width,
           1,
           4000,
-          (final v) => controller.setWindow(
-            state.window.copyWith(width: v),
-          ),
+          (final v) => controller.setWindow(state.window.copyWith(width: v)),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
