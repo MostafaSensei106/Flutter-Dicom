@@ -21,7 +21,7 @@ pub struct DicomFrameResult {
 impl DicomFrameResult {
     /// Creates a new instance of [DicomFrameResult] from an existing one.
     pub fn new(result: DicomFrameResult) -> Self {
-        return Self {
+        Self {
             metadata: result.metadata,
             pixel_data: result.pixel_data,
         };
