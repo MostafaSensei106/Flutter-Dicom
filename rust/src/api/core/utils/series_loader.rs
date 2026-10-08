@@ -27,8 +27,7 @@ impl SeriesLoader {
 
     /// Loads a specific set of DICOM files.
     pub fn load_files(paths: Vec<String>) -> Result<Vec<DicomSeries>> {
-        let mut config = DicomConfig::default();
-        config.skip_pixels = true; // IMPORTANT for fast loading!
+        let config = DicomConfig { skip_pixels: true, ..Default::default() }; // IMPORTANT for fast loading!
         
         let mut slices = Vec::new();
         

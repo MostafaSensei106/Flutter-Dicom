@@ -178,7 +178,7 @@ fn extract_pixel_data(
 
     // PATH 1: raw element read (works for native/uncompressed data).
     if !is_encapsulated {
-        if let Some(ref elem) = raw_element {
+        if let Some(elem) = raw_element {
             if let Ok(raw_bytes) = elem.to_bytes() {
                 let raw_slice = raw_bytes.as_ref();
                 if !raw_slice.is_empty() && frame_bytes > 0 {
@@ -310,7 +310,7 @@ fn flatten_tags(obj: &DefaultDicomObject) -> Vec<DicomTagEntry> {
         value = value.trim().to_string();
         if value.len() > TAG_VALUE_LIMIT {
             value.truncate(TAG_VALUE_LIMIT);
-            value.push_str("…");
+            value.push('…');
         }
         out.push(DicomTagEntry {
             group: tag.group(),
@@ -389,11 +389,13 @@ fn convert_pixels(bytes: &[u8], bits_allocated: u16, pixel_representation: u16) 
         } else {
             bytes.iter().map(|&b| b as i16).collect()
         }
-    } else if bytes.len() % 2 == 0 {
+    } else if bytes.len().is_multiple_of(2) {
         if pixel_representation == 0 {
             // Unsigned 16-bit → offset to signed range for shader
             bytes
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|chunk| {
                     let raw = u16::from_le_bytes([chunk[0], chunk[1]]);
                     (raw as i32 - 32768) as i16
@@ -401,7 +403,9 @@ fn convert_pixels(bytes: &[u8], bits_allocated: u16, pixel_representation: u16) 
                 .collect()
         } else {
             bytes
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
                 .collect()
         }

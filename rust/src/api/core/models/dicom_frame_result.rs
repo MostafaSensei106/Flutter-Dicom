@@ -24,6 +24,6 @@ impl DicomFrameResult {
         Self {
             metadata: result.metadata,
             pixel_data: result.pixel_data,
-        };
+        }
     }
 }
